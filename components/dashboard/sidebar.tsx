@@ -19,6 +19,11 @@ import {
   BarChart,
   MessageSquare,
   Newspaper,
+  Folder,
+  UserCheck,
+  Handshake,
+  FolderKanban,
+  MessageSquareText,
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
@@ -92,43 +97,46 @@ export default function DashboardSidebar() {
 
   const adminMenuItems = [
     {
-      title: language === "vi" ? "Quản lý người dùng" : "Manage Users",
+      title: language === "vi" ? "Người dùng" : "Users",
       icon: <Users className="w-5 h-5" />,
       href: "/quan-ly/admin/users",
     },
     {
-      title: language === "vi" ? "Quản lý đơn hàng" : "Manage Orders",
+      title: language === "vi" ? "Đơn hàng" : "Orders",
       icon: <ShoppingCart className="w-5 h-5" />,
       href: "/quan-ly/admin/orders",
     },
     {
-      title: language === "vi" ? "Quản lý sản phẩm" : "Manage Products",
+      title: language === "vi" ? "Sản phẩm" : "Products",
       icon: <Package className="w-5 h-5" />,
       href: "/quan-ly/admin/products",
     },
     {
-      title: language === "vi" ? "Quản lý Affiliate" : "Affiliate Management",
-      icon: <Users className="w-5 h-5" />,
+      title: language === "vi" ? "Affiliate" : "Affiliate",
+      icon: <Handshake className="w-5 h-5" />,
       href: "/quan-ly/admin/affiliate",
     },
     {
-      title: language === "vi" ? "Quản lý tin tức" : "News Management",
+      title: language === "vi" ? "Tin tức" : "News",
       icon: <Newspaper className="w-5 h-5" />,
       href: "/quan-ly/admin/news",
     },
     {
-      title: language === "vi" ? "Quản lý cộng đồng góp cây xanh" : "Green Contribution Management",
-      icon: <Newspaper className="w-5 h-5" />,
+      title: language === "vi" ? "Người quyên góp" : "Donors",
+      icon: <UserCheck className="w-5 h-5" />,
       href: "/quan-ly/admin/green-community",
     },
-
     {
-      title: language === "vi" ? "Tư vấn" : "Consultations",
-      icon: <MessageSquare className="w-5 h-5" />,
+      title: language === "vi" ? "Dự án" : "Projects",
+      icon: <FolderKanban className="w-5 h-5" />,
+      href: "/quan-ly/admin/projects",
+    },
+    {
+      title: language === "vi" ? "Tư vấn" : "Consulting",
+      icon: <MessageSquareText className="w-5 h-5" />,
       href: "/quan-ly/admin/consultations",
     },
   ];
-
   const isActive = (href: string) => pathname === href;
 
   const hankderRemove = () => {

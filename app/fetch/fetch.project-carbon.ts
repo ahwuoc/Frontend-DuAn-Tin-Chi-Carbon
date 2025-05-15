@@ -1,5 +1,29 @@
 import HTTP from "../common/http";
-interface ProjectCarbonApiResponse {
+
+export interface ProjectCarbonDetails {
+  forestLocation?: string;
+  forestArea?: string | number; // Có thể string hoặc number
+  treeSpecies?: string;
+  plantingAge?: string | number;
+  averageHeight?: string | number;
+  averageCircumference?: string | number;
+  previousDeforestation?: "no" | "yes" | "unknown" | "";
+
+  riceLocation?: string;
+  riceArea?: string | number;
+  riceTerrain?: string;
+  riceClimate?: string;
+  riceSoilType?: string;
+  riceStartDate?: string; // ISO date string
+  riceEndDate?: string;   // ISO date string
+
+  biocharRawMaterial?: string;
+  biocharCarbonContent?: string | number;
+  biocharLandArea?: string | number;
+  biocharApplicationMethod?: string;
+}
+
+export interface ProjectCarbonApiResponse {
   _id: string;
   name: string;
   organization?: string;
@@ -7,34 +31,13 @@ interface ProjectCarbonApiResponse {
   email: string;
   address?: string;
   projectType: "forest" | "rice" | "biochar";
-  details: {
-    forestLocation?: string;
-    forestArea?: string; // Có thể API trả về string hoặc number
-    treeSpecies?: string;
-    plantingAge?: string; // Có thể API trả về string hoặc number
-    averageHeight?: string; // Có thể API trả về string hoặc number
-    averageCircumference?: string; // Có thể API trả về string hoặc number
-    previousDeforestation?: "no" | "yes" | "unknown" | "";
-
-    riceLocation?: string;
-    riceArea?: string; // Có thể API trả về string hoặc number
-    riceTerrain?: string;
-    riceClimate?: string;
-    riceSoilType?: string;
-    riceStartDate?: string; // API thường trả về string ISO date
-    riceEndDate?: string; // API thường trả về string ISO date
-
-    biocharRawMaterial?: string;
-    biocharCarbonContent?: string; // Có thể API trả về string hoặc number
-    biocharLandArea?: string; // Có thể API trả về string hoặc number
-    biocharApplicationMethod?: string;
-  };
+  details: ProjectCarbonDetails;
   additionalInfo?: string;
-  landDocuments?: string[]; // Mảng các tên file/đường dẫn
-  kmlFile?: string | null; // Tên file/đường dẫn hoặc null
-  user?: string; // ID người dùng dạng string
-  createdAt: string; // API thường trả về string ISO date
-  updatedAt: string; // API thường trả về string ISO date
+  landDocuments?: string[];
+  kmlFile?: string | null;
+  user?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface DeleteApiResponse {
@@ -43,23 +46,22 @@ interface DeleteApiResponse {
 
 export const apiProjectCarbon = {
   add: (body: any) => {
-    HTTP.POST<ProjectCarbonApiResponse>("/projects/carbon", { body });
+    return HTTP.POST<ProjectCarbonApiResponse>("/project-carbons", { body });
   },
 
   getAll: () => {
-    return HTTP.GET<ProjectCarbonApiResponse[]>("/projects/carbon");
+    return HTTP.GET<ProjectCarbonApiResponse[]>("/project-carbons");
   },
 
   getById: (id: string) => {
-    return HTTP.GET<ProjectCarbonApiResponse>(`/projects/carbon/${id}`);
+    return HTTP.GET<ProjectCarbonApiResponse>(`/project-carbons/${id}`);
   },
+
   update: (id: string, body: FormData) => {
-    return HTTP.PUT<ProjectCarbonApiResponse>(`/projects/carbon/${id}`, {
-      body,
-    });
+    return HTTP.PUT<ProjectCarbonApiResponse>(`/project-carbons/${id}`, { body });
   },
 
   delete: (id: string) => {
-    return HTTP.DELETE<DeleteApiResponse>(`/projects/carbon/${id}`);
+    return HTTP.DELETE<DeleteApiResponse>(`/project-carbons/${id}`); 
   },
 };

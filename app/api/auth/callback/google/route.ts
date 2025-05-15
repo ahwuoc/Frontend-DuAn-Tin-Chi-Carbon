@@ -85,8 +85,6 @@ export async function GET(request: NextRequest) {
     }
     console.log("✅ Google Access Token obtained.");
 
-    // 2. Fetch user data from your backend using Google's access token
-    // Your backend should verify this access_token with Google before creating/returning user data
     const serverResponse = await fetch(
       `${backendApiUrl}/login/email/${googleAccessToken}`, // Endpoint to your backend
       {
@@ -116,7 +114,7 @@ export async function GET(request: NextRequest) {
 
       const customJwtToken = jwt.sign(userPayload, jwtSecret, {
         expiresIn: jwtExpiresIn,
-      // This is just a fallback; use the first one
+        // This is just a fallback; use the first one
       });
       console.log("✅ Custom JWT created.");
 
