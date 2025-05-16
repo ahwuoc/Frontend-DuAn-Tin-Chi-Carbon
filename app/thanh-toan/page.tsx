@@ -137,18 +137,16 @@ export default function CheckoutPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-      note:
-        name === "fullName" || name === "phone"
-          ? `${name === "fullName" ? value : formData.fullName} - ${name === "phone" ? value : formData.phone} - ${product?.name || ""}`
-          : prev.note,
-    }));
+    setFormData((prev) => {
+      const updated = { ...prev, [name]: value };
+      if (name === "fullName" || name === "phone") {
+        updated.note = `${updated.fullName} - ${updated.phone} - ${product?.name || ""}`;
+      }
+      return updated;
+    });
+
     if (errors[name as keyof FormData]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }

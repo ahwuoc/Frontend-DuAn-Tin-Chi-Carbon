@@ -22,6 +22,7 @@ const montserrat = Montserrat({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://tinchicarbonvietnam.vn"),
   title: {
     default: "Tín Chỉ Carbon Việt Nam | Giải pháp phát triển bền vững",
     template: "%s | Tín Chỉ Carbon Việt Nam",

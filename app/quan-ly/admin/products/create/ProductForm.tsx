@@ -29,7 +29,6 @@ export type ProductFormData = Partial<Omit<IProduct, "_id" | "createdAt" | "upda
   };
 };
 
-// Định nghĩa props cho ProductForm component
 interface ProductFormProps {
   initialData?: ProductFormData | null;
   onSubmit: (data: ProductFormData) => Promise<void>;

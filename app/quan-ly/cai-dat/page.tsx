@@ -20,29 +20,26 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import apiAuth from "@/app/fetch/fetch.auth";
-import { TUser } from "@/app/fetch/fetch.auth";
 
 export default function SettingsPage() {
   const { language } = useLanguage();
   const router = useRouter();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("profile");
+  const { user } = useAuth();
 
-  // Thêm trạng thái isEditing để theo dõi chế độ chỉnh sửa
   const [isEditing, setIsEditing] = useState(false);
 
-  // Initial state from localStorage or default values
-  const [formData, setFormData] = useState<TUser>(() => {
-    const storedUser = localStorage.getItem("user");
-    return storedUser
-      ? JSON.parse(storedUser)
-      : {
-        name: "",
-        email: "",
-        avatar: "",
-        phone: "",
-        address: "",
-      };
+
+
+  const [formData, setFormData] = useState<any>(() => {
+    return user ?? {
+      name: "",
+      email: "",
+      avatar: "",
+      phone: "",
+      address: "",
+    };
   });
 
   const handleInputChange = (

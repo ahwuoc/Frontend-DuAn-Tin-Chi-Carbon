@@ -21,20 +21,15 @@ import { useToast } from "@/hooks/use-toast";
 import ParticlesBackground from "@/components/particles-background";
 import { Eye, EyeOff } from "lucide-react";
 import apiAuth from "../fetch/fetch.auth";
-import { useSearchParams } from "next/navigation";
 export default function RegisterPage() {
   const router = useRouter();
   const { t, language } = useLanguage();
   const { toast } = useToast();
-  const searchParams = useSearchParams();
-  const ref = searchParams.get("ref");
-  // State cho form đăng ký
   const [formState, setFormState] = useState({
     name: "",
     phone: "",
     email: "",
     password: "",
-    ref: ref ?? "",
     confirmPassword: "",
     agreeTerms: false,
     isLoading: false,
@@ -57,7 +52,6 @@ export default function RegisterPage() {
         last_name: "",
         phone: formState.phone,
         email: formState.email,
-        ref: ref ?? "",
         password: formState.password,
         status: 1,
         join: new Date().toISOString(), // Thời gian hiện tại
@@ -258,22 +252,6 @@ export default function RegisterPage() {
                       )}
                     </button>
                   </div>
-                </div>
-                <div>
-                  <Label
-                    htmlFor="name"
-                    className="block text-sm font-medium text-gray-200"
-                  >
-                    {language === "vi" ? "Mã giới thiệu" : "Referral Code"}
-                  </Label>
-                  <Input
-                    id="ref"
-                    name="ref"
-                    type="text"
-                    value={formState.ref}
-                    onChange={(e) => updateState("ref", e.target.value)}
-                    className="appearance-none block w-full px-3 py-2 border border-gray-700 bg-gray-900/60 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm text-white"
-                  />
                 </div>
                 {/* Confirm Password */}
                 <div>
