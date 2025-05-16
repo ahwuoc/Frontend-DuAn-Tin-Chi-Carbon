@@ -22,11 +22,14 @@ import Image from "next/image";
 import { useRef, useEffect, useState } from "react";
 import CardComponents from "./card";
 import HTTP from "@/app/common/http";
+interface FreeProduct {
+  _id: number
+}
 import useEmblaCarousel from "embla-carousel-react";
 export default function CarbonToanThuPage() {
   const { language, t } = useLanguage();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [FreeProduct, setFreeProduct] = useState();
+  const [FreeProduct, setFreeProduct] = useState<FreeProduct>();
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -46,9 +49,8 @@ export default function CarbonToanThuPage() {
 
   useEffect(() => {
     const fetchFreeProduct = async () => {
-      const response = await HTTP.GET("/products/free/trial");
+      const response = await HTTP.GET<any>("/products/free/trial");
       if (response && response.data) {
-        console.log("Data cua toi", response.data);
         setFreeProduct(response.data);
       }
     };
@@ -494,8 +496,8 @@ export default function CarbonToanThuPage() {
     },
   };
 
-  const getText = (key: any) => {
-    return translations[language][key] || translations["vi"][key];
+  const getText = (key: string) => {
+    return translations[language][key as keyof typeof translations["vi"]] || translations["vi"][key as keyof typeof translations["vi"]];
   };
 
   // Complete table of contents data

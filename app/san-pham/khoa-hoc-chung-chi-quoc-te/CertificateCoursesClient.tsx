@@ -16,20 +16,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { useLanguage } from "@/context/language-context";
 import { useEffect, useState } from "react";
-import { apiCarbon } from "@/app/fetch/fetch.carboncredits";
-import { ICarbonProduct } from "@/app/fetch/fetch.carboncredits";
+import { apiProducts } from "../../fetch/fetch.products";
 import translations from "@/app/mockup/translate.mockup";
 export default function CertificateCoursesClient() {
   const { language } = useLanguage();
-  const [products, setProducts] = useState<ICarbonProduct[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await apiCarbon.getProductType(
+        const response = await apiProducts.getProducts(
           "international_certificates",
         );
         if (response?.data) {
-          setProduct(response.data);
+          setProducts(response.data);
         }
       } catch (error: any) {
         console.error("Lỗi khi fetch product:", error);
@@ -38,8 +37,9 @@ export default function CertificateCoursesClient() {
     fetchProducts();
   }, []);
 
-  const getText = (key) => {
-    return translations[language][key] || translations["vi"][key];
+  const getText = (key: keyof typeof translations["vi"]) => {
+    const langDict = translations[language] as typeof translations["vi"];
+    return langDict[key] || translations["vi"][key];
   };
 
   return (
@@ -1345,7 +1345,7 @@ export default function CertificateCoursesClient() {
                   {getText("expertSuitableFor")}
                 </p>
                 <Link
-                  href={`/thanh-toan?product=${product}`}
+                  href={`/thanh-toan?product=`}
                   className="mt-auto w-full"
                   aria-label={getText("registerNow")}
                 >

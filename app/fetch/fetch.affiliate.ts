@@ -31,7 +31,7 @@ export const apiAffiliates = {
   create: (body: Record<string, any>) =>
     HTTP.POST<IResponse>("/affiliates", { body }),
   getAll: () => HTTP.GET<AffiliatesResponse>("/affiliates"),
-  getByUserId: (id: string) => HTTP.GET<IResponse[]>(`/affiliates/${id}`),
+  getByUserId: (id: string) => HTTP.GET<any>(`/affiliates/${id}`),
   update: (id: string, body: Record<string, any>) =>
     HTTP.PATCH<IResponse>(`/affiliates/${id}`, { body }),
   remove: (id: string) => HTTP.DELETE(`/affiliates/${id}`),

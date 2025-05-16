@@ -22,9 +22,11 @@ import translations from "@/app/mockup/translate.mockup";
 export default function InternationalCertificateCoursesPage() {
   const { language } = useLanguage();
 
-  const getText = (key) => {
-    return translations[language][key] || translations["vi"][key];
+  const getText = (key: keyof typeof translations["vi"]) => {
+    const langData = translations[language] as typeof translations["vi"];
+    return langData[key] || translations["vi"][key];
   };
+
   const courseSchema = generateProductSchema({
     name:
       language === "vi"
@@ -1006,29 +1008,32 @@ export default function InternationalCertificateCoursesPage() {
                   </div>
                   <div>
                     <div className="uppercase tracking-wide text-sm text-green-600 font-semibold">
-                      {getText("vietnameseInstructor")}
+                      Giảng viên tiếng Việt
                     </div>
                     <h3 className="block mt-1 text-2xl leading-tight font-bold text-gray-900">
-                      {getText("tranThiNhuPhuong")}
+                      Trần Thị Như Phượng
                     </h3>
                     <p className="mt-2 text-gray-600">
-                      {getText("tranEducation")}
+                      Tiến sĩ Giáo dục học, Đại học Sư phạm TP. Hồ Chí Minh
                     </p>
                     <div className="mt-2 text-gray-600">
-                      <p className="font-medium">{getText("tranPosition")}</p>
-                      <p className="font-medium">{getText("tranExpertise")}</p>
-                      <p className="font-medium">{getText("tranRole")}</p>
+                      <p className="font-medium">Trưởng bộ môn Phương pháp giảng dạy tiếng Việt</p>
+                      <p className="font-medium">Chuyên môn: Ngôn ngữ học, Giáo dục học</p>
+                      <p className="font-medium">Vai trò: Giảng viên, Nghiên cứu viên</p>
                     </div>
                     <div className="mt-4 text-gray-600">
-                      <p className="mb-2">{getText("tranDesc")}</p>
+                      <p className="mb-2">
+                        Giảng viên có hơn 20 năm kinh nghiệm trong đào tạo giáo viên tiểu học và nghiên cứu về phương pháp giảng dạy tiếng Việt.
+                      </p>
                       <ul className="list-disc pl-5 space-y-1">
-                        <li>{getText("tranAchievement1")}</li>
-                        <li>{getText("tranAchievement2")}</li>
-                        <li>{getText("tranAchievement3")}</li>
-                        <li>{getText("tranAchievement4")}</li>
+                        <li>Tham gia biên soạn chương trình giáo dục phổ thông mới</li>
+                        <li>Tác giả nhiều công trình nghiên cứu khoa học cấp quốc gia</li>
+                        <li>Giải thưởng giảng viên xuất sắc năm 2020</li>
+                        <li>Thành viên hội đồng chuyên môn Bộ Giáo dục</li>
                       </ul>
                     </div>
                   </div>
+
                 </div>
               </div>
             </div>

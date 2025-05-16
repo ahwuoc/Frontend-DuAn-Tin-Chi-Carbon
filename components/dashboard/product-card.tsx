@@ -17,18 +17,18 @@ import { ArrowRight, Calendar } from "lucide-react";
 
 interface ProductCardProps {
   id: string;
+  name: string;
   type: "carbon_credits" | "carbon_accounting" | "international_certificates";
-  title: string;
   description: string;
-  image: string;
+  image?: string;
   purchaseDate: string;
   status: "active" | "pending" | "expired";
+  viewMode?: "grid" | "list";
 }
-
 export default function ProductCard({
   id,
   type,
-  title,
+  name,
   description,
   image,
   purchaseDate,
@@ -81,7 +81,7 @@ export default function ProductCard({
       <div className="relative h-40 sm:h-48 w-full">
         <Image
           src={image || "/placeholder.svg?height=200&width=400"}
-          alt={title}
+          alt={name}
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -92,7 +92,7 @@ export default function ProductCard({
       </div>
       <CardHeader className="pb-2">
         <CardTitle className="text-lg line-clamp-2">
-          {type === "carbon_accounting" ? "Carbon Toàn Thư 4.0" : title}
+          {type === "carbon_accounting" ? "Carbon Toàn Thư 4.0" : name}
         </CardTitle>
         <CardDescription className="flex items-center text-sm text-gray-500">
           <Calendar className="h-4 w-4 mr-1 flex-shrink-0" />

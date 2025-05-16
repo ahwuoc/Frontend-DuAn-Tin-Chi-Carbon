@@ -199,9 +199,10 @@ export default function CarbonProjectsPage() {
     },
   }
 
-  const getText = (key) => {
-    return translations[language][key] || translations["vi"][key]
-  }
+  const getText = (key: keyof typeof translations["vi"]) => {
+    return translations[language][key] || translations["vi"][key];
+  };
+
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -309,16 +310,11 @@ export default function CarbonProjectsPage() {
                 title="Wade Tree 18 Height Gradient"
                 frameBorder="0"
                 allowFullScreen
-                mozallowfullscreen="true"
-                webkitallowfullscreen="true"
                 allow="autoplay; fullscreen; xr-spatial-tracking"
-                xr-spatial-tracking
-                execution-while-out-of-viewport
-                execution-while-not-rendered
-                web-share
                 src="https://sketchfab.com/models/ebe393edf83e4ac79005f4e9244e96d6/embed?autostart=1"
                 className="w-full h-full"
-              ></iframe>
+              />
+
             </div>
 
             {/* Thông tin ở dưới cùng */}

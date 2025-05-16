@@ -106,7 +106,7 @@ export default function CarbonCard() {
                 </p>
                 <div className="space-y-3 mb-6 max-h-48 overflow-y-auto pr-2">
                   {product.features?.length ? (
-                    product.features.map((feature) => (
+                    product.features.map((feature: any) => (
                       <div key={feature.id} className="flex items-start">
                         <CheckCircle className="h-5 w-5 text-green-600 mr-2 mt-1 flex-shrink-0" />
                         <div>
@@ -131,7 +131,7 @@ export default function CarbonCard() {
                   </p>
                   <ul className="text-sm text-green-700 list-disc pl-5 space-y-1">
                     {product.features?.length ? (
-                      product.features.map((feature) => (
+                      product.features.map((feature: any) => (
                         <li key={feature.id}>{feature.title || "N/A"}</li>
                       ))
                     ) : (

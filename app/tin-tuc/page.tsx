@@ -57,7 +57,7 @@ export default function NewsPage() {
   }, []);
 
   // Hàm định dạng ngày tháng dựa trên ngôn ngữ
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: Date) => {
     const date = new Date(dateString);
     const locale = language === "en" ? "en-US" : "vi-VN";
     return date.toLocaleDateString(locale);
@@ -156,7 +156,7 @@ export default function NewsPage() {
                     </div>
                     <div className="flex items-center">
                       <User className="h-4 w-4 mr-2" />
-                      <span>{featuredNews.userId?.name || t("admin")}</span>
+                      <span>{featuredNews.userId}</span>
                     </div>
                   </div>
                   <h2 className="text-3xl font-bold mb-4 text-gray-800">
@@ -173,7 +173,7 @@ export default function NewsPage() {
 
               {/* News Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {gridNews.map((newsItem, index) => (
+                {gridNews.map((newsItem: any, index) => (
                   <Card
                     key={index}
                     className="hover:shadow-lg transition-shadow duration-300"

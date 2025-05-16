@@ -1,4 +1,5 @@
 export interface Product {
+  _id?: string;
   id: string;
   name: string;
   type: "carbon_credits" | "carbon_accounting" | "international_certificates";

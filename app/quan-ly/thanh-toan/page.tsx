@@ -155,7 +155,7 @@ const BillingPage = () => {
             createdAt: new Date(response.data.createdAt).toISOString(),
             updatedAt: new Date(response.data.updatedAt).toISOString(),
           };
-          setCurrentPaymentMethods((prev) => [...prev, formattedMethod]);
+          setCurrentPaymentMethods((prev) => [...prev, formattedMethod as IAffiliatePaymentMethod]);
           toast({
             title: "Thành công",
             description: "Đã thêm phương thức thanh toán.",

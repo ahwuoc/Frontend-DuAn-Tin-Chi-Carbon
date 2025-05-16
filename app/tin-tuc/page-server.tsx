@@ -46,7 +46,6 @@ export default async function NewsPageServer() {
               muted
               playsInline
               preload="auto"
-              fetchPriority="high"
               poster="/images/vietnam-farmer-639204_1920.jpg"
               className="absolute inset-0 w-full h-full object-cover opacity-70"
             />

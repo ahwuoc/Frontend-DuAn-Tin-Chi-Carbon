@@ -11,6 +11,9 @@ export interface IOrder {
   price: number;
   status: "pending" | "paid" | "shipped" | "cancelled" | "active";
   createdAt: Date;
+  expiryDate?: string;
+  name?: string;
+  description?: string;
 }
 export interface IProduct {
   name: string;
@@ -44,12 +47,12 @@ interface ResTOrder2 {
 }
 
 export const apiOrders = {
-  getInfoOrderByUserId: (id: any) => HTTP.GET<ResTOrder>(`/orders/info/${id}`),
+  getInfoOrderByUserId: (id: any) => HTTP.GET<any>(`/orders/info/${id}`),
   cancelOrder: (orderCode: string) => HTTP.DELETE(`/orders/${orderCode}`),
-  getOrderByUser: (id: string) => HTTP.GET(`/orders/user/${id}`),
+  getOrderByUser: (id: string) => HTTP.GET<any>(`/orders/user/${id}`),
   getAll: () => HTTP.GET<any[]>("/orders"),
   deleteID: (id: string) => HTTP.DELETE(`/orders/id/${id}`),
-  createOrder: (body: any) => HTTP.POST<ResTOrder2>("/orders", { body }),
+  createOrder: (body: any) => HTTP.POST<any>("/orders", { body }),
   update: (id: string, body: any) => HTTP.PUT(`/orders/${id}`, { body }),
   confirm: (id: string, body: any) => HTTP.PUT(`/orders/${id}`, { body }),
 };

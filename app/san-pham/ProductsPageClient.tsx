@@ -38,7 +38,6 @@ function ProductsPageClient() {
               muted
               playsInline
               preload="auto"
-              fetchPriority="high"
               poster="/images/mother-1505000_1280.jpg"
               className="absolute inset-0 w-full h-full object-cover opacity-90"
             />

@@ -47,12 +47,11 @@ export default function ProductsManagementPage() {
     const fetchProductByUser = async () => {
       try {
 
-        if (!userId) {
+        if (!user?.userId) {
           console.warn("No user ID found in localStorage");
-          setProducts(userProducts);
           return;
         }
-        const response = await apiOrders.getOrderByUser(userId);
+        const response = await apiOrders.getOrderByUser(user.userId);
         if (response.status === 200) {
           const { orders = [], products = [] } = response.data ?? {};
           setOrders(orders);
@@ -70,13 +69,12 @@ export default function ProductsManagementPage() {
     fetchProductByUser();
   }, []);
 
-  // Lọc sản phẩm đã thanh toán (loại bỏ sản phẩm liên quan đến đơn hàng pending)
   const filteredProducts = products.filter((product) => {
     const relatedOrder = orders.find(
       (order) => order.productId === product._id && order.status === "pending",
     );
     if (relatedOrder) {
-      return false; // Loại bỏ sản phẩm nếu có đơn hàng pending
+      return false;
     }
 
     const matchesStatusTab =
@@ -88,7 +86,7 @@ export default function ProductsManagementPage() {
       (product.description?.toLowerCase() ?? "").includes(
         searchTerm.toLowerCase(),
       );
-    return matchesStatusTab | matchesTypeTab && matchesSearch;
+    return matchesStatusTab || matchesTypeTab && matchesSearch;
   });
 
   // Lấy sản phẩm cho đơn hàng pending
@@ -130,6 +128,8 @@ export default function ProductsManagementPage() {
         );
     }
   };
+
+  const getProductDetailLink = (productId: string) => `/products/${productId}`;
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "Không xác định";
@@ -335,48 +335,45 @@ export default function ProductsManagementPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {pendingProducts.map(({ order, product }) => (
-              <Card
-                key={order._id}
-                className="hover:shadow-md transition-shadow"
-              >
-                <CardHeader>
-                  <CardTitle className="text-lg">
-                    {product.name ?? "Không có tiêu đề"}
-                  </CardTitle>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <span>Mã đơn hàng: {order.orderCode}</span>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-sm text-gray-600">
-                      {product.description ?? "Không có mô tả"}
-                    </p>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <span>Số tiền: {formatCurrency(order.amount)}</span>
+              product ? (
+                <Card key={order._id} className="hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <CardTitle className="text-lg">
+                      {product.name ?? "Không có tiêu đề"}
+                    </CardTitle>
+                    <div className="flex items-center text-sm text-gray-500">
+                      <span>Mã đơn hàng: {order.orderCode}</span>
                     </div>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <span>Hết hạn: {formatDate(order.expiredAt)}</span>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <p className="text-sm text-gray-600">
+                        {product.description ?? "Không có mô tả"}
+                      </p>
+                      <div className="flex items-center text-sm text-gray-600">
+                        <span>Số tiền: {formatCurrency(order.amount)}</span>
+                      </div>
+                      <div className="flex items-center text-sm text-gray-600">
+                        <span>Hết hạn: {formatDate(order.expiredAt)}</span>
+                      </div>
+                      {order.linkthanhtoan && (
+                        <Button asChild className="bg-yellow-600 hover:bg-yellow-700">
+                          <a href={order.linkthanhtoan} target="_blank" rel="noopener noreferrer">
+                            Thanh toán ngay
+                          </a>
+                        </Button>
+                      )}
                     </div>
-                    {order.linkthanhtoan && (
-                      <Button
-                        asChild
-                        className="bg-yellow-600 hover:bg-yellow-700"
-                      >
-                        <a
-                          href={order.linkthanhtoan}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Thanh toán ngay
-                        </a>
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div key={order._id} className="p-4 text-red-500">
+                  Product không tồn tại
+                </div>
+              )
             ))}
           </div>
+
         </div>
       )}
 
@@ -402,16 +399,18 @@ export default function ProductsManagementPage() {
           ) : (
             filteredProducts.length > 0 && (
               <ProductTabs
-                products={filteredProducts}
-                viewMode={viewMode}
+                products={products}
+                viewMode="grid"
                 getStatusBadge={getStatusBadge}
                 formatDate={formatDate}
                 formatCurrency={formatCurrency}
                 getProductTypeName={getProductTypeName}
                 getProductTypeIcon={getProductTypeIcon}
                 getFeatureIcon={getFeatureIcon}
-                renderAdditionalInfo={renderAdditionalInfo}
+                getProductDetailLink={getProductDetailLink}
+                renderAdditionalInfo={renderAdditionalInfo} // Thêm dòng này
               />
+
             )
           )}
         </div>

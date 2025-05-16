@@ -86,15 +86,15 @@ export default function ProjectDetailPage() {
       const date = new Date(dateString);
       return language === "vi"
         ? date.toLocaleDateString("vi-VN", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          })
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        })
         : date.toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          });
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
     },
     [language],
   );
@@ -326,7 +326,7 @@ export default function ProjectDetailPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {document?.documents &&
+                {project.documents &&
                   project.documents.map((doc, index) => (
                     <div
                       key={index}

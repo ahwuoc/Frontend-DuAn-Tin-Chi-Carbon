@@ -23,6 +23,7 @@ export interface IAffiliateDetail {
 }
 
 export interface IAffiliatePaymentMethod {
+  _id?: string;
   id: string;
   affiliateId: string;
   type: "bank_transfer" | "paypal" | "other";

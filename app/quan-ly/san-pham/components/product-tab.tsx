@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { JSX } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -67,9 +68,9 @@ export function ProductTabs({
     }
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {products.map((product) => (
+        {products.map((product: any) => (
           <Card
-            key={product._id ?? product.id ?? "unknown"} // Xử lý khi _id hoặc id là undefined
+            key={product._id ?? product.id ?? "unknown"}
             className="overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow"
           >
             <div className="relative h-48 w-full">
@@ -113,7 +114,7 @@ export function ProductTabs({
 
               {renderAdditionalInfo(product)}
 
-              {(product.features ?? []).slice(0, 3).map((feature) => (
+              {(product.features ?? []).slice(0, 3).map((feature: any) => (
                 <div
                   key={feature.id ?? feature.title ?? Math.random().toString()} // Xử lý khi feature.id hoặc feature.title là undefined
                   className="flex items-center bg-gray-100 rounded-full px-3 py-1 text-xs text-gray-700"
@@ -183,7 +184,7 @@ export function ProductTabs({
 
     return (
       <div className="space-y-4">
-        {products.map((product) => (
+        {products.map((product: any) => (
           <Card
             key={product._id ?? product.id ?? "unknown"} // Xử lý khi _id hoặc id là undefined
             className="overflow-hidden hover:shadow-md transition-shadow"
@@ -230,7 +231,7 @@ export function ProductTabs({
                 {(product.features ?? []).length > 0 && (
                   <div className="mt-auto pt-3">
                     <div className="flex flex-wrap gap-2">
-                      {(product.features ?? []).map((feature, index) => (
+                      {(product.features ?? []).map((feature: any, index: number) => (
                         <div
                           key={feature.id ?? feature.title ?? index}
                           className="flex items-center bg-gray-100 rounded-full px-3 py-1 text-xs text-gray-700"

@@ -10,7 +10,7 @@ export const PricingSection: FC = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await  apiProducts.getProducts(
+        const response = await apiProducts.getProducts(
           "international_certificates",
         );
         setProducts(response.data);
@@ -67,7 +67,7 @@ export const PricingSection: FC = () => {
                 </p>
               )}
               <div className="space-y-3 mb-8">
-                {plan.features.map((feature, idx) => (
+                {plan.features.map((feature: any, idx: number) => (
                   <div key={feature.id || idx} className="flex items-start">
                     <CheckCircle className="h-5 w-5 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
                     <div>
