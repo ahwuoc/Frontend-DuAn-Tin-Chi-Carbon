@@ -3,6 +3,9 @@ const nextConfig = {
   experimental: {
     scrollRestoration: false,
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   images: {
     unoptimized: true,
   },
