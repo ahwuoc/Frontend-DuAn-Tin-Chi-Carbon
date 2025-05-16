@@ -19,7 +19,6 @@ interface FormFeature {
   icon: string;
 }
 
-// Định nghĩa kiểu dữ liệu cho Form Data
 export type ProductFormData = Partial<Omit<IProduct, "_id" | "createdAt" | "updatedAt">> & {
   features?: FormFeature[];
   accountManager?: {
