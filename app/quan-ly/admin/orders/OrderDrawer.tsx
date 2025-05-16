@@ -57,9 +57,10 @@ export default function OrderDrawer({
       if (selectedOrder?._id) {
         const res = await apiOrders.update(selectedOrder._id, formData);
         if (res?.status === 200 && res.data) {
-          setOrders((prev) =>
-            prev.map((o) => (o._id === selectedOrder._id ? res.data : o)),
+          setOrders((prev = []) =>
+            prev.map((o) => (o._id === selectedOrder?._id ? (res.data as IOrder) : o))
           );
+
           toast({
             title: "Thành công",
             description: "Sửa đơn hàng thành công!",
@@ -69,8 +70,12 @@ export default function OrderDrawer({
         }
       } else {
         const res = await apiOrders.createOrder(formData);
-        if (res.status === 201) {
-          setOrders((prev) => [...prev, res.data.order]);
+        if (res.status && res.data) {
+          setOrders((prev) =>
+            prev.map((o) =>
+              o._id === selectedOrder?._id ? (res.data as IOrder) : o
+            )
+          );
           toast({
             title: "Thành công",
             description: "Thêm đơn hàng mới thành công!",
@@ -124,7 +129,7 @@ export default function OrderDrawer({
 
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
-      <DrawerContent side="left" className="w-full sm:w-96">
+      <DrawerContent className="w-full sm:w-96">
         <DrawerHeader>
           <DrawerTitle>
             {selectedOrder?._id ? "Sửa đơn hàng" : "Thêm đơn hàng mới"}

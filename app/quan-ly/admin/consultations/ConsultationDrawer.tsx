@@ -17,6 +17,7 @@ import {
   IConsultation,
 } from "@/app/fetch/fetch.consultations";
 import { Trash2 } from "lucide-react";
+type ConsultationType = "forest" | "carbon" | "other" | "biochar" | "agriculture" | "csu" | "carbonbook";
 
 interface ConsultationDrawerProps {
   isOpen: boolean;
@@ -31,7 +32,7 @@ interface ConsultationDrawerProps {
     email: string;
     phone: string;
     organization: string;
-    consultationType: "forest" | "carbon" | "other";
+    consultationType: ConsultationType;
     projectType: string;
     projectSize: string;
     budget: string;
@@ -43,13 +44,24 @@ interface ConsultationDrawerProps {
       email: string;
       phone: string;
       organization: string;
-      consultationType: "forest" | "carbon" | "other";
+      consultationType: ConsultationType;
       projectType: string;
       projectSize: string;
       budget: string;
       status: "pending" | "in_progress" | "completed" | "cancelled";
     }>
   >;
+}
+interface FormDataType {
+  name: string;
+  email: string;
+  phone: string;
+  organization: string;
+  consultationType: ConsultationType; // dùng type rộng luôn
+  projectType: string;
+  projectSize: string;
+  budget: string;
+  status: "pending" | "in_progress" | "completed" | "cancelled";
 }
 
 export default function ConsultationDrawer({
@@ -85,7 +97,7 @@ export default function ConsultationDrawer({
         }
       } else {
         const res = await apiConsultations.createConsultation(formData);
-        if (res.status === 201) {
+        if (res && res.data) {
           setConsultations((prev) => [...prev, res.data.consultation]);
           toast({
             title: "Thành công",
@@ -149,7 +161,7 @@ export default function ConsultationDrawer({
 
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
-      <DrawerContent side="left" className="w-full sm:w-96">
+      <DrawerContent className="w-full sm:w-96">
         <DrawerHeader>
           <DrawerTitle>
             {selectedConsultation?._id

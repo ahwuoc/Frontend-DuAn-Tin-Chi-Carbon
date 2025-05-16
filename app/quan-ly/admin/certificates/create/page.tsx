@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { apiCertificates, Certificate } from "../../../../fetch/fetch.certificates";
 export type CertificateStatus = "active" | "expired" | "pending";
 const defaultForm: Partial<Certificate> = {
-    id: "",
+    _id: "",
     name: "",
     type: "international_certificates",
     description: "",
@@ -48,7 +48,7 @@ export default function CreateCertificatePage() {
         setError(null);
 
         try {
-            if (!form.id || !form.name) throw new Error("ID và tên là bắt buộc");
+            if (!form._id || !form.name) throw new Error("ID và tên là bắt buộc");
 
             await toast.promise(
                 apiCertificates.create(form as Certificate),

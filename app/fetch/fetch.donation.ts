@@ -24,17 +24,21 @@ export interface DonationResponse {
   treeCountByUser: { email: string; treeCount: number }[];
 }
 
+export interface saveResponse {
+  savedDonation: IDonation;
+}
+
 import HTTP from "../common/http";
 
 const apiDonation = {
-  addDonate: (body: any) => HTTP.POST("/donation", { body }),
+  addDonate: (body: any) => HTTP.POST<saveResponse>("/donation", { body }),
 
   getDonations: () => HTTP.GET("/donations"),
 
   getDonationById: (id: string) => HTTP.GET(`/donation/${id}`),
 
   getInfor: () => HTTP.GET<DonationResponse>("/donation/infor"),
-  updateDonation: (id: string, body: IDonation) =>
+  updateDonation: (id: string, body: any) =>
     HTTP.PUT(`/donation/${id}`, { body }),
 
   deleteDonation: (id: string) => HTTP.DELETE(`/donation/${id}`),

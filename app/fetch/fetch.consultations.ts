@@ -1,5 +1,6 @@
 import HTTP from "../common/http";
 export interface IConsultation {
+  _id?: string;
   name: string;
   age?: string;
   location?: string;
@@ -28,8 +29,19 @@ export interface IConsultation {
   createdAt: Date;
   updatedAt: Date;
 }
+type IResponse = {
+  consultation: IConsultation;
+};
+type IResponse2 = {
+  data: IConsultation[];
+};
 
 export const apiConsultations = {
-  getAll: () => HTTP.GET("/consultation/getall"),
-  register: (body: any) => HTTP.POST("consultation/register", { body }),
+  getAll: () => HTTP.GET<IResponse2>("/consultation/getall"),
+  register: (body: any) => HTTP.POST("/consultation/register", { body }),
+  createConsultation: (body: any) =>
+    HTTP.POST<IResponse>("/consultation/", { body }),
+  deleteConsultation: (id: string) => HTTP.DELETE(`/consultation/${id}`),
+  updateConsultation: (id: string, body: any) =>
+    HTTP.DELETE<IResponse>(`/consultation/${id}`, { body }),
 };

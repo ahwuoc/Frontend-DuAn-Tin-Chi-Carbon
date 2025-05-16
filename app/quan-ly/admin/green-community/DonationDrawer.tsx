@@ -22,6 +22,7 @@ interface DonationDrawerProps {
     setDonations: React.Dispatch<React.SetStateAction<IDonation[]>>;
     selectedDonation: IDonation | null;
     setSelectedDonation: React.Dispatch<React.SetStateAction<IDonation | null>>;
+    onSuccess: () => Promise<void>;
 }
 
 export default function DonationDrawer({
@@ -30,6 +31,7 @@ export default function DonationDrawer({
     setDonations,
     selectedDonation,
     setSelectedDonation,
+    onSuccess,
 }: DonationDrawerProps) {
     const { toast } = useToast();
     const [formData, setFormData] = useState({
@@ -112,8 +114,11 @@ export default function DonationDrawer({
             if (selectedDonation?._id) {
                 const res = await apiDonation.updateDonation(selectedDonation._id, payload);
                 if (res?.data) {
-                    setDonations((prev) =>
-                        prev.map((d) => (d._id === selectedDonation._id ? res.data.data : d)),
+                    const updated = res.data as IDonation;
+                    setDonations((prev: any[]) =>
+                        Array.isArray(prev)
+                            ? prev.map((d) => (d._id === selectedDonation._id ? res.data : d))
+                            : prev
                     );
                     toast({
                         title: "Thành công",
@@ -150,7 +155,7 @@ export default function DonationDrawer({
 
     return (
         <Drawer open={isOpen} onOpenChange={setIsOpen}>
-            <DrawerContent side="left" className="w-full sm:w-96">
+            <DrawerContent className="w-full sm:w-96">
                 <DrawerHeader>
                     <DrawerTitle>
                         {selectedDonation?._id ? "Sửa thông tin đóng góp" : "Thêm đóng góp mới"}

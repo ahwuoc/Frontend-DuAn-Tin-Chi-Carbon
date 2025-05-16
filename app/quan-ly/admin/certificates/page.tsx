@@ -112,12 +112,15 @@ export default function CertificatesPage() {
                                     >
                                         Sửa
                                     </Link>
-                                    <button
-                                        onClick={() => handleDelete(cert._id)}
-                                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-                                    >
-                                        Xóa
-                                    </button>
+                                    {cert._id && (
+                                        <button
+                                            onClick={() => handleDelete(cert._id!)} // dấu ! để khẳng định không undefined
+                                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                                        >
+                                            Xóa
+                                        </button>
+                                    )}
+
                                 </td>
                             </tr>
                         ))}

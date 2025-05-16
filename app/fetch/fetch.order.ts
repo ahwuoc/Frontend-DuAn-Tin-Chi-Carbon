@@ -33,16 +33,20 @@ export interface IProduct {
   };
 }
 interface ResTOrder {
-  orders: IOrder[];
+  orders?: IOrder[];
   totalAmount?: number;
 }
+interface ResTOrder2 {
+  order?: IOrder[];
+}
+
 export const apiOrders = {
   getInfoOrderByUserId: (id: any) => HTTP.GET<ResTOrder>(`/orders/info/${id}`),
   cancelOrder: (orderCode: string) => HTTP.DELETE(`/orders/${orderCode}`),
   getOrderByUser: (id: string) => HTTP.GET(`/orders/user/${id}`),
   getAll: () => HTTP.GET("/orders"),
   deleteID: (id: string) => HTTP.DELETE(`/orders/id/${id}`),
-  createOrder: (body: any) => HTTP.POST("/orders", { body }),
+  createOrder: (body: any) => HTTP.POST<ResTOrder2>("/orders", { body }),
   update: (id: string, body: any) => HTTP.PUT(`/orders/${id}`, { body }),
   confirm: (id: string, body: any) => HTTP.PUT(`/orders/${id}`, { body }),
 };

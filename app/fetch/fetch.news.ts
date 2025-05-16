@@ -1,5 +1,6 @@
 import HTTP from "../common/http";
 export interface INews extends Document {
+  userId?: string;
   _id: string;
   title: string;
   content: string;
@@ -11,9 +12,12 @@ export interface INews extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+interface Response {
+  data: INews[];
+}
 export const apiNews = {
-  getAll: () => HTTP.GET("/news"),
-  getById: (id: string) => HTTP.GET(`/news/${id}`),
+  getAll: () => HTTP.GET<Response>("/news"),
+  getById: (id: string) => HTTP.GET<Response>(`/news/${id}`),
   create: (body: any) => HTTP.POST("/news", { body }),
   update: (id: string, body: any) => HTTP.PUT(`/news/${id}`, { body }),
   delete: (id: string) => HTTP.DELETE(`/news/${id}`),

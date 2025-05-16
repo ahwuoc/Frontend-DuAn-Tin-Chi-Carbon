@@ -3,7 +3,7 @@ export type CertificateStatus = "active" | "expired";
 export type CertificateLevel = "Nghiên cứu" | "Chuyên gia";
 
 export interface Certificate {
-  id: string;
+  _id?: string;
   name: string;
   type: "international_certificates";
   description: string;
@@ -18,6 +18,7 @@ export interface Certificate {
   courseProgress: number;
   lastAccessed: string;
   issuer: string;
+  certificateImage?: any;
   progressStatus?: "Hoàn thành" | "Đang học" | "Chưa học";
 }
 

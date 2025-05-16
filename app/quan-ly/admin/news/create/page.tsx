@@ -89,14 +89,15 @@ export default function NewsFormPage() {
             const fetchNews = async () => {
                 try {
                     const response = await apiNews.getById(newsId);
-                    if (response?.data?.data) {
+                    if (response && response.data) {
                         const newsData = response.data.data;
                         setFormData({
-                            ...newsData,
-                            tags: newsData.tags || [],
+                            ...newsData[0],
+                            tags: newsData[0]?.tags ?? [],
                         });
-                        if (newsData.image) {
-                            setImagePreview(newsData.image);
+
+                        if (newsData[0]?.image) {
+                            setImagePreview(newsData[0].image);
                         }
                     } else {
                         toast({ title: "Lỗi", description: "Không tìm thấy tin tức.", variant: "destructive" });

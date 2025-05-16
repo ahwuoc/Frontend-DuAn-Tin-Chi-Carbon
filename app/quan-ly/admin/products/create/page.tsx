@@ -142,14 +142,14 @@ function ProductForm({
 
         // Validation cho các trường số (chỉ kiểm tra nếu có giá trị và là số)
         if (formData.price !== undefined && typeof formData.price === 'number' && formData.price < 0) {
-             newErrors.price = "Giá không được âm.";
-         }
-         if (formData.carbonAmount !== undefined && typeof formData.carbonAmount === 'number' && formData.carbonAmount < 0) {
-             newErrors.carbonAmount = "Lượng carbon không được âm.";
-         }
-         if (formData.area !== undefined && typeof formData.area === 'number' && formData.area < 0) {
-             newErrors.area = "Diện tích không được âm.";
-         }
+            newErrors.price = "Giá không được âm.";
+        }
+        if (formData.carbonAmount !== undefined && typeof formData.carbonAmount === 'number' && formData.carbonAmount < 0) {
+            newErrors.carbonAmount = "Lượng carbon không được âm.";
+        }
+        if (formData.area !== undefined && typeof formData.area === 'number' && formData.area < 0) {
+            newErrors.area = "Diện tích không được âm.";
+        }
 
         // Validation cho Account Manager
         if (!formData.accountManager?.name?.trim()) newErrors.accountManagerName = "Tên người quản lý là bắt buộc.";
@@ -212,8 +212,8 @@ function ProductForm({
         }
     };
 
-     // Xóa một mục feature theo index
-     const removeFeature = (index: number) => {
+    // Xóa một mục feature theo index
+    const removeFeature = (index: number) => {
         setFormData((prev) => ({
             ...prev,
             features: (prev.features || []).filter((_, i) => i !== index), // Lọc bỏ mục có index tương ứng
@@ -418,80 +418,80 @@ function ProductForm({
 // import { useRouter } from 'next/navigation';
 
 export default function CreateProductPage() {
-  const { toast } = useToast();
-  // const router = useRouter(); // Khởi tạo router
+    const { toast } = useToast();
+    // const router = useRouter(); // Khởi tạo router
 
-  // State quản lý trạng thái loading khi gọi API
-  const [isSubmitting, setIsSubmitting] = useState(false);
+    // State quản lý trạng thái loading khi gọi API
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Hàm xử lý dữ liệu form sau khi ProductForm validate và gọi onSubmit
-  const handleProductSubmit = async (data: ProductFormData) => {
-    setIsSubmitting(true); // Bắt đầu trạng thái loading
-    console.log("Dữ liệu sản phẩm mới sẵn sàng để gửi API:", data);
+    // Hàm xử lý dữ liệu form sau khi ProductForm validate và gọi onSubmit
+    const handleProductSubmit = async (data: ProductFormData) => {
+        setIsSubmitting(true); // Bắt đầu trạng thái loading
+        console.log("Dữ liệu sản phẩm mới sẵn sàng để gửi API:", data);
 
-    // TODO: THAY THẾ PHẦN NÀY bằng logic gọi API THỰC TẾ của bạn
-    // để gửi dữ liệu 'data' lên backend để tạo sản phẩm mới.
+        // TODO: THAY THẾ PHẦN NÀY bằng logic gọi API THỰC TẾ của bạn
+        // để gửi dữ liệu 'data' lên backend để tạo sản phẩm mới.
 
-    try {
-      // Ví dụ: Gọi API POST để tạo sản phẩm
-      const response = await fetch('/api/products', { // Điều chỉnh URL API của bạn cho đúng
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // Thêm các header Auth nếu cần
-        },
-        body: JSON.stringify(data),
-      });
+        try {
+            // Ví dụ: Gọi API POST để tạo sản phẩm
+            const response = await fetch('/api/products', { // Điều chỉnh URL API của bạn cho đúng
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Thêm các header Auth nếu cần
+                },
+                body: JSON.stringify(data),
+            });
 
-      if (response.ok) {
-        const result = await response.json();
-        console.log('API phản hồi thành công:', result);
+            if (response.ok) {
+                const result = await response.json();
+                console.log('API phản hồi thành công:', result);
 
-        toast({
-            title: "Thành công!",
-            description: "Sản phẩm mới đã được tạo thành công.",
-            variant: "default",
-        });
+                toast({
+                    title: "Thành công!",
+                    description: "Sản phẩm mới đã được tạo thành công.",
+                    variant: "default",
+                });
 
-        // TODO: Chuyển hướng người dùng sau khi tạo thành công
-        // router.push('/quan-ly/admin/products');
+                // TODO: Chuyển hướng người dùng sau khi tạo thành công
+                // router.push('/quan-ly/admin/products');
 
-      } else {
-        const errorData = await response.json();
-        console.error('Lỗi từ API:', response.status, errorData);
+            } else {
+                const errorData = await response.json();
+                console.error('Lỗi từ API:', response.status, errorData);
 
-         toast({
-            title: "Lỗi!",
-            description: errorData.message || "Có lỗi xảy ra khi tạo sản phẩm. Vui lòng thử lại.",
-            variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Lỗi trong quá trình gửi request:', error);
-       toast({
-            title: "Lỗi!",
-            description: "Không thể kết nối đến server hoặc xử lý yêu cầu. Vui lòng kiểm tra kết nối mạng.",
-            variant: "destructive",
-        });
-    } finally {
-        setIsSubmitting(false); // Kết thúc trạng thái loading
-    }
-  };
+                toast({
+                    title: "Lỗi!",
+                    description: errorData.message || "Có lỗi xảy ra khi tạo sản phẩm. Vui lòng thử lại.",
+                    variant: "destructive",
+                });
+            }
+        } catch (error) {
+            console.error('Lỗi trong quá trình gửi request:', error);
+            toast({
+                title: "Lỗi!",
+                description: "Không thể kết nối đến server hoặc xử lý yêu cầu. Vui lòng kiểm tra kết nối mạng.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSubmitting(false); // Kết thúc trạng thái loading
+        }
+    };
 
-  // Trong page component này, chúng ta render ProductForm
-  // và truyền các props cần thiết.
-  return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-6">Tạo Sản phẩm Mới</h1>
+    // Trong page component này, chúng ta render ProductForm
+    // và truyền các props cần thiết.
+    return (
+        <div className="container mx-auto py-10">
+            <h1 className="text-2xl font-bold mb-6">Tạo Sản phẩm Mới</h1>
 
-      {/* Render ProductForm và truyền props */}
-      <ProductForm
-        // initialData không cần thiết khi tạo mới, nên để undefined hoặc null (mặc định)
-        onSubmit={handleProductSubmit} // Truyền hàm xử lý submit của trang vào form
-        isEditMode={false}            // Chế độ tạo mới
-        // onDelete không cần thiết ở trang tạo mới
-        isLoading={isSubmitting}      // Truyền trạng thái loading vào form
-      />
-    </div>
-  );
+            {/* Render ProductForm và truyền props */}
+            <ProductForm
+                // initialData không cần thiết khi tạo mới, nên để undefined hoặc null (mặc định)
+                onSubmit={handleProductSubmit} // Truyền hàm xử lý submit của trang vào form
+                isEditMode={false}            // Chế độ tạo mới
+                // onDelete không cần thiết ở trang tạo mới
+                isLoading={isSubmitting}      // Truyền trạng thái loading vào form
+            />
+        </div>
+    );
 }

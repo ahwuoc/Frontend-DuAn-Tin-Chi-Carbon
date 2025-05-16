@@ -19,7 +19,30 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+
 import ConsultationDrawer from "./ConsultationDrawer";
+type ConsultationType = "forest" | "carbon" | "other" | "biochar" | "agriculture" | "csu" | "carbonbook";
+interface FormDataType {
+  name: string;
+  email: string;
+  phone: string;
+  organization: string;
+  consultationType: ConsultationType; // dùng type rộng luôn
+  projectType: string;
+  projectSize: string;
+  budget: string;
+  status: "pending" | "in_progress" | "completed" | "cancelled";
+}
+
+interface ConsultationDrawerProps {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  setConsultations: React.Dispatch<React.SetStateAction<IConsultation[]>>;
+  selectedConsultation: IConsultation | null;
+  setSelectedConsultation: React.Dispatch<React.SetStateAction<IConsultation | null>>;
+  formData: FormDataType;
+  setFormData: React.Dispatch<React.SetStateAction<FormDataType>>;
+}
 
 import {
   apiConsultations,
@@ -27,6 +50,25 @@ import {
 } from "@/app/fetch/fetch.consultations";
 
 export default function AdminConsultationsPage() {
+  const consultationTypeMap: Record<ConsultationType, string> = {
+    forest: "Trồng rừng",
+    carbon: "Carbon Offset",
+    biochar: "Biochar",
+    agriculture: "Nông nghiệp",
+    csu: "CSU",
+    carbonbook: "Carbonbook",
+    other: "Khác",
+  };
+
+  const statusMap: Record<
+    "pending" | "in_progress" | "completed" | "cancelled",
+    string
+  > = {
+    pending: "Đang chờ",
+    in_progress: "Đang xử lý",
+    completed: "Hoàn thành",
+    cancelled: "Đã hủy",
+  };
   const router = useRouter();
   const [consultations, setConsultations] = useState<IConsultation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +82,7 @@ export default function AdminConsultationsPage() {
     email: "",
     phone: "",
     organization: "",
-    consultationType: "forest" as "forest" | "carbon" | "other",
+    consultationType: "forest" as ConsultationType,
     projectType: "",
     projectSize: "",
     budget: "",
@@ -76,7 +118,7 @@ export default function AdminConsultationsPage() {
         email: consultation.email || "",
         phone: consultation.phone || "",
         organization: consultation.organization || "",
-        consultationType: consultation.consultationType || "forest",
+        consultationType: consultation.consultationType || "other",
         projectType: consultation.projectType || "",
         projectSize: consultation.projectSize || "",
         budget: consultation.budget || "",
@@ -186,20 +228,11 @@ export default function AdminConsultationsPage() {
                             {consultation.organization || "N/A"}
                           </TableCell>
                           <TableCell>
-                            {consultation.consultationType === "forest"
-                              ? "Trồng rừng"
-                              : consultation.consultationType === "carbon"
-                                ? "Carbon Offset"
-                                : "Khác"}
+                            {consultationTypeMap[consultation.consultationType] || "Khác"}
                           </TableCell>
+
                           <TableCell>
-                            {consultation.status === "pending"
-                              ? "Đang chờ"
-                              : consultation.status === "in_progress"
-                                ? "Đang xử lý"
-                                : consultation.status === "completed"
-                                  ? "Hoàn thành"
-                                  : "Đã hủy"}
+                            {statusMap[consultation.status] || "Không rõ"}
                           </TableCell>
                           <TableCell>
                             {formatDate(consultation.createdAt)}
