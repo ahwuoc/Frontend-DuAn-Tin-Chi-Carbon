@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiAffiliates } from "@/app/fetch/fetch.affiliate";
-
+import { useAuth } from "../../../../context/auth-context";
 interface FormData {
   fullName: string;
   email: string;
@@ -33,6 +33,7 @@ export default function AffiliateRegisterForm() {
     experience: "",
   });
 
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,11 +80,9 @@ export default function AffiliateRegisterForm() {
 
     setIsSubmitting(true);
     try {
-      const userId =
-        JSON.parse(localStorage.getItem("user_id") ?? "null") ?? "";
 
-      if (!userId) throw new Error("Không tìm thấy userId");
 
+      const userId = user?.userId;
       const payload = { ...formData, userId };
       const response = await apiAffiliates.create(payload);
 

@@ -68,18 +68,18 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 import { IProject, apiProjects } from "@/app/fetch/fetch.projects";
-
+import { useAuth } from "../../context/auth-context";
 export default function ProjectsList() {
   const { language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
-  const [projects, setProjects] = useState<IProject[]>([]); // Đổi từ project -> projects
-
+  const [projects, setProjects] = useState<IProject[]>([]);
+  const { user } = useAuth()
   useEffect(() => {
     const getlistProject = async () => {
-      const response = await apiProjects.getAllProject();
-      if (response.status === 200) {
+      const response = await apiProjects.getAll();
+      if (response && response.data) {
         setProjects(response.data);
       }
     };

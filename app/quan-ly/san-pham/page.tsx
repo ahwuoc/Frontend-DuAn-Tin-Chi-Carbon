@@ -26,10 +26,10 @@ import {
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { apiCarbon } from "@/app/fetch/fetch.carbon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProductTabs } from "./components/product-tab";
-
+import { useAuth } from "../../../context/auth-context";
+import { apiOrders } from "../../fetch/fetch.order";
 export default function ProductsManagementPage() {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
@@ -43,15 +43,16 @@ export default function ProductsManagementPage() {
 
   useEffect(() => {
     setIsClient(true);
+    const { user } = useAuth();
     const fetchProductByUser = async () => {
       try {
-        const userId = JSON.parse(localStorage.getItem("user_id")) ?? undefined;
+
         if (!userId) {
           console.warn("No user ID found in localStorage");
           setProducts(userProducts);
           return;
         }
-        const response = await apiCarbon.getOrderByUser(userId);
+        const response = await apiOrders.getOrderByUser(userId);
         if (response.status === 200) {
           const { orders = [], products = [] } = response.data ?? {};
           setOrders(orders);

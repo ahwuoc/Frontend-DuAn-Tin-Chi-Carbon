@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import { useLanguage } from "@/context/language-context";
+// import { useLanguage } from "@/context/language-context"; // Xóa import này
 import {
   Card,
   CardContent,
@@ -41,22 +41,159 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 
+// Dữ liệu giả định cho các sản phẩm Carbon Toàn Thư
+// Cần phải có định nghĩa của carbonProducts ở đây hoặc import từ nơi khác
+// Ví dụ (đặt bên ngoài component hoặc import):
+const carbonProducts = {
+  "ca-001": {
+    id: "ca-001",
+    title: "Carbon Toàn Thư Gói Chuyên gia",
+    description: "Gói dành cho chuyên gia và nhóm nhỏ cần phân tích sâu về phát thải carbon.",
+    status: "active",
+    company: "Công ty TNHH Xanh Việt Nam",
+    startDate: "01/01/2024",
+    endDate: "31/12/2024",
+    price: 15000000, // VND
+    billingCycle: "Hàng năm",
+    paymentMethod: "Chuyển khoản ngân hàng",
+    cardInfo: "**** **** **** 1234",
+    nextBillingDate: "01/01/2025",
+    aiPlatformUrl: "https://ai.carbonseek.vn/expert",
+    documentsDriveUrl: "https://docs.google.com/drive/expert",
+    features: [
+      { id: 1, icon: "Database", title: "Quản lý dữ liệu phát thải", description: "Thu thập và quản lý dữ liệu phát thải từ nhiều nguồn." },
+      { id: 2, icon: "BarChart2", title: "Phân tích nâng cao", description: "Các công cụ phân tích và báo cáo chuyên sâu." },
+      { id: 3, icon: "Users", title: "Hỗ trợ 5 người dùng", description: "Truy cập cho tối đa 5 người dùng trong tổ chức." },
+    ],
+    usageStats: {
+      totalUsage: 560,
+      lastMonthUsage: 85,
+      usageLimit: "Không giới hạn", // Có thể là một số hoặc 'Không giới hạn'
+      usagePercentage: 0 // Nếu là không giới hạn, percentage có thể là 0 hoặc N/A
+    },
+    recentActivities: [
+      { user: "Nguyễn Văn A", action: "Truy cập nền tảng AI", date: "15/05/2025" },
+      { user: "Trần Thị B", action: "Tải báo cáo Q1 2025", date: "14/05/2025" },
+      { user: "Lê Văn C", action: "Xem tài liệu hướng dẫn API", date: "14/05/2025" },
+      { user: "Nguyễn Văn A", action: "Cập nhật dữ liệu hoạt động", date: "13/05/2025" },
+    ],
+    supportContact: {
+      email: "support@carbonseek.vn",
+      phone: "028 1234 5678",
+      supportHours: "Thứ 2 - Thứ 6, 9:00 - 17:00",
+    },
+    accountManager: {
+      name: "Phạm Thị D",
+      email: "dpt@carbonseek.vn",
+      phone: "090 987 6543",
+    },
+    // Thêm các trường dữ liệu khác nếu cần
+  },
+  "ca-002": {
+    id: "ca-002",
+    title: "Carbon Toàn Thư Gói Doanh nghiệp",
+    description: "Giải pháp toàn diện cho doanh nghiệp lớn, tích hợp và báo cáo theo tiêu chuẩn quốc tế.",
+    status: "active",
+    company: "Tập đoàn Hòa Phát",
+    startDate: "10/03/2024",
+    endDate: "09/03/2025",
+    price: 50000000, // VND
+    billingCycle: "Hàng năm",
+    paymentMethod: "Chuyển khoản ngân hàng",
+    cardInfo: "**** **** **** 5678",
+    nextBillingDate: "10/03/2025",
+    aiPlatformUrl: "https://ai.carbonseek.vn/enterprise",
+    documentsDriveUrl: "https://docs.google.com/drive/enterprise",
+    features: [
+      { id: 1, icon: "Database", title: "Quản lý dữ liệu quy mô lớn", description: "Hỗ trợ thu thập và quản lý dữ liệu phức tạp cho doanh nghiệp lớn." },
+      { id: 2, icon: "BarChart2", title: "Báo cáo ESG tùy chỉnh", description: "Công cụ tạo báo cáo ESG theo yêu cầu và tuân thủ các khung báo cáo." },
+      { id: 3, icon: "Users", title: "Hỗ trợ không giới hạn người dùng", description: "Truy cập không giới hạn cho tất cả nhân viên." },
+      { id: 4, icon: "Network", title: "Tích hợp hệ thống", description: "Hỗ trợ tích hợp dữ liệu tự động với các hệ thống nội bộ." },
+    ],
+    usageStats: {
+      totalUsage: 1250,
+      lastMonthUsage: 210,
+      usageLimit: "Không giới hạn",
+      usagePercentage: 0
+    },
+    recentActivities: [
+      { user: "Nguyễn Văn F", action: "Truy cập nền tảng AI", date: "15/05/2025" },
+      { user: "Trần Thị G", action: "Xuất báo cáo ESG H1 2025", date: "15/05/2025" },
+      { user: "Lê Văn H", action: "Thêm người dùng mới", date: "14/05/2025" },
+      { user: "Phạm Thị I", action: "Xem video hướng dẫn tích hợp", date: "13/05/2025" },
+    ],
+    supportContact: {
+      email: "enterprise-support@carbonseek.vn",
+      phone: "028 9876 5432",
+      supportHours: "Thứ 2 - Chủ Nhật, 24/7",
+    },
+    accountManager: {
+      name: "Nguyễn Văn K",
+      email: "kvn@carbonseek.vn",
+      phone: "091 234 5678",
+    },
+  },
+  "ca-003": {
+    id: "ca-003",
+    title: "Carbon Toàn Thư Gói Dùng thử",
+    description: "Dùng thử nền tảng Carbon Toàn Thư với các tính năng cơ bản.",
+    status: "pending", // Giả định trạng thái pending hoặc expired cho gói dùng thử
+    company: "Công ty Mới Bắt Đầu",
+    startDate: "01/05/2025",
+    endDate: "31/05/2025",
+    price: 0, // Miễn phí
+    billingCycle: "Một lần", // Hoặc "Dùng thử"
+    paymentMethod: "N/A",
+    cardInfo: "N/A",
+    nextBillingDate: "31/05/2025",
+    aiPlatformUrl: "https://ai.carbonseek.vn/trial",
+    documentsDriveUrl: "https://docs.google.com/drive/trial",
+    features: [
+      { id: 1, icon: "FileText", title: "Quản lý dữ liệu cơ bản", description: "Nhập và xem dữ liệu phát thải cơ bản." },
+      { id: 2, icon: "FileQuestion", title: "Truy cập FAQ", description: "Xem các câu hỏi thường gặp." },
+      { id: 3, icon: "Users", title: "Hỗ trợ 1 người dùng", description: "Truy cập cho 1 người dùng." },
+    ],
+    usageStats: {
+      totalUsage: 15,
+      lastMonthUsage: 15, // Dùng thử 1 tháng nên lastMonthUsage = totalUsage
+      usageLimit: 50, // Giới hạn số lượt truy cập hoặc tính năng
+      usagePercentage: (15 / 50) * 100 // Tính theo giới hạn
+    },
+    recentActivities: [
+      { user: "Trần Văn L", action: "Truy cập nền tảng AI", date: "15/05/2025" },
+      { user: "Trần Văn L", action: "Xem hướng dẫn sử dụng", date: "14/05/2025" },
+    ],
+    supportContact: {
+      email: "trial-support@carbonseek.vn",
+      phone: "028 1122 3344",
+      supportHours: "Thứ 2 - Thứ 6, 9:00 - 17:00",
+    },
+    accountManager: {
+      name: "Lê Thị M",
+      email: "mlt@carbonseek.vn",
+      phone: "093 456 7890",
+    },
+  },
+};
+
+
 export default function CarbonAccountingDetailPage() {
   const { id } = useParams();
-  const { language } = useLanguage();
+  // const { language } = useLanguage(); // Xóa dòng này
   const [usageData, setUsageData] = useState({
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    labels: ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6"], // Cập nhật nhãn sang tiếng Việt
     datasets: [65, 45, 75, 50, 80, 90],
   });
 
   // Dữ liệu cho các gói Carbon Toàn Thư khác nhau
 
   // Lấy thông tin sản phẩm dựa trên ID
+  // Sử dụng as string để đảm bảo kiểu dữ liệu
   const carbonProduct =
-    carbonProducts[id as string] || carbonProducts["ca-002"]; // Fallback to Enterprise package if ID not found
+    carbonProducts[id as string] || carbonProducts["ca-002"];
 
-  // Hàm đ hiển thị icon dựa trên loại
-  const renderIcon = (iconName) => {
+  // Hàm hiển thị icon dựa trên loại
+  const renderIcon = (iconName: string) => { // Thêm kiểu cho iconName
     switch (iconName) {
       case "FileText":
         return <FileText className="h-5 w-5 text-green-600" />;
@@ -93,6 +230,19 @@ export default function CarbonAccountingDetailPage() {
     }
   };
 
+  // Helper function to format currency in VND
+  const formatCurrencyVND = (amount: number) => {
+    if (amount === 0) return "Miễn phí";
+    // Sử dụng NumberFormat để định dạng tiền tệ Việt Nam
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      minimumFractionDigits: 0, // Không hiển thị số thập phân nếu không có
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+
   return (
     <div>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
@@ -102,25 +252,19 @@ export default function CarbonAccountingDetailPage() {
               {carbonProduct.title}
             </h1>
             <span
-              className={`ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                carbonProduct.status === "active"
-                  ? "bg-green-100 text-green-800"
-                  : carbonProduct.status === "pending"
-                    ? "bg-yellow-100 text-yellow-800"
-                    : "bg-red-100 text-red-800"
-              }`}
-            >
-              {carbonProduct.status === "active"
-                ? language === "vi"
-                  ? "Đang hoạt động"
-                  : "Active"
+              className={`ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${carbonProduct.status === "active"
+                ? "bg-green-100 text-green-800"
                 : carbonProduct.status === "pending"
-                  ? language === "vi"
-                    ? "Đang xử lý"
-                    : "Pending"
-                  : language === "vi"
-                    ? "Hết hạn"
-                    : "Expired"}
+                  ? "bg-yellow-100 text-yellow-800"
+                  : "bg-red-100 text-red-800"
+                }`}
+            >
+              {/* Thay thế điều kiện ngôn ngữ bằng văn bản tiếng Việt */}
+              {carbonProduct.status === "active"
+                ? "Đang hoạt động"
+                : carbonProduct.status === "pending"
+                  ? "Đang xử lý"
+                  : "Hết hạn"}
             </span>
           </div>
           <div className="flex items-center mt-2 text-gray-600">
@@ -134,13 +278,11 @@ export default function CarbonAccountingDetailPage() {
             className="border-green-600 text-green-600 hover:bg-green-50"
           >
             <BookOpen className="mr-2 h-4 w-4" />
-            {language === "vi" ? "Tài liệu" : "Documents"}
+            Tài liệu {/* Văn bản tiếng Việt */}
           </Button>
           <Button className="bg-green-600 hover:bg-green-700">
             <ArrowUpRight className="mr-2 h-4 w-4" />
-            {language === "vi"
-              ? "Truy cập AI CarbonSeek"
-              : "Access AI CarbonSeek"}
+            Truy cập AI CarbonSeek {/* Văn bản tiếng Việt */}
           </Button>
         </div>
       </div>
@@ -150,12 +292,10 @@ export default function CarbonAccountingDetailPage() {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center">
               <Bot className="h-5 w-5 mr-2 text-green-600" />
-              {language === "vi" ? "AI CarbonSeek" : "AI CarbonSeek"}
+              AI CarbonSeek {/* Văn bản tiếng Việt */}
             </CardTitle>
             <CardDescription>
-              {language === "vi"
-                ? "Nền tảng AI phân tích phát thải carbon"
-                : "AI Carbon Emission Analysis Platform"}
+              Nền tảng AI phân tích phát thải carbon {/* Văn bản tiếng Việt */}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -169,18 +309,14 @@ export default function CarbonAccountingDetailPage() {
               />
             </div>
             <p className="text-sm text-gray-600 mb-4">
-              {language === "vi"
-                ? "Truy cập nền tảng AI CarbonSeek để phân tích và quản lý dữ liệu phát thải carbon của doanh nghiệp bạn."
-                : "Access the AI CarbonSeek platform to analyze and manage your business's carbon emission data."}
+              Truy cập nền tảng AI CarbonSeek để phân tích và quản lý dữ liệu phát thải carbon của doanh nghiệp bạn. {/* Văn bản tiếng Việt */}
             </p>
             <Button
               className="w-full bg-green-600 hover:bg-green-700 h-10"
               onClick={() => window.open(carbonProduct.aiPlatformUrl, "_blank")}
             >
               <ExternalLink className="mr-2 h-4 w-4" />
-              {language === "vi"
-                ? "Đăng nhập vào AI CarbonSeek"
-                : "Login to AI CarbonSeek"}
+              Đăng nhập vào AI CarbonSeek {/* Văn bản tiếng Việt */}
             </Button>
           </CardContent>
         </Card>
@@ -189,31 +325,23 @@ export default function CarbonAccountingDetailPage() {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center">
               <BookOpen className="h-5 w-5 mr-2 text-blue-600" />
-              {language === "vi"
-                ? "Tài liệu & Hướng dẫn"
-                : "Documents & Guides"}
+              Tài liệu & Hướng dẫn {/* Văn bản tiếng Việt */}
             </CardTitle>
             <CardDescription>
-              {language === "vi"
-                ? "Thư viện tài liệu hỗ trợ"
-                : "Support Document Library"}
+              Thư viện tài liệu hỗ trợ {/* Văn bản tiếng Việt */}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="mb-4 relative h-32 w-full rounded-lg overflow-hidden">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Greenhouse%20Library%20Haven.jpg-V06rjIZMn48LhPqcTNKEYK9NMkbiRb.jpeg"
-                alt={
-                  language === "vi" ? "Thư viện tài liệu" : "Document Library"
-                }
+                alt="Thư viện tài liệu" // Văn bản tiếng Việt
                 fill
                 className="object-cover"
               />
             </div>
             <p className="text-sm text-gray-600 mb-4">
-              {language === "vi"
-                ? "Truy cập thư viện Google Drive chứa tất cả tài liệu hướng dẫn, mẫu báo cáo và tài liệu tham khảo."
-                : "Access the Google Drive library containing all guides, report templates, and reference materials."}
+              Truy cập thư viện Google Drive chứa tất cả tài liệu hướng dẫn, mẫu báo cáo và tài liệu tham khảo. {/* Văn bản tiếng Việt */}
             </p>
             <Button
               className="w-full bg-blue-600 hover:bg-blue-700 h-10"
@@ -222,9 +350,7 @@ export default function CarbonAccountingDetailPage() {
               }
             >
               <ExternalLink className="mr-2 h-4 w-4" />
-              {language === "vi"
-                ? "Mở thư viện tài liệu"
-                : "Open Document Library"}
+              Mở thư viện tài liệu {/* Văn bản tiếng Việt */}
             </Button>
           </CardContent>
         </Card>
@@ -233,19 +359,19 @@ export default function CarbonAccountingDetailPage() {
       <Tabs defaultValue="overview" className="mb-8">
         <TabsList>
           <TabsTrigger value="overview">
-            {language === "vi" ? "Tổng quan" : "Overview"}
+            Tổng quan {/* Văn bản tiếng Việt */}
           </TabsTrigger>
           <TabsTrigger value="resources">
-            {language === "vi" ? "Tài nguyên" : "Resources"}
+            Tài nguyên {/* Văn bản tiếng Việt */}
           </TabsTrigger>
           <TabsTrigger value="usage">
-            {language === "vi" ? "Sử dụng" : "Usage"}
+            Sử dụng {/* Văn bản tiếng Việt */}
           </TabsTrigger>
           <TabsTrigger value="subscription">
-            {language === "vi" ? "Thông tin đăng ký" : "Subscription"}
+            Thông tin đăng ký {/* Văn bản tiếng Việt */}
           </TabsTrigger>
           <TabsTrigger value="support">
-            {language === "vi" ? "Hỗ trợ" : "Support"}
+            Hỗ trợ {/* Văn bản tiếng Việt */}
           </TabsTrigger>
         </TabsList>
 
@@ -257,9 +383,7 @@ export default function CarbonAccountingDetailPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <h3 className="text-lg font-medium mb-4">
-                        {language === "vi"
-                          ? "Mô tả sản phẩm"
-                          : "Product Description"}
+                        Mô tả sản phẩm {/* Văn bản tiếng Việt */}
                       </h3>
                       <p className="text-gray-600 mb-4">
                         {carbonProduct.description}
@@ -269,9 +393,7 @@ export default function CarbonAccountingDetailPage() {
                         <Calendar className="h-5 w-5 text-gray-500" />
                         <div>
                           <p className="text-sm font-medium text-gray-500">
-                            {language === "vi"
-                              ? "Thời hạn đăng ký"
-                              : "Subscription Period"}
+                            Thời hạn đăng ký {/* Văn bản tiếng Việt */}
                           </p>
                           <p className="text-sm">
                             {carbonProduct.startDate} - {carbonProduct.endDate}
@@ -293,7 +415,7 @@ export default function CarbonAccountingDetailPage() {
 
                   <div className="mt-8">
                     <h3 className="text-lg font-medium mb-4">
-                      {language === "vi" ? "Tính năng chính" : "Key Features"}
+                      Tính năng chính {/* Văn bản tiếng Việt */}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {carbonProduct.features.map((feature) => (
@@ -328,9 +450,7 @@ export default function CarbonAccountingDetailPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>
-                    {language === "vi"
-                      ? "Thông tin sản phẩm"
-                      : "Product Information"}
+                    Thông tin sản phẩm {/* Văn bản tiếng Việt */}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -338,7 +458,7 @@ export default function CarbonAccountingDetailPage() {
                     <Building className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-500">
-                        {language === "vi" ? "Công ty" : "Company"}
+                        Công ty {/* Văn bản tiếng Việt */}
                       </p>
                       <p className="text-sm">{carbonProduct.company}</p>
                     </div>
@@ -348,9 +468,7 @@ export default function CarbonAccountingDetailPage() {
                     <Calendar className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-500">
-                        {language === "vi"
-                          ? "Thời hạn đăng ký"
-                          : "Subscription Period"}
+                        Thời hạn đăng ký {/* Văn bản tiếng Việt */}
                       </p>
                       <p className="text-sm">
                         {carbonProduct.startDate} - {carbonProduct.endDate}
@@ -362,20 +480,15 @@ export default function CarbonAccountingDetailPage() {
                     <CreditCard className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-500">
-                        {language === "vi" ? "Gói dịch vụ" : "Service Package"}
+                        Gói dịch vụ {/* Văn bản tiếng Việt */}
                       </p>
                       <p className="text-sm">
+                        {/* Thay thế điều kiện ngôn ngữ bằng văn bản tiếng Việt */}
                         {carbonProduct.id === "ca-002"
-                          ? language === "vi"
-                            ? "Doanh nghiệp"
-                            : "Enterprise"
+                          ? "Doanh nghiệp"
                           : carbonProduct.id === "ca-001"
-                            ? language === "vi"
-                              ? "Chuyên gia"
-                              : "Expert"
-                            : language === "vi"
-                              ? "Dùng thử"
-                              : "Trial"}
+                            ? "Chuyên gia"
+                            : "Dùng thử"}
                       </p>
                     </div>
                   </div>
@@ -384,9 +497,7 @@ export default function CarbonAccountingDetailPage() {
                     <Users className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-500">
-                        {language === "vi"
-                          ? "Người quản lý tài khoản"
-                          : "Account Manager"}
+                        Người quản lý tài khoản {/* Văn bản tiếng Việt */}
                       </p>
                       <p className="text-sm">
                         {carbonProduct.accountManager.name}
@@ -403,9 +514,7 @@ export default function CarbonAccountingDetailPage() {
                       className="w-full justify-start text-green-600 border-green-200 hover:bg-green-50"
                     >
                       <ArrowUpRight className="h-4 w-4 mr-2" />
-                      {language === "vi"
-                        ? "Truy cập AI CarbonSeek"
-                        : "Access AI CarbonSeek"}
+                      Truy cập AI CarbonSeek {/* Văn bản tiếng Việt */}
                     </Button>
                   </div>
                 </CardContent>
@@ -419,14 +528,10 @@ export default function CarbonAccountingDetailPage() {
             <CardContent className="pt-6">
               <div className="mb-4">
                 <h3 className="text-lg font-medium mb-2">
-                  {language === "vi"
-                    ? "Tài nguyên có sẵn"
-                    : "Available Resources"}
+                  Tài nguyên có sẵn {/* Văn bản tiếng Việt */}
                 </h3>
                 <p className="text-gray-600">
-                  {language === "vi"
-                    ? "Tất cả tài liệu và hướng dẫn cho Carbon Toàn Thư 4.0"
-                    : "All documents and guides for Carbon Complete 4.0"}
+                  Tất cả tài liệu và hướng dẫn cho Carbon Toàn Thư 4.0 {/* Văn bản tiếng Việt */}
                 </p>
               </div>
 
@@ -434,11 +539,7 @@ export default function CarbonAccountingDetailPage() {
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder={
-                      language === "vi"
-                        ? "Tìm kiếm tài liệu..."
-                        : "Search documents..."
-                    }
+                    placeholder="Tìm kiếm tài liệu..." // Văn bản tiếng Việt
                     className="w-full px-4 py-2 pl-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                   <svg
@@ -459,16 +560,16 @@ export default function CarbonAccountingDetailPage() {
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" size="sm">
-                    {language === "vi" ? "Lọc" : "Filter"}
+                    Lọc {/* Văn bản tiếng Việt */}
                   </Button>
                   <Button variant="outline" size="sm">
-                    {language === "vi" ? "Sắp xếp" : "Sort"}
+                    Sắp xếp {/* Văn bản tiếng Việt */}
                   </Button>
                 </div>
               </div>
 
               <div className="space-y-4 mt-6">
-                {carbonProduct.resources.map((resource) => (
+                {carbonProduct.resources && carbonProduct.resources.map((resource) => (
                   <div
                     key={resource.id}
                     className="flex flex-col p-4 border rounded-lg hover:bg-gray-50 transition-colors"
@@ -491,6 +592,7 @@ export default function CarbonAccountingDetailPage() {
                           variant="outline"
                           size="sm"
                           className="text-blue-600 border-blue-200"
+                          onClick={() => window.open(resource.url, "_blank")} // Giả định resource có url
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -507,30 +609,33 @@ export default function CarbonAccountingDetailPage() {
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                             <circle cx="12" cy="12" r="3"></circle>
                           </svg>
-                          {language === "vi" ? "Xem" : "View"}
+                          Xem {/* Văn bản tiếng Việt */}
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-green-600 border-green-200"
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          {language === "vi" ? "Tải xuống" : "Download"}
-                        </Button>
+                        {resource.downloadUrl && ( // Chỉ hiện nút tải xuống nếu có downloadUrl
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-green-600 border-green-200"
+                            onClick={() => window.open(resource.downloadUrl, "_blank")} // Giả định resource có downloadUrl
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Tải xuống {/* Văn bản tiếng Việt */}
+                          </Button>
+                        )}
                       </div>
                     </div>
-                    {resource.title.includes("CarbonSeek") &&
-                      resource.type === "video" && (
-                        <div className="mt-3 relative h-32 w-full rounded-lg overflow-hidden">
-                          <video
-                            src="https://res.cloudinary.com/dyticflm3/video/upload/v1744631174/CARBONSEEK_C%C3%B4ng_c%E1%BB%A5_h%E1%BB%97_tr%E1%BB%A3_nghi%C3%AAn_c%E1%BB%A9u_v%C3%A0_qu%E1%BA%A3n_l%C3%BD_to%C3%A0n_b%E1%BB%99_v%E1%BB%81_ESG_T%C3%ADn_ch%E1%BB%89_carbon_%C4%91%E1%BA%A7y_%C4%91%E1%BB%A7_th%C3%B4ng_tin_nh%E1%BA%A5t_tr%C3%AAn_th%E1%BB%8B_tr%C6%B0%E1%BB%9Dng_hi%E1%BB%87n_nay_cvbsck.mp4"
-                            className="w-full h-full object-cover"
-                            autoPlay
-                            muted
-                            loop
-                          />
-                        </div>
-                      )}
+                    {/* Hiển thị video nhúng nếu là video resource */}
+                    {resource.type === "video" && (
+                      <div className="mt-3 relative h-32 w-full rounded-lg overflow-hidden">
+                        <video
+                          src={resource.url} // Sử dụng url của resource
+                          className="w-full h-full object-cover"
+                          autoPlay
+                          muted
+                          loop
+                        />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -542,14 +647,10 @@ export default function CarbonAccountingDetailPage() {
                   </div>
                   <div>
                     <h4 className="font-medium text-blue-800">
-                      {language === "vi"
-                        ? "Thư viện tài liệu đầy đủ"
-                        : "Complete Document Library"}
+                      Thư viện tài liệu đầy đủ {/* Văn bản tiếng Việt */}
                     </h4>
                     <p className="text-sm text-blue-700 mt-1 mb-3">
-                      {language === "vi"
-                        ? "Truy cập Google Drive để xem tất cả tài liệu, bao gồm các bản cập nhật mới nhất."
-                        : "Access Google Drive to view all documents, including the latest updates."}
+                      Truy cập Google Drive để xem tất cả tài liệu, bao gồm các bản cập nhật mới nhất. {/* Văn bản tiếng Việt */}
                     </p>
                     <Button
                       className="bg-blue-600 hover:bg-blue-700"
@@ -558,9 +659,7 @@ export default function CarbonAccountingDetailPage() {
                       }
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
-                      {language === "vi"
-                        ? "Mở thư viện Google Drive"
-                        : "Open Google Drive Library"}
+                      Mở thư viện Google Drive {/* Văn bản tiếng Việt */}
                     </Button>
                   </div>
                 </div>
@@ -573,12 +672,10 @@ export default function CarbonAccountingDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle>
-                {language === "vi" ? "Thống kê sử dụng" : "Usage Statistics"}
+                Thống kê sử dụng {/* Văn bản tiếng Việt */}
               </CardTitle>
               <CardDescription>
-                {language === "vi"
-                  ? "Theo dõi việc sử dụng nền tảng Carbon Toàn Thư của bạn"
-                  : "Track your Carbon Complete platform usage"}
+                Theo dõi việc sử dụng nền tảng Carbon Toàn Thư của bạn {/* Văn bản tiếng Việt */}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -586,9 +683,7 @@ export default function CarbonAccountingDetailPage() {
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base">
-                      {language === "vi"
-                        ? "Tổng lượt truy cập"
-                        : "Total Accesses"}
+                      Tổng lượt truy cập {/* Văn bản tiếng Việt */}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -596,7 +691,7 @@ export default function CarbonAccountingDetailPage() {
                       {carbonProduct.usageStats.totalUsage}
                     </div>
                     <p className="text-sm text-gray-500 mt-1">
-                      {language === "vi" ? "Kể từ" : "Since"}{" "}
+                      Kể từ{" "} {/* Văn bản tiếng Việt */}
                       {carbonProduct.startDate}
                     </p>
                   </CardContent>
@@ -605,57 +700,66 @@ export default function CarbonAccountingDetailPage() {
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base">
-                      {language === "vi"
-                        ? "Sử dụng tháng này"
-                        : "This Month Usage"}
+                      Sử dụng tháng này {/* Văn bản tiếng Việt */}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold">
                       {carbonProduct.usageStats.lastMonthUsage}
                     </div>
-                    <div className="flex items-center text-sm text-green-600 mt-1">
-                      <TrendingUp className="h-4 w-4 mr-1" />
-                      <span>
-                        +12%{" "}
-                        {language === "vi"
-                          ? "so với tháng trước"
-                          : "vs last month"}
-                      </span>
-                    </div>
+                    {/* Giả định có dữ liệu so sánh tháng trước */}
+                    {carbonProduct.usageStats.lastMonthChangePercentage !== undefined && (
+                      <div className={`flex items-center text-sm ${carbonProduct.usageStats.lastMonthChangePercentage >= 0 ? 'text-green-600' : 'text-red-600'} mt-1`}>
+                        {carbonProduct.usageStats.lastMonthChangePercentage >= 0 ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />} {/* Cần import TrendingDown */}
+                        <span>
+                          {carbonProduct.usageStats.lastMonthChangePercentage >= 0 ? "+" : ""}
+                          {carbonProduct.usageStats.lastMonthChangePercentage}% so với tháng trước {/* Văn bản tiếng Việt */}
+                        </span>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base">
-                      {language === "vi" ? "Giới hạn sử dụng" : "Usage Limit"}
+                      Giới hạn sử dụng {/* Văn bản tiếng Việt */}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold">
-                      {carbonProduct.usageStats.usageLimit}
-                    </div>
-                    <div className="flex items-center text-sm text-gray-500 mt-1">
-                      <span>
-                        {carbonProduct.usageStats.usagePercentage}%{" "}
-                        {language === "vi" ? "đã sử dụng" : "used"}
-                      </span>
-                    </div>
+                    {/* Hiển thị giới hạn nếu có */}
+                    {carbonProduct.usageStats.usageLimit !== "Không giới hạn" ? (
+                      <div className="text-3xl font-bold">
+                        {carbonProduct.usageStats.usageLimit}
+                      </div>
+                    ) : (
+                      <div className="text-xl font-bold text-gray-700">
+                        Không giới hạn {/* Văn bản tiếng Việt */}
+                      </div>
+                    )}
+
+                    {carbonProduct.usageStats.usageLimit !== "Không giới hạn" && (
+                      <div className="flex items-center text-sm text-gray-500 mt-1">
+                        <span>
+                          {carbonProduct.usageStats.usagePercentage}% đã sử dụng {/* Văn bản tiếng Việt */}
+                        </span>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
 
               <div className="mb-8">
                 <h3 className="text-lg font-medium mb-4">
-                  {language === "vi" ? "Xu hướng sử dụng" : "Usage Trends"}
+                  Xu hướng sử dụng {/* Văn bản tiếng Việt */}
                 </h3>
+                {/* Biểu đồ đơn giản sử dụng div */}
                 <div className="h-64 bg-gray-50 rounded-lg border p-4 flex items-center justify-center">
                   <div className="w-full h-full flex items-end justify-between px-4">
                     {usageData.datasets.map((value, index) => (
                       <div key={index} className="flex flex-col items-center">
                         <div
-                          className="bg-green-500 w-12 rounded-t-md"
+                          className="bg-green-500 w-8 rounded-t-md" // Giảm chiều rộng thanh để đỡ chật
                           style={{ height: `${value}%` }}
                         ></div>
                         <span className="text-xs mt-2">
@@ -671,14 +775,14 @@ export default function CarbonAccountingDetailPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-base">
-                      {language === "vi"
-                        ? "Người dùng hoạt động"
-                        : "Active Users"}
+                      Người dùng hoạt động {/* Văn bản tiếng Việt */}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
+                      {/* Lọc người dùng có trạng thái 'active' nếu có trường status */}
                       {carbonProduct.recentActivities
+                        .filter(activity => activity.status === 'active') // Giả định activity có trường status
                         .slice(0, 4)
                         .map((activity, index) => (
                           <div
@@ -687,10 +791,14 @@ export default function CarbonAccountingDetailPage() {
                           >
                             <span className="text-sm">{activity.user}</span>
                             <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                              {language === "vi" ? "Đang hoạt động" : "Active"}
+                              Đang hoạt động {/* Văn bản tiếng Việt */}
                             </span>
                           </div>
                         ))}
+                      {/* Nếu không có người dùng active trong recentActivities, hiển thị thông báo */}
+                      {carbonProduct.recentActivities.filter(activity => activity.status === 'active').length === 0 && (
+                        <p className="text-sm text-gray-500">Chưa có người dùng hoạt động gần đây.</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -698,9 +806,7 @@ export default function CarbonAccountingDetailPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-base">
-                      {language === "vi"
-                        ? "Hoạt động gần đây"
-                        : "Recent Activities"}
+                      Hoạt động gần đây {/* Văn bản tiếng Việt */}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -729,33 +835,26 @@ export default function CarbonAccountingDetailPage() {
             <CardContent className="pt-6">
               <div className="mb-6">
                 <h3 className="text-lg font-medium mb-2">
-                  {language === "vi"
-                    ? "Chi tiết đăng ký"
-                    : "Subscription Details"}
+                  Chi tiết đăng ký {/* Văn bản tiếng Việt */}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="text-gray-600">
-                        {language === "vi" ? "Gói dịch vụ" : "Service Package"}
+                        Gói dịch vụ {/* Văn bản tiếng Việt */}
                       </span>
                       <span className="font-medium">
+                        {/* Thay thế điều kiện ngôn ngữ bằng văn bản tiếng Việt */}
                         {carbonProduct.id === "ca-002"
-                          ? language === "vi"
-                            ? "Doanh nghiệp"
-                            : "Enterprise"
+                          ? "Doanh nghiệp"
                           : carbonProduct.id === "ca-001"
-                            ? language === "vi"
-                              ? "Chuyên gia"
-                              : "Expert"
-                            : language === "vi"
-                              ? "Dùng thử"
-                              : "Trial"}
+                            ? "Chuyên gia"
+                            : "Dùng thử"}
                       </span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="text-gray-600">
-                        {language === "vi" ? "Ngày bắt đầu" : "Start Date"}
+                        Ngày bắt đầu {/* Văn bản tiếng Việt */}
                       </span>
                       <span className="font-medium">
                         {carbonProduct.startDate}
@@ -763,7 +862,7 @@ export default function CarbonAccountingDetailPage() {
                     </div>
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="text-gray-600">
-                        {language === "vi" ? "Ngày kết thúc" : "End Date"}
+                        Ngày kết thúc {/* Văn bản tiếng Việt */}
                       </span>
                       <span className="font-medium">
                         {carbonProduct.endDate}
@@ -771,9 +870,7 @@ export default function CarbonAccountingDetailPage() {
                     </div>
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="text-gray-600">
-                        {language === "vi"
-                          ? "Chu kỳ thanh toán"
-                          : "Billing Cycle"}
+                        Chu kỳ thanh toán {/* Văn bản tiếng Việt */}
                       </span>
                       <span className="font-medium">
                         {carbonProduct.billingCycle}
@@ -781,28 +878,19 @@ export default function CarbonAccountingDetailPage() {
                     </div>
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="text-gray-600">
-                        {language === "vi" ? "Giá" : "Price"}
+                        Giá {/* Văn bản tiếng Việt */}
                       </span>
                       <span className="font-medium">
-                        {carbonProduct.price === 0
-                          ? language === "vi"
-                            ? "Miễn phí"
-                            : "Free"
-                          : new Intl.NumberFormat(
-                              language === "vi" ? "vi-VN" : "en-US",
-                              {
-                                style: "currency",
-                                currency: "VND",
-                              },
-                            ).format(carbonProduct.price)}
+                        {/* Sử dụng helper function để định dạng tiền */}
+                        {formatCurrencyVND(carbonProduct.price)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="text-gray-600">
-                        {language === "vi" ? "Trạng thái" : "Status"}
+                        Trạng thái {/* Văn bản tiếng Việt */}
                       </span>
                       <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-                        {language === "vi" ? "Đang hoạt động" : "Active"}
+                        Đang hoạt động {/* Văn bản tiếng Việt */}
                       </span>
                     </div>
                   </div>
@@ -811,17 +899,13 @@ export default function CarbonAccountingDetailPage() {
                     <Card className="border-2 border-green-100">
                       <CardHeader>
                         <CardTitle>
-                          {language === "vi"
-                            ? "Thông tin thanh toán"
-                            : "Payment Information"}
+                          Thông tin thanh toán {/* Văn bản tiếng Việt */}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600">
-                            {language === "vi"
-                              ? "Phương thức thanh toán"
-                              : "Payment Method"}
+                            Phương thức thanh toán {/* Văn bản tiếng Việt */}
                           </span>
                           <div className="flex items-center">
                             <CreditCard className="h-4 w-4 mr-2 text-gray-500" />
@@ -830,17 +914,13 @@ export default function CarbonAccountingDetailPage() {
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600">
-                            {language === "vi"
-                              ? "Thông tin thẻ"
-                              : "Card Information"}
+                            Thông tin thẻ {/* Văn bản tiếng Việt */}
                           </span>
                           <span>{carbonProduct.cardInfo}</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600">
-                            {language === "vi"
-                              ? "Thanh toán tiếp theo"
-                              : "Next Payment"}
+                            Thanh toán tiếp theo {/* Văn bản tiếng Việt */}
                           </span>
                           <span>{carbonProduct.nextBillingDate}</span>
                         </div>
@@ -848,123 +928,102 @@ export default function CarbonAccountingDetailPage() {
                         <div className="pt-4 mt-2 border-t border-gray-200">
                           <Button variant="outline" className="w-full">
                             <Settings className="h-4 w-4 mr-2" />
-                            {language === "vi"
-                              ? "Quản lý thanh toán"
-                              : "Manage Payment"}
+                            Quản lý thanh toán {/* Văn bản tiếng Việt */}
                           </Button>
                         </div>
                       </CardContent>
                     </Card>
 
-                    {carbonProduct.id === "ca-003" ? (
+                    {/* Cập nhật cảnh báo hết hạn dùng thử / đăng ký */}
+                    {carbonProduct.status !== "expired" && ( // Chỉ hiển thị cảnh báo nếu chưa hết hạn
                       <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
                         <div className="flex items-start">
                           <AlertTriangle className="h-5 w-5 text-yellow-500 mr-3 mt-0.5" />
                           <div>
                             <h4 className="font-medium text-yellow-800">
-                              {language === "vi"
+                              {carbonProduct.id === "ca-003"
                                 ? "Sắp hết hạn dùng thử"
-                                : "Trial Ending Soon"}
+                                : "Sắp hết hạn đăng ký"}
                             </h4>
                             <p className="text-sm text-yellow-700 mt-1">
-                              {language === "vi"
+                              {carbonProduct.id === "ca-003"
                                 ? `Gói dùng thử của bạn sẽ hết hạn vào ngày ${carbonProduct.endDate}. Nâng cấp ngay để tiếp tục sử dụng dịch vụ.`
-                                : `Your trial will expire on ${carbonProduct.endDate}. Upgrade now to continue using the service.`}
+                                : `Đăng ký của bạn sẽ hết hạn vào ngày ${carbonProduct.endDate}. Liên hệ với chúng tôi để gia hạn và đảm bảo dịch vụ không bị gián đoạn.`}
                             </p>
                             <Button className="mt-3 bg-yellow-600 hover:bg-yellow-700">
-                              {language === "vi"
+                              {carbonProduct.id === "ca-003"
                                 ? "Nâng cấp ngay"
-                                : "Upgrade Now"}
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                        <div className="flex items-start">
-                          <AlertTriangle className="h-5 w-5 text-yellow-500 mr-3 mt-0.5" />
-                          <div>
-                            <h4 className="font-medium text-yellow-800">
-                              {language === "vi"
-                                ? "Sắp hết hạn đăng ký"
-                                : "Subscription Ending Soon"}
-                            </h4>
-                            <p className="text-sm text-yellow-700 mt-1">
-                              {language === "vi"
-                                ? `Đăng ký của bạn sẽ hết hạn vào ngày ${carbonProduct.endDate}. Liên hệ với chúng tôi để gia hạn và đảm bảo dịch vụ không bị gián đoạn.`
-                                : `Your subscription will expire on ${carbonProduct.endDate}. Contact us to renew and ensure uninterrupted service.`}
-                            </p>
-                            <Button className="mt-3 bg-yellow-600 hover:bg-yellow-700">
-                              {language === "vi" ? "Gia hạn ngay" : "Renew Now"}
+                                : "Gia hạn ngay"}
                             </Button>
                           </div>
                         </div>
                       </div>
                     )}
+
                   </div>
                 </div>
               </div>
 
               <div className="mt-8">
                 <h3 className="text-lg font-medium mb-4">
-                  {language === "vi" ? "Lịch sử thanh toán" : "Payment History"}
+                  Lịch sử thanh toán {/* Văn bản tiếng Việt */}
                 </h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-3 px-4 font-medium text-gray-500">
-                          {language === "vi" ? "Ngày" : "Date"}
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-500">
-                          {language === "vi" ? "Mô tả" : "Description"}
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-500">
-                          {language === "vi" ? "Số tiền" : "Amount"}
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-500">
-                          {language === "vi" ? "Trạng thái" : "Status"}
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-500">
-                          {language === "vi" ? "Hóa đơn" : "Invoice"}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="border-b">
-                        <td className="py-3 px-4">{carbonProduct.startDate}</td>
-                        <td className="py-3 px-4">{carbonProduct.title}</td>
-                        <td className="py-3 px-4">
-                          {carbonProduct.price === 0
-                            ? language === "vi"
-                              ? "Miễn phí"
-                              : "Free"
-                            : new Intl.NumberFormat(
-                                language === "vi" ? "vi-VN" : "en-US",
-                                {
-                                  style: "currency",
-                                  currency: "VND",
-                                },
-                              ).format(carbonProduct.price)}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
-                            {language === "vi" ? "Đã thanh toán" : "Paid"}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 px-2"
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                {/* Giả định có dữ liệu lịch sử thanh toán trong carbonProduct.paymentHistory */}
+                {carbonProduct.paymentHistory && carbonProduct.paymentHistory.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left py-3 px-4 font-medium text-gray-500">
+                            Ngày {/* Văn bản tiếng Việt */}
+                          </th>
+                          <th className="text-left py-3 px-4 font-medium text-gray-500">
+                            Mô tả {/* Văn bản tiếng Việt */}
+                          </th>
+                          <th className="text-left py-3 px-4 font-medium text-gray-500">
+                            Số tiền {/* Văn bản tiếng Việt */}
+                          </th>
+                          <th className="text-left py-3 px-4 font-medium text-gray-500">
+                            Trạng thái {/* Văn bản tiếng Việt */}
+                          </th>
+                          <th className="text-left py-3 px-4 font-medium text-gray-500">
+                            Hóa đơn {/* Văn bản tiếng Việt */}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {carbonProduct.paymentHistory.map((payment, index) => (
+                          <tr key={index} className="border-b">
+                            <td className="py-3 px-4">{payment.date}</td>
+                            <td className="py-3 px-4">{payment.description}</td>
+                            <td className="py-3 px-4">
+                              {formatCurrencyVND(payment.amount)}
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className={`px-2 py-1 rounded-full text-xs ${payment.status === 'Đã thanh toán' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                {payment.status}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4">
+                              {payment.invoiceUrl && ( // Chỉ hiện nút tải xuống nếu có invoiceUrl
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 px-2"
+                                  onClick={() => window.open(payment.invoiceUrl, "_blank")}
+                                >
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">Không có lịch sử thanh toán nào.</p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -976,7 +1035,7 @@ export default function CarbonAccountingDetailPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                   <h3 className="text-lg font-medium mb-4">
-                    {language === "vi" ? "Liên hệ hỗ trợ" : "Support Contact"}
+                    Liên hệ hỗ trợ {/* Văn bản tiếng Việt */}
                   </h3>
                   <Card className="border-2 border-green-100">
                     <CardContent className="pt-6">
@@ -986,14 +1045,10 @@ export default function CarbonAccountingDetailPage() {
                         </div>
                         <div>
                           <h4 className="font-medium text-lg">
-                            {language === "vi"
-                              ? "Đội ngũ hỗ trợ"
-                              : "Support Team"}
+                            Đội ngũ hỗ trợ {/* Văn bản tiếng Việt */}
                           </h4>
                           <p className="text-gray-500">
-                            {language === "vi"
-                              ? "Luôn sẵn sàng giúp đỡ bạn với mọi vấn đề"
-                              : "Always ready to help you with any issues"}
+                            Luôn sẵn sàng giúp đỡ bạn với mọi vấn đề {/* Văn bản tiếng Việt */}
                           </p>
                         </div>
                       </div>
@@ -1042,7 +1097,7 @@ export default function CarbonAccountingDetailPage() {
                           </svg>
                           <div>
                             <p className="text-sm font-medium text-gray-500">
-                              {language === "vi" ? "Điện thoại" : "Phone"}
+                              Điện thoại {/* Văn bản tiếng Việt */}
                             </p>
                             <p className="text-sm">
                               {carbonProduct.supportContact.phone}
@@ -1068,9 +1123,7 @@ export default function CarbonAccountingDetailPage() {
                           </svg>
                           <div>
                             <p className="text-sm font-medium text-gray-500">
-                              {language === "vi"
-                                ? "Giờ hỗ trợ"
-                                : "Support Hours"}
+                              Giờ hỗ trợ {/* Văn bản tiếng Việt */}
                             </p>
                             <p className="text-sm">
                               {carbonProduct.supportContact.supportHours}
@@ -1095,9 +1148,7 @@ export default function CarbonAccountingDetailPage() {
                           >
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                           </svg>
-                          {language === "vi"
-                            ? "Gửi yêu cầu hỗ trợ"
-                            : "Send Support Request"}
+                          Gửi yêu cầu hỗ trợ {/* Văn bản tiếng Việt */}
                         </Button>
                         <Button variant="outline" className="w-full">
                           <svg
@@ -1114,16 +1165,14 @@ export default function CarbonAccountingDetailPage() {
                           >
                             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                           </svg>
-                          {language === "vi" ? "Gọi hỗ trợ" : "Call Support"}
+                          Gọi hỗ trợ {/* Văn bản tiếng Việt */}
                         </Button>
                       </div>
                     </CardContent>
                   </Card>
 
                   <h3 className="text-lg font-medium mt-8 mb-4">
-                    {language === "vi"
-                      ? "Người quản lý tài khoản"
-                      : "Account Manager"}
+                    Người quản lý tài khoản {/* Văn bản tiếng Việt */}
                   </h3>
                   <Card className="border-2 border-blue-100">
                     <CardContent className="pt-6">
@@ -1136,9 +1185,7 @@ export default function CarbonAccountingDetailPage() {
                             {carbonProduct.accountManager.name}
                           </h4>
                           <p className="text-gray-500">
-                            {language === "vi"
-                              ? "Người quản lý tài khoản của bạn"
-                              : "Your account manager"}
+                            Người quản lý tài khoản của bạn {/* Văn bản tiếng Việt */}
                           </p>
                         </div>
                       </div>
@@ -1187,7 +1234,7 @@ export default function CarbonAccountingDetailPage() {
                           </svg>
                           <div>
                             <p className="text-sm font-medium text-gray-500">
-                              {language === "vi" ? "Điện thoại" : "Phone"}
+                              Điện thoại {/* Văn bản tiếng Việt */}
                             </p>
                             <p className="text-sm">
                               {carbonProduct.accountManager.phone}
@@ -1211,9 +1258,7 @@ export default function CarbonAccountingDetailPage() {
                         >
                           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                         </svg>
-                        {language === "vi"
-                          ? "Liên hệ người quản lý"
-                          : "Contact Manager"}
+                        Liên hệ người quản lý {/* Văn bản tiếng Việt */}
                       </Button>
                     </CardContent>
                   </Card>
@@ -1221,137 +1266,61 @@ export default function CarbonAccountingDetailPage() {
 
                 <div>
                   <h3 className="text-lg font-medium mb-4">
-                    {language === "vi"
-                      ? "Câu hỏi thường gặp"
-                      : "Frequently Asked Questions"}
+                    Câu hỏi thường gặp {/* Văn bản tiếng Việt */}
                   </h3>
                   <div className="space-y-4">
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-base">
-                          {language === "vi"
-                            ? "Làm thế nào để tạo báo cáo phát thải?"
-                            : "How do I generate an emission report?"}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-600">
-                          {language === "vi"
-                            ? "Để tạo báo cáo phát thải, đăng nhập vào nền tảng AI CarbonSeek, chọn 'Báo cáo' từ menu chính, sau đó chọn loại báo cáo và khoảng thời gian bạn muốn tạo báo cáo."
-                            : "To generate an emission report, log in to the AI CarbonSeek platform, select 'Reports' from the main menu, then choose the report type and time period you want to generate the report for."}
-                        </p>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-base">
-                          {language === "vi"
-                            ? "Làm thế nào để thêm người dùng mới vào hệ thống?"
-                            : "How do I add new users to the system?"}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-600">
-                          {language === "vi"
-                            ? "Để thêm người dùng mới, đăng nhập với tư cách quản trị viên, đi đến 'Cài đặt > Quản lý người dùng', sau đó nhấp vào 'Thêm người dùng mới' và điền thông tin cần thiết."
-                            : "To add new users, log in as an administrator, go to 'Settings > User Management', then click on 'Add New User' and fill in the required information."}
-                        </p>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-base">
-                          {language === "vi"
-                            ? "Làm thế nào để tích hợp dữ liệu từ hệ thống khác?"
-                            : "How do I integrate data from other systems?"}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-600">
-                          {language === "vi"
-                            ? "Carbon Toàn Thư 4.0 cung cấp API để tích hợp dữ liệu từ các hệ thống khác. Xem tài liệu API trong thư viện tài liệu để biết hướng dẫn chi tiết về cách tích hợp."
-                            : "Carbon Complete 4.0 provides APIs to integrate data from other systems. See the API documentation in the document library for detailed instructions on how to integrate."}
-                        </p>
-                      </CardContent>
-                    </Card>
+                    {/* Giả định có dữ liệu FAQ trong carbonProduct.faq */}
+                    {carbonProduct.faq && carbonProduct.faq.length > 0 ? (
+                      carbonProduct.faq.map((item, index) => (
+                        <Card key={index}>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-base">
+                              {item.question}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-sm text-gray-600">
+                              {item.answer}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-500">Chưa có câu hỏi thường gặp nào.</p>
+                    )}
 
                     <div className="pt-4">
                       <Button variant="outline" className="w-full">
                         <FileQuestion className="h-4 w-4 mr-2" />
-                        {language === "vi"
-                          ? "Xem tất cả câu hỏi thường gặp"
-                          : "View all FAQs"}
+                        Xem tất cả câu hỏi thường gặp {/* Văn bản tiếng Việt */}
                       </Button>
                     </div>
                   </div>
 
                   <h3 className="text-lg font-medium mt-8 mb-4">
-                    {language === "vi"
-                      ? "Tài liệu hỗ trợ"
-                      : "Support Resources"}
+                    Tài liệu hỗ trợ {/* Văn bản tiếng Việt */}
                   </h3>
+                  {/* Giả định có dữ liệu supportResources trong carbonProduct */}
                   <div className="space-y-4">
-                    <Card className="hover:bg-gray-50 transition-colors">
-                      <CardContent className="p-4 flex items-center">
-                        <div className="bg-green-100 p-2 rounded-full mr-4">
-                          <Video className="h-5 w-5 text-green-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium">
-                            {language === "vi"
-                              ? "Video hướng dẫn"
-                              : "Tutorial Videos"}
-                          </h4>
-                          <p className="text-sm text-gray-500">
-                            {language === "vi"
-                              ? "Xem các video hướng dẫn về cách sử dụng nền tảng"
-                              : "Watch tutorial videos on how to use the platform"}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="hover:bg-gray-50 transition-colors">
-                      <CardContent className="p-4 flex items-center">
-                        <div className="bg-blue-100 p-2 rounded-full mr-4">
-                          <FileText className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium">
-                            {language === "vi"
-                              ? "Hướng dẫn sử dụng"
-                              : "User Guides"}
-                          </h4>
-                          <p className="text-sm text-gray-500">
-                            {language === "vi"
-                              ? "Tài liệu hướng dẫn chi tiết về tất cả các tính năng"
-                              : "Detailed documentation on all features"}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="hover:bg-gray-50 transition-colors">
-                      <CardContent className="p-4 flex items-center">
-                        <div className="bg-purple-100 p-2 rounded-full mr-4">
-                          <Bot className="h-5 w-5 text-purple-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium">
-                            {language === "vi"
-                              ? "Trợ lý ảo"
-                              : "Virtual Assistant"}
-                          </h4>
-                          <p className="text-sm text-gray-500">
-                            {language === "vi"
-                              ? "Sử dụng trợ lý ảo AI để được hỗ trợ ngay lập tức"
-                              : "Use the AI virtual assistant for immediate help"}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    {carbonProduct.supportResources && carbonProduct.supportResources.length > 0 ? (
+                      carbonProduct.supportResources.map((resource, index) => (
+                        <Card key={index} className="hover:bg-gray-50 transition-colors">
+                          <CardContent className="p-4 flex items-center">
+                            <div className={`p-2 rounded-full mr-4 ${resource.iconColor === 'blue' ? 'bg-blue-100' : resource.iconColor === 'purple' ? 'bg-purple-100' : 'bg-green-100'}`}> {/* Sử dụng màu icon từ dữ liệu hoặc mặc định */}
+                              {renderIcon(resource.icon)}
+                            </div>
+                            <div>
+                              <h4 className="font-medium">{resource.title}</h4>
+                              <p className="text-sm text-gray-500">
+                                {resource.description}
+                              </p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-500">Không có tài nguyên hỗ trợ nào.</p>
+                    )}
                   </div>
                 </div>
               </div>

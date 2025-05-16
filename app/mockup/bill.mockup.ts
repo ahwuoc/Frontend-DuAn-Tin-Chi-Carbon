@@ -1,4 +1,3 @@
-// Dữ liệu mẫu cho hóa đơn
 export const invoices = [
   {
     id: "inv1",

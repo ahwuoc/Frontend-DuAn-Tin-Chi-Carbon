@@ -1,19 +1,19 @@
-import { apiCarbon, ICarbonProduct } from "@/app/fetch/fetch.carbon";
+
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CardContent, Card } from "@/components/ui/card";
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
-
+import { apiProducts } from "../../fetch/fetch.products";
 export default function CarbonCard() {
-  const [products, setProducts] = useState<ICarbonProduct[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await apiCarbon.getProductType("carbon_credits");
+        const response = await apiProducts.getProducts("carbon_credits");
         const productData = response.data || [];
         if (Array.isArray(productData)) {
           setProducts(productData);
@@ -63,9 +63,8 @@ export default function CarbonCard() {
         return (
           <Card
             key={product.id}
-            className={`relative w-1/4 bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 border-2 ${
-              isExpert ? "border-green-600" : "border-gray-200"
-            } flex flex-col min-h-[650px] w-full max-w-sm overflow-hidden`}
+            className={`relative w-1/4 bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 border-2 ${isExpert ? "border-green-600" : "border-gray-200"
+              } flex flex-col min-h-[650px] w-full max-w-sm overflow-hidden`}
           >
             {isExpert && (
               <div className="bg-green-600 text-white text-center py-2 text-sm font-semibold tracking-wide">
@@ -156,11 +155,10 @@ export default function CarbonCard() {
                   className="block w-full"
                 >
                   <Button
-                    className={`w-full py-3 text-base font-semibold tracking-wide transition-colors duration-200 ${
-                      isExpert
-                        ? "bg-green-600 hover:bg-green-700"
-                        : "bg-green-600 hover:bg-green-700"
-                    } text-white rounded-lg`}
+                    className={`w-full py-3 text-base font-semibold tracking-wide transition-colors duration-200 ${isExpert
+                      ? "bg-green-600 hover:bg-green-700"
+                      : "bg-green-600 hover:bg-green-700"
+                      } text-white rounded-lg`}
                   >
                     {isTrial
                       ? "Dùng thử ngay"

@@ -33,6 +33,7 @@ export type TUpdateResponse = {
 export type TLogoutResponse = {
   success: boolean;
   message: string;
+  data: any;
 };
 
 const apiAuth = {

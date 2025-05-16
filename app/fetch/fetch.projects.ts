@@ -1,12 +1,48 @@
 import HTTP from "../common/http";
 
-interface IProjectDocument {
+export interface IProjectDocument {
   name: string;
   date: Date;
   type: string;
 }
+// Định nghĩa interface cho hoạt động (Activity)
+export interface IActivity {
+  _id?: string; // _id có thể có nếu lấy từ DB, nhưng không cần khi tạo mới
+  title: string;
+  date: string; // ISO string
+  description: string;
+}
 
-interface IProjectActivity {
+// Định nghĩa interface cho tọa độ (Coordinates)
+// Interface này chỉ dùng nội bộ khi gửi dữ liệu đi nếu API cần format object
+export interface ICoordinates {
+  lat: number;
+  lng: number;
+}
+
+// Định nghĩa kiểu dữ liệu cho form
+export type FormData = {
+  name: string;
+  description?: string;
+  coordinates?: string; // Luôn là string trong form
+  registrationDate?: string;
+  startDate?: string;
+  endDate?: string;
+  carbonCredits?: number;
+  carbonCreditsTotal?: number;
+  carbonCreditsClaimed?: number;
+  area?: number;
+  // userId: string; // Đã xóa khỏi FormData
+  location?: string;
+  type?: string;
+  status?: "pending" | "active" | "completed" | "archived";
+  participants?: string; // Chuỗi phân tách bằng dấu phẩy
+  progress?: number;
+  documents: string[]; // Quản lý dạng mảng string
+  activities: IActivity[]; // Quản lý dạng mảng IActivity
+};
+
+export interface IProjectActivity {
   date: Date;
   description: string;
 }
@@ -31,10 +67,16 @@ export interface IProject {
   activities: IProjectActivity[];
   userId: string;
 }
-
+export type ResTProduct = {
+  project: IProject[];
+};
 export const apiProjects = {
   getProject: (id: string) => HTTP.GET<IProject>(`/projects/${id}`),
-  getAllProject: () => HTTP.GET<IProject[]>("/projects"),
+  update: (id: string, body: any) =>
+    HTTP.PUT<IProject>(`/projects/${id}`, { body }),
+  getAll: () => HTTP.GET<IProject[]>("/projects"),
   addProject: (data: any) => HTTP.POST<IProject>("/projects", data),
-  getMyProject: (id: string) => HTTP.GET<IProject>(`/projects/profile/${id}`),
+  getMyProject: (id: string) =>
+    HTTP.GET<ResTProduct>(`/projects/profile/${id}`),
+  delete: (id: any) => HTTP.DELETE(`/projects/${id}`),
 };

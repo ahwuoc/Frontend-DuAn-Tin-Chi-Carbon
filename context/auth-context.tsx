@@ -3,35 +3,38 @@
 import {
   createContext,
   useContext,
-  useState,
   useEffect,
+  useState,
   type ReactNode,
 } from "react";
 import apiAuth from "../app/fetch/fetch.auth";
 import Cookies from "js-cookie";
+import { apiProjects, IProject } from "../app/fetch/fetch.projects";
 type User = {
+  userId?: string;
   name: string;
   email: string;
   phone?: string;
   address?: string;
   avatar?: string;
-  products?: Array<{
-    id: string;
-    name: string;
-    purchaseDate: string;
-    expiryDate?: string;
-    status: "active" | "pending" | "expired";
-  }>;
-  projects?: Array<{
-    id: string;
-    type: "forest" | "rice" | "biochar";
-    name: string;
-    registrationDate: string;
-    status: "pending" | "approved" | "in_progress" | "completed";
-  }>;
+  role?: string;
+  products?: IOrder[];
+  projects?: IProject[];
+  orders?: IOrder[];
 };
 
+type TokenPayload = {
+  userId: string;
+  email: string;
+  role: string;
+  name: string;
+  iat: number;
+  exp: number;
+};
+import { jwtDecode } from "jwt-decode";
+import { apiOrders, IOrder } from "../app/fetch/fetch.order";
 type AuthContextType = {
+  setUserFromToken: (token: string) => void,
   user: User | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
@@ -43,49 +46,115 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+export function setCookie(name: string, value: string, days = 7): void {
+  const expires = new Date(Date.now() + days * 86400 * 1000).toUTCString()
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`
+}
+export const getCookie = (name: string): string | null => {
+  const cookies = document.cookie.split('; ');
+  const found = cookies.find(row => row.startsWith(name + '='));
+  return found ? decodeURIComponent(found.split('=')[1]) : null;
+};
+
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    try {
-      if (storedUser && storedUser !== "undefined") {
-        setUser(JSON.parse(storedUser));
-        setIsAuthenticated(true);
+    const token = getCookie("token");
+    if (token) {
+      try {
+        setUserFromToken(token);
+      } catch (e) {
+        console.error("Invalid token", e);
+        logout(); // Log out if token is invalid
       }
-    } catch (error) {
-      console.error("Lỗi khi parse user từ localStorage:", error);
-      localStorage.removeItem("user");
+    } else if (storedUser) {
+      try {
+        const userData: User = JSON.parse(storedUser);
+        if (userData.userId && userData.email && userData.name) {
+          setUser(userData);
+          setIsAuthenticated(true);
+        } else {
+          logout();
+        }
+      } catch (e) {
+        console.error("Invalid user data in localStorage", e);
+        logout();
+      }
+    } else {
+      setIsAuthenticated(false);
+      setUser(null);
     }
   }, []);
-
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       const response = await apiAuth.login({ email, password });
-      if (response.userData && response.token) {
-        const token = response.token;
-        const userData = response.userData;
-        localStorage.setItem("token", String(token));
-        localStorage.setItem("user", JSON.stringify(userData));
-        localStorage.setItem("user_id", JSON.stringify(userData._id));
-        setUser(userData);
-        setIsAuthenticated(true);
+      if (response && response.token) {
+        setUserFromToken(response.token)
         return true;
       } else {
-        throw new Error(`Unexpected status: ${response.status}`);
+        throw new Error(`Unexpected status: ${response}`);
       }
     } catch (error: any) {
-      console.error("Login error:", error);
       setIsAuthenticated(false);
       return false;
     }
   };
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (user?.userId) {
+        try {
+          const [projectRes, orderRes] = await Promise.all([
+            apiProjects.getMyProject(user.userId),
+            apiOrders.getInfoOrderByUserId(user.userId),
+          ]);
+          setUser(currentUser => {
+            if (!currentUser) return null;
+            return {
+              ...currentUser,
+              projects: projectRes?.data?.project || [],
+              products: orderRes?.data?.orders || [],
+              orders: orderRes.data.orders || []
+            };
+          });
+        } catch (err) {
+          console.error("Lỗi khi lấy dữ liệu người dùng (sản phẩm/dự án):", err);
+          setUser(currentUser => {
+            if (!currentUser) return null;
+            return {
+              ...currentUser,
+              projects: [], // Clear old data on error
+              products: [], // Clear old data on error
+            };
+          });
+        } finally {
+          // setLoadingData(false); // Optional: unset loading state
+        }
+      } else {
+        // If user logs out or becomes null, clear projects and products from state
+        setUser(currentUser => {
+          if (!currentUser) return null;
+          // Keep essential user info, but clear data specific to a logged-in user
+          return {
+            ...currentUser,
+            projects: [],
+            products: [],
+          };
+        });
+      }
+    };
+
+    fetchUserData();
+
+  }, [user?.userId]);
 
   const registerUser = async (userData: Partial<User>): Promise<boolean> => {
     try {
       if (!userData.email) return false;
       const response = await apiAuth.register(userData);
-      if (response.status !== 200) {
+      if (response.success) {
         return false;
       }
       const storedUsers = localStorage.getItem("users");
@@ -97,11 +166,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         products: users[userData.email]?.products || [],
         projects: users[userData.email]?.projects || [],
       };
-      localStorage.setItem("users", JSON.stringify(users));
-      localStorage.setItem("user", JSON.stringify(users[userData.email]));
       return true;
     } catch (error) {
       return false;
+    }
+  };
+  const setUserFromToken = (token: string) => {
+    try {
+      const decoded = jwtDecode<TokenPayload>(token);
+      // Check token expiry if needed: if (decoded.exp * 1000 < Date.now()) { throw new Error("Token expired"); }
+
+      const userData: User = {
+        userId: decoded.userId, // Set userId from token
+        name: decoded.name,
+        email: decoded.email,
+        role: decoded.role,
+        products: [],
+        projects: [],
+      };
+
+      setUser(userData);
+      setIsAuthenticated(true);
+      // Store token in cookie and user info in localStorage
+      setCookie("token", token, 7); // Store token in cookie for 7 days
+      localStorage.setItem("user", JSON.stringify({ // Store basic user info (without projects/products initially)
+        userId: decoded.userId,
+        name: decoded.name,
+        email: decoded.email,
+        role: decoded.role,
+        phone: undefined, // These fields might need to be fetched from a /me endpoint
+        address: undefined,
+        avatar: undefined,
+      }));
+
+    } catch (error) {
+      console.error("Error setting user from token:", error);
+      logout(); // Log out if token is invalid or decoding fails
     }
   };
   const addUserProduct = async (productData: any): Promise<boolean> => {
@@ -155,8 +255,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!users[user.email]) {
         return false;
       }
-
-      // Thêm dự án vào danh sách dự án của người dùng
       const updatedUser = {
         ...users[user.email],
         projects: [
@@ -169,42 +267,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
         ],
       };
-
-      // Cập nhật người dùng trong danh sách
       users[user.email] = updatedUser;
-
-      // Lưu danh sách người dùng vào localStorage
       localStorage.setItem("users", JSON.stringify(users));
-
-      // Cập nhật trạng thái người dùng hiện tại
       setUser(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser));
-
       return true;
     } catch (error) {
       console.error("Thêm dự án thất bại:", error);
       return false;
     }
   };
-  ``;
-  const clearAllCookies = () => {
-    document.cookie.split(";").forEach((cookie) => {
-      const name = cookie.split("=")[0].trim();
-      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-    });
-  };
-
   const logout = async () => {
-    localStorage.clear();
-    clearAllCookies();
-    const response = await apiAuth.logout();
+    localStorage.clear()
+    Cookies.remove('token');
     setUser(null);
     setIsAuthenticated(false);
+    window.location.href = '/';
   };
-
   return (
     <AuthContext.Provider
       value={{
+        setUserFromToken,
         user,
         isAuthenticated,
         login,

@@ -1,383 +1,293 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DollarSign, Calendar, Clock, CreditCard, Receipt } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
-import { useLanguage } from "@/context/language-context";
-import {
-  CreditCard,
-  Download,
-  Calendar,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  FileText,
-  DollarSign,
-  Receipt,
-  Plus,
-  ChevronDown,
-  ExternalLink,
-  ArrowUpRight,
-  Wallet,
-  Building,
-  User,
-  Settings,
-} from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  subscriptions,
-  invoices,
-  paymentMethods,
-} from "@/app/mockup/bill.mockup";
-
-import { Subscriptions } from "./components/subscriptions";
-import { PaymentMethods } from "./components/payments";
-import { Invoices } from "./components/invoices";
-import { Overview } from "./components/overview";
-export interface Invoice {
-  id: string;
-  number: string;
-  date: string;
-  dueDate: string;
-  amount: string;
-  status: "paid" | "pending" | "overdue" | "draft";
-  items: { name: string; quantity: number; price: string }[];
-}
-
-export interface PaymentMethod {
-  id: string;
-  type: "credit_card" | "bank_transfer" | "paypal";
-  name: string;
-  last4?: string;
-  expiryDate?: string;
-  isDefault: boolean;
-}
-
-export interface Subscription {
-  id: string;
-  name: string;
-  status: "active" | "canceled" | "expired";
-  startDate: string;
-  endDate: string;
-  amount: string;
-  billingCycle: "monthly" | "quarterly" | "annually";
-  autoRenew: boolean;
-}
-
-// Main BillingPage Component
-export default function BillingPage() {
-  const { user, isAuthenticated } = useAuth();
-  const { language } = useLanguage();
+import { Invoice, Subscription, IAffiliatePaymentMethod } from "./type";
+import PaymentMethods from "./components/PaymentMethods";
+import Subscriptions from "./components/Subscriptions";
+import Invoices from "./components/Invoices";
+import Overview from "./components/Overview";
+import { formatDate, getInvoiceStatusBadge, getSubscriptionStatusBadge, getPaymentMethodIcon, getBillingCycleName } from "./utils/billing";
+import { apiPayMethod } from "../../fetch/fetch.payment-method";
+import { apiOrders } from "../../fetch/fetch.order";
+import { IOrder } from "../../fetch/fetch.order";
+const BillingPage = () => {
   const router = useRouter();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
   const searchParams = useSearchParams();
-  const product = searchParams.get("product");
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return language === "vi"
-      ? date.toLocaleDateString("vi-VN", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })
-      : date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
+  const [currentInvoices, setCurrentInvoices] = useState<Invoice[]>([]);
+  const [currentSubscriptions, setCurrentSubscriptions] = useState<Subscription[]>([]);
+  const [currentPaymentMethods, setCurrentPaymentMethods] = useState<IAffiliatePaymentMethod[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isUpdatingPaymentMethod, setIsUpdatingPaymentMethod] = useState(false);
+  const [orders, setOrders] = useState<IOrder[]>([]);
+  const [totalAmount, setToTotal] = useState<number>(0);
+  const { user } = useAuth();
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const response = await apiOrders.getInfoOrderByUserId(user?.userId)
+      if (response && response.data) {
+        setOrders(response.data.orders)
+        setToTotal(response.data.totalAmount ?? 0)
+      }
+    }
+
+  }, [])
+  const getBillingData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      if (user?.userId) {
+        const paymentMethodsResponse = await apiPayMethod.getAll(user.userId);
+        if (paymentMethodsResponse.data) {
+          const formattedMethods = paymentMethodsResponse.data.map((method: any) => ({
+            ...method,
+            id: method.id || method._id,
+            affiliateId: method.affiliateId.toString(),
+            createdAt: new Date(method.createdAt).toISOString(),
+            updatedAt: new Date(method.updatedAt).toISOString(),
+          }));
+          setCurrentPaymentMethods(formattedMethods);
+        } else {
+          setCurrentPaymentMethods([]);
+        }
+        setCurrentInvoices([]);
+        setCurrentSubscriptions([]);
+      } else {
+        setCurrentPaymentMethods([]);
+        setCurrentInvoices([]);
+        setCurrentSubscriptions([]);
+      }
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể tải dữ liệu thanh toán.",
+        variant: "destructive",
       });
-  };
-  const getInvoiceStatusBadge = (status: string) => {
-    switch (status) {
-      case "paid":
-        return (
-          <Badge className="bg-green-100 text-green-800 hover:bg-green-200 flex items-center">
-            <CheckCircle2 className="w-3 h-3 mr-1" />
-            {language === "vi" ? "Đã thanh toán" : "Paid"}
-          </Badge>
-        );
-      case "pending":
-        return (
-          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 flex items-center">
-            <Clock className="w-3 h-3 mr-1" />
-            {language === "vi" ? "Đang chờ" : "Pending"}
-          </Badge>
-        );
-      case "overdue":
-        return (
-          <Badge className="bg-red-100 text-red-800 hover:bg-red-200 flex items-center">
-            <AlertCircle className="w-3 h-3 mr-1" />
-            {language === "vi" ? "Quá hạn" : "Overdue"}
-          </Badge>
-        );
-      case "draft":
-        return (
-          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200 flex items-center">
-            {language === "vi" ? "Bản nháp" : "Draft"}
-          </Badge>
-        );
-      default:
-        return (
-          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200">
-            {status}
-          </Badge>
-        );
+      setCurrentPaymentMethods([]);
+      setCurrentInvoices([]);
+      setCurrentSubscriptions([]);
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [user?.userId, toast]);
 
-  // Subscription status badge
-  const getSubscriptionStatusBadge = (status: string) => {
-    switch (status) {
-      case "active":
-        return (
-          <Badge className="bg-green-100 text-green-800 hover:bg-green-200 flex items-center">
-            <CheckCircle2 className="w-3 h-3 mr-1" />
-            {language === "vi" ? "Đang hoạt động" : "Active"}
-          </Badge>
-        );
-      case "canceled":
-        return (
-          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 flex items-center">
-            {language === "vi" ? "Đã hủy" : "Canceled"}
-          </Badge>
-        );
-      case "expired":
-        return (
-          <Badge className="bg-red-100 text-red-800 hover:bg-red-200 flex items-center">
-            {language === "vi" ? "Hết hạn" : "Expired"}
-          </Badge>
-        );
-      default:
-        return (
-          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200">
-            {status}
-          </Badge>
-        );
+  useEffect(() => {
+    getBillingData();
+  }, [getBillingData]);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && ["overview", "invoices", "subscriptions", "payment_methods"].includes(tab)) {
+      setActiveTab(tab);
     }
-  };
+  }, [searchParams]);
 
-  // Payment method icon
-  const getPaymentMethodIcon = (type: string) => {
-    switch (type) {
-      case "credit_card":
-        return <CreditCard className="w-5 h-5 text-blue-600" />;
-      case "bank_transfer":
-        return <Building className="w-5 h-5 text-green-600" />;
-      case "paypal":
-        return <Wallet className="w-5 h-5 text-purple-600" />;
-      default:
-        return <CreditCard className="w-5 h-5 text-gray-600" />;
+  const handleSetDefaultPaymentMethod = useCallback(async (methodId: string) => {
+    setIsUpdatingPaymentMethod(true);
+    try {
+      await apiPayMethod.setDefault(methodId);
+      setCurrentPaymentMethods((prev) =>
+        prev.map((m) => ({ ...m, isDefault: m.id === methodId }))
+      );
+      toast({
+        title: "Thành công",
+        description: "Đã đặt phương thức thanh toán mặc định.",
+        variant: "success",
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Lỗi",
+        description: "Đã xảy ra lỗi khi đặt phương thức thanh toán mặc định.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingPaymentMethod(false);
     }
-  };
+  }, [toast]);
 
-  // Billing cycle name
-  const getBillingCycleName = (cycle: string) => {
-    switch (cycle) {
-      case "monthly":
-        return language === "vi" ? "Hàng tháng" : "Monthly";
-      case "quarterly":
-        return language === "vi" ? "Hàng quý" : "Quarterly";
-      case "annually":
-        return language === "vi" ? "Hàng năm" : "Annually";
-      default:
-        return cycle;
+  const handleDeletePaymentMethod = useCallback(async (methodId: string) => {
+    setIsUpdatingPaymentMethod(true);
+    try {
+      await apiPayMethod.delete(methodId);
+      setCurrentPaymentMethods((prev) => prev.filter((m) => m.id !== methodId));
+      toast({
+        title: "Thành công",
+        description: "Đã xóa phương thức thanh toán.",
+        variant: "success",
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Lỗi",
+        description: "Đã xảy ra lỗi khi xóa phương thức thanh toán.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingPaymentMethod(false);
     }
-  };
-  const handleSubmitBillingInfo = (e: React.FormEvent, billingInfo: any) => {
-    e.preventDefault();
-    alert(
-      language === "vi"
-        ? "Thông tin thanh toán đã được cập nhật!"
-        : "Billing information updated!",
-    );
-  };
+  }, [toast]);
 
-  // Handle submit payment method
-  const handleSubmitPaymentMethod = (e: React.FormEvent, newMethod: any) => {
-    e.preventDefault();
-    console.log("Submitted payment method:", newMethod);
+  const handleAddPaymentMethod = useCallback(
+    async (newMethod: IAffiliatePaymentMethod) => {
+      setIsUpdatingPaymentMethod(true);
+      try {
+        const payload = {
+          userId: user?.userId || "",
+          type: newMethod.type,
+          name: newMethod.name,
+          details: newMethod.details,
+          isDefault: newMethod.isDefault,
+        };
+        const response = await apiPayMethod.create(payload);
+        if (response.data) {
+          const formattedMethod = {
+            ...response.data,
+            id: response.data.id || response.data._id,
+            affiliateId: response.data.affiliateId.toString(),
+            createdAt: new Date(response.data.createdAt).toISOString(),
+            updatedAt: new Date(response.data.updatedAt).toISOString(),
+          };
+          setCurrentPaymentMethods((prev) => [...prev, formattedMethod]);
+          toast({
+            title: "Thành công",
+            description: "Đã thêm phương thức thanh toán.",
+            variant: "success",
+          });
+        }
+      } catch (error) {
+        console.error(error);
+        toast({
+          title: "Lỗi",
+          description: "Đã xảy ra lỗi khi thêm phương thức thanh toán.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsUpdatingPaymentMethod(false);
+      }
+    },
+    [toast, user?.userId]
+  );
 
-    alert(
-      language === "vi"
-        ? "Phương thức thanh toán đã được thêm!"
-        : "Payment method added!",
-    );
-  };
-
+  if (isLoading) {
+    return <div className="container mx-auto py-8 text-center">Đang tải dữ liệu thanh toán...</div>;
+  }
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold">
-            {language === "vi" ? "Thanh toán" : "Billing"}
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-800">Thanh toán</h1>
           <p className="text-gray-500 mt-1">
-            {language === "vi"
-              ? "Quản lý hóa đơn, đăng ký và phương thức thanh toán"
-              : "Manage invoices, subscriptions, and payment methods"}
+            Quản lý hóa đơn, đăng ký và phương thức thanh toán của bạn.
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setActiveTab("invoices");
+              router.push("?tab=invoices", { scroll: false });
+            }}
+          >
             <Receipt className="w-4 h-4 mr-2" />
-            {language === "vi" ? "Xem tất cả hóa đơn" : "View All Invoices"}
-          </Button>
-          <Button >
-            <Plus className="w-4 h-4 mr-2" />
-            {language === "vi"
-              ? "Thêm phương thức thanh toán"
-              : "Add Payment Method"}
+            Xem tất cả hóa đơn
           </Button>
         </div>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500">
-                  {language === "vi" ? "Tổng chi tiêu" : "Total Spent"}
-                </p>
-                <h3 className="text-2xl font-bold mt-1">10.100.000 đ</h3>
-              </div>
-              <div className="bg-green-100 p-3 rounded-full">
-                <DollarSign className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <Card className="shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">Tổng chi tiêu</CardTitle>
+            <DollarSign className="h-5 w-5 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalAmount} đ</div>
+            <p className="text-xs text-gray-500">+2.500.000 đ so với tháng trước</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500">
-                  {language === "vi"
-                    ? "Đăng ký đang hoạt động"
-                    : "Active Subscriptions"}
-                </p>
-                <h3 className="text-2xl font-bold mt-1">
-                  {
-                    subscriptions.filter((s: any) => s.status === "active")
-                      .length
-                  }
-                </h3>
-              </div>
-              <div className="bg-blue-100 p-3 rounded-full">
-                <Calendar className="h-6 w-6 text-blue-600" />
-              </div>
+        <Card className="shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">Đăng ký đang hoạt động</CardTitle>
+            <Calendar className="h-5 w-5 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {currentSubscriptions.filter((s) => s.status === "active").length}
             </div>
+            <p className="text-xs text-gray-500">Tổng số các gói đang dùng</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500">
-                  {language === "vi"
-                    ? "Hóa đơn chưa thanh toán"
-                    : "Unpaid Invoices"}
-                </p>
-                <h3 className="text-2xl font-bold mt-1">
-                  {
-                    invoices.filter(
-                      (i: Invoice) =>
-                        i.status === "pending" || i.status === "overdue",
-                    ).length
-                  }
-                </h3>
-              </div>
-              <div className="bg-yellow-100 p-3 rounded-full">
-                <Clock className="h-6 w-6 text-yellow-600" />
-              </div>
+        <Card className="shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">Hóa đơn chưa thanh toán</CardTitle>
+            <Clock className="h-5 w-5 text-yellow-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {currentInvoices.filter((i) => i.status === "pending" || i.status === "overdue").length}
             </div>
+            <p className="text-xs text-gray-500">Tổng số hóa đơn cần xử lý</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500">
-                  {language === "vi"
-                    ? "Phương thức thanh toán"
-                    : "Payment Methods"}
-                </p>
-                <h3 className="text-2xl font-bold mt-1">
-                  {paymentMethods.length}
-                </h3>
-              </div>
-              <div className="bg-purple-100 p-3 rounded-full">
-                <CreditCard className="h-6 w-6 text-purple-600" />
-              </div>
-            </div>
+        <Card className="shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">Phương thức thanh toán</CardTitle>
+            <CreditCard className="h-5 w-5 text-purple-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{currentPaymentMethods.length}</div>
+            <p className="text-xs text-gray-500">Số lượng phương thức đã lưu</p>
           </CardContent>
         </Card>
       </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="mb-8">
-          <TabsTrigger value="overview">
-            {language === "vi" ? "Tổng quan" : "Overview"}
-          </TabsTrigger>
-          <TabsTrigger value="invoices">
-            {language === "vi" ? "Hóa đơn" : "Invoices"}
-          </TabsTrigger>
-          <TabsTrigger value="subscriptions">
-            {language === "vi" ? "Đăng ký" : "Subscriptions"}
-          </TabsTrigger>
-          <TabsTrigger value="payment_methods">
-            {language === "vi" ? "Phương thức thanh toán" : "Payment Methods"}
-          </TabsTrigger>
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => {
+          setActiveTab(value);
+          router.push(`?tab=${value}`, { scroll: false });
+        }}
+        className="w-full"
+      >
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 mb-6">
+          <TabsTrigger value="overview">Tổng quan</TabsTrigger>
+          <TabsTrigger value="invoices">Hóa đơn</TabsTrigger>
+          <TabsTrigger value="subscriptions">Đăng ký</TabsTrigger>
+          <TabsTrigger value="payment_methods">Phương thức thanh toán</TabsTrigger>
         </TabsList>
-
         <TabsContent value="overview">
           <Overview
-            language={language}
             user={user}
-            invoices={invoices}
-            subscriptions={subscriptions}
-            paymentMethods={paymentMethods}
-            setActiveTab={setActiveTab}
+            invoices={currentInvoices}
+            subscriptions={currentSubscriptions}
+            paymentMethods={currentPaymentMethods}
+            setActiveTab={(value: string) => {
+              setActiveTab(value);
+              router.push(`?tab=${value}`, { scroll: false });
+            }}
             formatDate={formatDate}
             getInvoiceStatusBadge={getInvoiceStatusBadge}
             getSubscriptionStatusBadge={getSubscriptionStatusBadge}
             getPaymentMethodIcon={getPaymentMethodIcon}
             getBillingCycleName={getBillingCycleName}
-            handleSubmitBillingInfo={handleSubmitBillingInfo}
           />
         </TabsContent>
         <TabsContent value="invoices">
           <Invoices
-            language={language}
-            invoices={invoices}
+            invoices={currentInvoices}
             formatDate={formatDate}
             getInvoiceStatusBadge={getInvoiceStatusBadge}
           />
         </TabsContent>
         <TabsContent value="subscriptions">
           <Subscriptions
-            language={language}
-            subscriptions={subscriptions}
+            subscriptions={currentSubscriptions}
             formatDate={formatDate}
             getSubscriptionStatusBadge={getSubscriptionStatusBadge}
             getBillingCycleName={getBillingCycleName}
@@ -386,13 +296,16 @@ export default function BillingPage() {
         </TabsContent>
         <TabsContent value="payment_methods">
           <PaymentMethods
-            language={language}
-            paymentMethods={paymentMethods}
+            paymentMethods={currentPaymentMethods}
             getPaymentMethodIcon={getPaymentMethodIcon}
-            handleSubmitPaymentMethod={handleSubmitPaymentMethod}
+            onSetDefault={handleSetDefaultPaymentMethod}
+            onDelete={handleDeletePaymentMethod}
+            onAddPaymentMethod={handleAddPaymentMethod}
           />
         </TabsContent>
       </Tabs>
     </div>
   );
-}
+};
+
+export default BillingPage;

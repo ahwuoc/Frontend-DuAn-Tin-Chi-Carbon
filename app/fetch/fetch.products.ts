@@ -13,6 +13,11 @@ interface IAccountManager {
   phone: string;
 }
 
+type TheLoai =
+  | "carbon_credits"
+  | "carbon_accounting"
+  | "international_certificates";
+
 export interface IProduct extends Document {
   name: string;
   type: "carbon_credits" | "carbon_accounting" | "international_certificates";
@@ -47,7 +52,15 @@ export const apiProducts = {
   create: (body: Record<string, any>) => HTTP.POST("/products", { body }),
   getAll: () => HTTP.GET("/products"),
   getById: (id: string) => HTTP.GET(`/products/${id}`),
-  update: (id: string, body: any) => HTTP.PUT(`/${id}`, { body }),
+  updateById: (id: string, body: any) => HTTP.PUT(`/${id}`, { body }),
   delete: (id: string) => HTTP.DELETE(`/${id}`),
   getFreeTrial: () => HTTP.GET("/free/trial"),
+  updatetimeline: (id: string, body: any) =>
+    HTTP.PUT(`/products/timelines/${id}`, { body }),
+  updateReport: (id: string, body: any) =>
+    HTTP.PUT(`/products/reports/${id}`, { body }),
+  updatecertificates: (id: string, body: any) =>
+    HTTP.PUT(`/products/certificates/${id}`, { body }),
+  getProducts: (type: TheLoai) =>
+    HTTP.GET<IProduct[]>(`/products?type=${type}`),
 };

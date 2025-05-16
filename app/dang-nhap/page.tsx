@@ -68,10 +68,11 @@ export default function LoginPage() {
       const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
       const redirectUri = process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI;
 
+      if (!redirectUri) throw new Error("redirectUri is required");
+
       const redirectPath = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(
         redirectUri
       )}&response_type=code&scope=openid%20email%20profile&access_type=offline&prompt=consent`;
-
       router.push(redirectPath);
     } catch (error) {
       toast({

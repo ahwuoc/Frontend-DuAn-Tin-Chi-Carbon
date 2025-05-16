@@ -1,5 +1,6 @@
 import HTTP from "../common/http";
 export interface IAffiliate extends Document {
+  _id?: string;
   userId?: string;
   fullName?: string;
   email: string;
@@ -17,13 +18,23 @@ export interface IAffiliate extends Document {
 }
 type IResponse = {
   message: string;
-  affiliates: IAffiliate;
+  affiliate: IAffiliate;
 };
+type IResponseData = {
+  message: string;
+  affiliate: IAffiliate;
+};
+interface AffiliatesResponse {
+  affiliates: IAffiliate[];
+}
 export const apiAffiliates = {
-  create: (body: Record<string, any>) => HTTP.POST("/affiliates", { body }),
-  getAll: () => HTTP.GET("/affiliates"),
-  getByUserId: (id: string) => HTTP.GET<IResponse>(`/affiliates/${id}`),
+  create: (body: Record<string, any>) =>
+    HTTP.POST<IResponse>("/affiliates", { body }),
+  getAll: () => HTTP.GET<AffiliatesResponse>("/affiliates"),
+  getByUserId: (id: string) => HTTP.GET<IResponse[]>(`/affiliates/${id}`),
   update: (id: string, body: Record<string, any>) =>
-    HTTP.PATCH(`/affiliates/${id}`, { body }),
+    HTTP.PATCH<IResponse>(`/affiliates/${id}`, { body }),
   remove: (id: string) => HTTP.DELETE(`/affiliates/${id}`),
+  getPaymentMethod: (id: string) => HTTP.GET(""),
+  delete: (id: string) => HTTP.DELETE(`/affo;oates/${id}`),
 };

@@ -189,7 +189,7 @@ export default function AdminProductsPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleEditProduct(product._id!)} // Assuming _id is always present
+                              onClick={() => handleEditProduct(`${product.type}/${product._id!}`)} // Assuming _id is always present
                             >
                               <Pencil className="w-4 h-4 mr-1" />
                               Sửa
@@ -213,7 +213,6 @@ export default function AdminProductsPage() {
           </CardContent>
         </Card>
       </div>
-      {/* ProductDrawer removed */}
     </div>
   );
 }

@@ -31,6 +31,15 @@ export default function AdminAffiliatesPage() {
   const [selectedAffiliate, setSelectedAffiliate] = useState<IAffiliate | null>(
     null
   );
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    company: "",
+    reason: "",
+    referralCode: "",
+    status: "pending" as "pending" | "approved" | "rejected",
+  });
 
   useEffect(() => {
     const fetchAffiliates = async () => {
@@ -58,7 +67,7 @@ export default function AdminAffiliatesPage() {
     setIsAffiliateDrawerOpen(true);
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: Date) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("vi-VN", {
       day: "2-digit",
@@ -166,7 +175,7 @@ export default function AdminAffiliatesPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleDeleteAffiliate(affiliate._id)}
+                              onClick={() => handleDeleteAffiliate(affiliate._id!)}
                             >
                               <Trash2 className="w-4 h-4 mr-1" />
                               Xóa
@@ -188,6 +197,8 @@ export default function AdminAffiliatesPage() {
         setAffiliates={setAffiliates}
         selectedAffiliate={selectedAffiliate}
         setSelectedAffiliate={setSelectedAffiliate}
+        formData={formData}
+        setFormData={setFormData}
       />
     </div>
   );

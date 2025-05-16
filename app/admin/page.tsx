@@ -37,7 +37,7 @@ export default function AdminPage() {
     loadData()
   }, [])
 
-  const handleAddContributor = async (e) => {
+  const handleAddContributor = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!newContributor.name) return
 
@@ -53,7 +53,7 @@ export default function AdminPage() {
     }
   }
 
-  const handleAddTree = async (e) => {
+  const handleAddTree = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!newTree.contributorId) return
 

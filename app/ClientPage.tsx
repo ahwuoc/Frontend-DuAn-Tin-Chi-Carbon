@@ -19,6 +19,7 @@ import { useLanguage } from "@/context/language-context"
 import MediaTestimonials from "@/components/media-testimonials"
 import CarbonCalculatorAdvanced from "@/components/carbon-calculator-advanced"
 import PartnerLogoCarousel from "@/components/partner-logo-carousel"
+import { ReactNode } from "react"
 
 export default function Home() {
   useSmoothScroll()
@@ -194,7 +195,7 @@ export default function Home() {
                   <div className="relative h-[500px] rounded-xl overflow-hidden shadow-2xl">
                     <Image
                       src="/images/vietnam-farmer-639204_1920.jpg"
-                      alt={t("company_name")}
+                      alt={"image"}
                       fill
                       className="object-cover"
                       onError={(e) => {
@@ -642,7 +643,7 @@ export default function Home() {
                 delay={news.delay / 2}
               >
                 <div className="relative h-60">
-                  <Image src={news.image || placeholderImage} alt={news.title} fill className="object-cover" />
+                  <Image src={news.image || placeholderImage} alt={news.title ?? ""} fill className="object-cover" />
                   <div className="absolute top-4 left-4 bg-green-600 text-white text-sm font-medium py-1 px-3 rounded-full">
                     {news.date}
                   </div>
@@ -695,13 +696,17 @@ export default function Home() {
         </div>
       </section>
       {/* Sử dụng dynamic import với error boundary */}
-      {typeof window !== "undefined" && <ParallaxSection />}
+      {typeof window !== "undefined" && (
+        <ParallaxSection>
+          <div>Your parallax content here</div>
+        </ParallaxSection>
+      )}
     </div>
   )
 }
 
 // Custom component to handle animations on scroll
-function AnimateOnScroll({ children, className = "", delay = 0, animation = "animate-fade-in" }) {
+function AnimateOnScroll({ children, className = "", delay = 0, animation = "animate-fade-in" }: AnimateOnScrollProps) {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -723,4 +728,10 @@ function AnimateOnScroll({ children, className = "", delay = 0, animation = "ani
       {children}
     </div>
   )
+}
+interface AnimateOnScrollProps {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+  animation?: string;
 }

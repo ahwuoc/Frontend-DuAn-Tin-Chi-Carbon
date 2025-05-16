@@ -12,7 +12,7 @@ export interface IOrder {
   status: "pending" | "paid" | "shipped" | "cancelled" | "active";
   createdAt: Date;
 }
-interface IProduct {
+export interface IProduct {
   name: string;
   type: "carbon_credits" | "carbon_accounting" | "international_certificates";
   description: string;
@@ -32,11 +32,17 @@ interface IProduct {
     trend: "up" | "down" | "stable";
   };
 }
+interface ResTOrder {
+  orders: IOrder[];
+  totalAmount?: number;
+}
 export const apiOrders = {
-  getInfoOrderByUserId: (id: any) => HTTP.GET<IOrder[]>(`/orders/info/${id}`),
+  getInfoOrderByUserId: (id: any) => HTTP.GET<ResTOrder>(`/orders/info/${id}`),
   cancelOrder: (orderCode: string) => HTTP.DELETE(`/orders/${orderCode}`),
   getOrderByUser: (id: string) => HTTP.GET(`/orders/user/${id}`),
   getAll: () => HTTP.GET("/orders"),
   deleteID: (id: string) => HTTP.DELETE(`/orders/id/${id}`),
+  createOrder: (body: any) => HTTP.POST("/orders", { body }),
   update: (id: string, body: any) => HTTP.PUT(`/orders/${id}`, { body }),
+  confirm: (id: string, body: any) => HTTP.PUT(`/orders/${id}`, { body }),
 };

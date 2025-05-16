@@ -16,8 +16,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { useLanguage } from "@/context/language-context";
 import { useEffect, useState } from "react";
-import { apiCarbon } from "@/app/fetch/fetch.carbon";
-import { ICarbonProduct } from "@/app/fetch/fetch.carbon";
+import { apiCarbon } from "@/app/fetch/fetch.carboncredits";
+import { ICarbonProduct } from "@/app/fetch/fetch.carboncredits";
 import translations from "@/app/mockup/translate.mockup";
 export default function CertificateCoursesClient() {
   const { language } = useLanguage();

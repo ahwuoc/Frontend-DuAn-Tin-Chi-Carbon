@@ -26,10 +26,19 @@ import {
   Flame,
 } from "lucide-react";
 import Link from "next/link";
-import { apiProjects, IProject } from "../fetch/fetch.projects";
-import { apiOrders, IOrder } from "../fetch/fetch.order";
-import { TUser } from "../fetch/fetch.auth";
 
+// Chỉ cần import các kiểu dữ liệu IProject và IOrder để sử dụng trong component
+import { IProject } from "../fetch/fetch.projects";
+import { IOrder } from "../fetch/fetch.order";
+
+// Không cần import apiProjects, apiOrders, TUser, Activity, useSearchParams ở đây nữa
+// import { apiProjects, IProject } from "../fetch/fetch.projects";
+// import { apiOrders, IOrder } from "../fetch/fetch.order";
+// import { TUser } from "../fetch/fetch.auth";
+// import { useSearchParams } from "next/navigation";
+
+// Định nghĩa kiểu dữ liệu cho Hoạt động (Activities) nếu bạn vẫn quản lý cục bộ
+// Nếu Activities cũng được thêm vào AuthContext, bạn có thể xóa định nghĩa này
 interface Activity {
   id: string;
   type:
@@ -43,65 +52,72 @@ interface Activity {
   status?: string;
 }
 
+
+// Sử dụng useAuth để lấy thông tin user và dữ liệu từ context
+import { useAuth } from "../../context/auth-context";
+
+
 export default function DashboardPage() {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState("overview");
+  const router = useRouter(); // Hook để điều hướng
+  const [activeTab, setActiveTab] = useState("overview"); // State quản lý tab đang hoạt động
+
+  // Lấy user, isAuthenticated, và dữ liệu sản phẩm/dự án trực tiếp từ AuthContext
+  // User object từ context giờ đây đã bao gồm projects và products (orders)
+  const { user, isAuthenticated } = useAuth();
+
+  // State cho danh sách hoạt động vẫn giữ cục bộ vì chưa được thêm vào AuthContext
+  // Nếu bạn muốn quản lý Activities trong Context, cần sửa đổi AuthProvider
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [orders, setOrders] = useState<IOrder[]>([]);
-  const [user, setUser] = useState<TUser | null>(null);
-  const [userProjects, setUserProjects] = useState<IProject[]>([]);
+
+  // State loading và error cục bộ có thể được đơn giản hóa
+  // Chúng ta sẽ dựa vào sự tồn tại của user từ context để xác định trạng thái loading
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const getCookie = (name: string) => {
-    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-    return match ? match[2] : null;
-  };
+  // Loại bỏ state error cục bộ vì lỗi fetch data chính được xử lý trong Context
+  // const [error, setError] = useState<string | null>(null);
+
+  // Loại bỏ useSearchParams và token logic ở đây, vì AuthProvider đã xử lý
+  // const searchParams = useSearchParams();
+  // const token = searchParams.get("token");
+  // const { setUserFromToken, user } = useAuth(); // Gọi useAuth ở ngoài useEffect
+
+  // Sử dụng useEffect để cập nhật trạng thái loading dựa trên trạng thái user từ context
+  useEffect(() => {
+    // Nếu user đã tồn tại, component đã tải xong dữ liệu cần thiết từ context
+    if (user) {
+      setLoading(false);
+    } else {
+      // Nếu user là null, có thể là đang tải hoặc chưa xác thực
+      // Giữ loading true nếu isAuthenticated vẫn là true (context đang trong quá trình tải user)
+      // Nếu isAuthenticated là false, user không đăng nhập -> không còn loading dữ liệu user
+      setLoading(isAuthenticated);
+      // Có thể thêm logic chuyển hướng nếu !isAuthenticated
+      // if (!isAuthenticated && !loading) {
+      //    router.push('/dang-nhap');
+      // }
+    }
+  }, [user, isAuthenticated]); // Effect chạy lại khi user hoặc isAuthenticated thay đổi
+
+
+  // Loại bỏ hoàn toàn useEffect fetch dữ liệu sản phẩm và dự án cục bộ
+  /*
   useEffect(() => {
     const fetchData = async () => {
-      const userGetcookie = () => {
-        const userCookie = getCookie("user");
-        if (userCookie) {
-          try {
-            const user = JSON.parse(decodeURIComponent(userCookie));
-            localStorage.setItem("user", JSON.stringify(user));
-            localStorage.setItem("user_id", JSON.stringify(user._id));
-            return user;
-          } catch (err) {
-            console.error("❌ Failed to parse user cookie:", err);
-          }
-        } else {
-          console.warn("⚠️ No user cookie found");
-        }
-      }
-      userGetcookie()
       setLoading(true);
       setError(null);
-      try {
-        const userStr = localStorage.getItem("user");
-        if (!userStr) {
-          throw new Error("Không tìm thấy thông tin người dùng.");
-        }
-        const userId =
-          JSON.parse(localStorage.getItem("user_id") || '""') ?? "";
-        const parsedUser = JSON.parse(userStr);
-        setUser(parsedUser);
-        const projectRes = await apiProjects.getMyProject(userId);
-        if (projectRes?.data) {
-          setUserProjects(projectRes.data.projects);
-        }
-        const orderRes = await apiOrders.getInfoOrderByUserId(userId);
-        if (orderRes?.data) {
-          setOrders(orderRes.data.orders);
-        }
-      } catch (err) {
-        console.error("Lỗi khi lấy dữ liệu:", err);
-        setError("Không thể tải dữ liệu. Vui lòng thử lại.");
-      } finally {
-        setLoading(false);
-      }
+      // ... logic fetch cũ đã bị loại bỏ
     };
     fetchData();
-  }, []);
+  }, [user?.userId, token]); // Loại bỏ token và user?.userId khỏi dependency nếu không còn fetch ở đây
+  */
+
+  // Lấy danh sách đơn hàng và dự án trực tiếp từ user object trong context
+  // Sử dụng optional chaining (?.) và giá trị mặc định [] để an toàn
+  const orders = user?.products || []; // user.products chứa danh sách đơn hàng từ AuthContext
+  const userProjects = user?.projects || []; // user.projects chứa danh sách dự án từ AuthContext
+
+
+  // Các hàm trợ giúp (getStatusBadge, getProjectIcon, getActivityIcon, formatDate)
+  // vẫn giữ nguyên vì chúng chỉ dùng để định dạng dữ liệu để hiển thị.
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -157,7 +173,7 @@ export default function DashboardPage() {
       default:
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-            {status}
+            {status} {/* Hiển thị trạng thái mặc định nếu không khớp */}
           </span>
         );
     }
@@ -172,10 +188,9 @@ export default function DashboardPage() {
       case "biochar":
         return <Flame className="w-5 h-5 text-orange-600" />;
       default:
-        return <FileText className="w-5 h-5 text-blue-600" />;
+        return <FileText className="w-5 h-5 text-blue-600" />; // Icon mặc định
     }
   };
-
   const getActivityIcon = (type: string) => {
     switch (type) {
       case "product_purchase":
@@ -187,12 +202,17 @@ export default function DashboardPage() {
       case "status_change":
         return <CheckCircle2 className="w-5 h-5 text-orange-600" />;
       default:
-        return <Clock className="w-5 h-5 text-gray-600" />;
+        return <Clock className="w-5 h-5 text-gray-600" />; // Icon mặc định
     }
   };
 
-  const formatDate = (dateString: Date) => {
+  const formatDate = (dateString: string | Date) => {
+    if (!dateString) return "N/A"; // Xử lý trường hợp ngày tháng không tồn tại
     const date = new Date(dateString);
+    // Kiểm tra nếu ngày tháng không hợp lệ
+    if (isNaN(date.getTime())) {
+      return "Ngày không hợp lệ";
+    }
     return date.toLocaleDateString("vi-VN", {
       day: "2-digit",
       month: "2-digit",
@@ -200,30 +220,45 @@ export default function DashboardPage() {
     });
   };
 
+
+  // Hiển thị trạng thái loading dựa trên state cục bộ (kết nối với context)
   if (loading) {
     return (
       <div className="container mx-auto py-10 px-4 text-center">
-        <p>Đang tải...</p>
+        {/* Thông báo loading có thể chi tiết hơn nếu AuthProvider cung cấp trạng thái loading riêng cho data */}
+        <p>Đang tải dữ liệu tài khoản...</p>
       </div>
     );
   }
 
-  if (error) {
+  // Nếu không loading và user là null, có nghĩa là chưa đăng nhập
+  if (!user) {
+    // Có thể chuyển hướng đến trang đăng nhập hoặc hiển thị thông báo yêu cầu đăng nhập
+    // Ví dụ: router.push('/dang-nhap');
     return (
       <div className="container mx-auto py-10 px-4 text-center">
-        <p className="text-red-500">{error}</p>
-        <Button onClick={() => window.location.reload()} className="mt-4">
-          Thử lại
+        <p className="text-red-500">Bạn cần đăng nhập để xem trang này.</p>
+        <Button onClick={() => router.push('/dang-nhap')} className="mt-4">
+          Đăng nhập
         </Button>
       </div>
     );
   }
 
+  // Loại bỏ check error cục bộ vì lỗi fetch data chính được xử lý trong Context
+  // if (error) { ... }
+
+
+  // Render giao diện dashboard khi user và dữ liệu đã sẵn sàng
   return (
     <div className="flex min-h-screen">
+      {/* Phần nội dung chính */}
       <div className="flex-1 p-4">
         <h1 className="text-3xl font-bold mb-6">Quản lý tài khoản</h1>
+
+        {/* Các thẻ tóm tắt thông tin */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {/* Thẻ Thông tin cá nhân */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg">Thông tin cá nhân</CardTitle>
@@ -231,9 +266,12 @@ export default function DashboardPage() {
             <CardContent>
               <div className="space-y-2">
                 <p className="text-sm text-gray-500">Họ tên</p>
+                {/* Access user info from context */}
                 <p className="font-medium">{user?.name || "N/A"}</p>
                 <p className="text-sm text-gray-500">Email</p>
+                {/* Access user info from context */}
                 <p className="font-medium">{user?.email || "N/A"}</p>
+                {/* Access user info from context */}
                 {user?.phone && (
                   <>
                     <p className="text-sm text-gray-500">Số điện thoại</p>
@@ -241,12 +279,14 @@ export default function DashboardPage() {
                   </>
                 )}
                 <p className="text-sm text-gray-500">Vai trò</p>
+                {/* Access user info from context */}
                 <p className="font-medium">
                   {user?.role === "admin" ? "Quản trị viên" : "Người dùng"}
                 </p>
               </div>
             </CardContent>
             <CardFooter>
+              {/* Link đến trang cài đặt */}
               <Link href="/quan-ly/cai-dat" className="w-full">
                 <Button variant="outline" size="sm" className="w-full">
                   <Settings className="w-4 h-4 mr-2" />
@@ -256,23 +296,27 @@ export default function DashboardPage() {
             </CardFooter>
           </Card>
 
+          {/* Thẻ Sản phẩm của tôi */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg">Sản phẩm của tôi</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-1">
+                {/* Use orders from context (user.products) */}
                 <p className="text-3xl font-bold">{orders.length}</p>
                 <p className="text-sm text-gray-500">Sản phẩm đã đăng ký</p>
                 <div className="mt-2 pt-2 border-t border-gray-100">
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-500">Đang hoạt động</span>
+                    {/* Use orders from context */}
                     <span className="font-medium">
                       {orders.filter((p) => p.status === "active").length}
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-sm mt-1">
                     <span className="text-gray-500">Đang xử lý</span>
+                    {/* Use orders from context */}
                     <span className="font-medium">
                       {orders.filter((p) => p.status === "pending").length}
                     </span>
@@ -281,6 +325,7 @@ export default function DashboardPage() {
               </div>
             </CardContent>
             <CardFooter>
+              {/* Link đến trang quản lý sản phẩm */}
               <Link href="/quan-ly/san-pham" className="w-full">
                 <Button variant="outline" size="sm" className="w-full">
                   <ShoppingCart className="w-4 h-4 mr-2" />
@@ -290,17 +335,20 @@ export default function DashboardPage() {
             </CardFooter>
           </Card>
 
+          {/* Thẻ Dự án của tôi */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg">Dự án của tôi</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-1">
+                {/* Use userProjects from context (user.projects) */}
                 <p className="text-3xl font-bold">{userProjects.length ?? 0}</p>
                 <p className="text-sm text-gray-500">Dự án đã đăng ký</p>
                 <div className="mt-2 pt-2 border-t border-gray-100">
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-500">Đã phê duyệt</span>
+                    {/* Use userProjects from context */}
                     <span className="font-medium">
                       {Array.isArray(userProjects)
                         ? userProjects.filter((p) => p.status === "approved")
@@ -310,6 +358,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex justify-between items-center text-sm mt-1">
                     <span className="text-gray-500">Đang thực hiện</span>
+                    {/* Use userProjects from context */}
                     <span className="font-medium">
                       {Array.isArray(userProjects)
                         ? userProjects.filter((p) => p.status === "in_progress")
@@ -321,6 +370,7 @@ export default function DashboardPage() {
               </div>
             </CardContent>
             <CardFooter>
+              {/* Button chuyển tab sang "Dự án" */}
               <Button
                 variant="outline"
                 size="sm"
@@ -334,7 +384,9 @@ export default function DashboardPage() {
           </Card>
         </div>
 
+        {/* Hệ thống Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          {/* Danh sách các Tab */}
           <TabsList className="grid grid-cols-3 mb-8">
             <TabsTrigger value="overview">
               <Users className="w-4 h-4 mr-2" />
@@ -350,6 +402,7 @@ export default function DashboardPage() {
             </TabsTrigger>
           </TabsList>
 
+          {/* Nội dung của tab "Tổng quan" */}
           <TabsContent value="overview" className="space-y-6">
             <Card>
               <CardHeader>
@@ -359,6 +412,7 @@ export default function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                {/* Hiển thị thông báo nếu không có hoạt động (activities state is still local) */}
                 {activities.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-gray-500">
@@ -382,10 +436,12 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 ) : (
+                  // Hiển thị danh sách hoạt động
                   <div className="space-y-4">
                     {activities.map((activity) => (
+                      // Assuming activity has an 'id' property
                       <div
-                        key={activity.id}
+                        key={activity.id || Math.random()} // Use a fallback key if id is missing
                         className="flex items-start p-3 rounded-lg border border-gray-200"
                       >
                         {getActivityIcon(activity.type)}
@@ -397,7 +453,7 @@ export default function DashboardPage() {
                             {activity.status && getStatusBadge(activity.status)}
                           </div>
                           <p className="text-sm text-gray-500 mt-1">
-                            {formatDate(activity.date)}
+                            {formatDate(activity.date as unknown as Date)}
                           </p>
                         </div>
                       </div>
@@ -413,6 +469,7 @@ export default function DashboardPage() {
             </Card>
           </TabsContent>
 
+          {/* Nội dung của tab "Sản phẩm" */}
           <TabsContent value="products" className="space-y-6">
             <Card>
               <CardHeader>
@@ -422,6 +479,7 @@ export default function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                {/* Use orders from context */}
                 {orders.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-gray-500">
@@ -436,6 +494,7 @@ export default function DashboardPage() {
                     </Button>
                   </div>
                 ) : (
+                  // Hiển thị danh sách đơn hàng từ context
                   <div className="space-y-4">
                     {orders.map((order: IOrder) => (
                       <div
@@ -499,6 +558,7 @@ export default function DashboardPage() {
             </Card>
           </TabsContent>
 
+          {/* Nội dung của tab "Dự án" */}
           <TabsContent value="projects" className="space-y-6">
             <Card>
               <CardHeader>
@@ -508,6 +568,7 @@ export default function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                {/* Use userProjects from context */}
                 {userProjects.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-gray-500">Bạn chưa đăng ký dự án nào</p>
@@ -522,6 +583,7 @@ export default function DashboardPage() {
                     </Button>
                   </div>
                 ) : (
+                  // Hiển thị danh sách dự án từ context
                   <div className="space-y-4">
                     {Array.isArray(userProjects) &&
                       userProjects.map((project) => (

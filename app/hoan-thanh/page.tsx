@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { CheckCircle, AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { apiCarbon } from "../fetch/fetch.carbon";
+import { apiOrders } from "../fetch/fetch.order";
 
 export default function ConfirmOrderPage() {
   const searchParams = useSearchParams();
@@ -35,10 +35,8 @@ export default function ConfirmOrderPage() {
       }
 
       try {
-        // Thêm prefix MA_ORDER- cho orderCode
         const formattedOrderCode = `MA_ORDER-${orderCode}`;
-        // Giả sử apiCarbon.confirmOrder gửi PUT để xác nhận đơn hàng
-        const response = await apiCarbon.confirmOrder(formattedOrderCode, {
+        const response = await apiOrders.confirm(formattedOrderCode, {
           status: "PAID",
         });
         if (response.status === 200) {
@@ -48,7 +46,7 @@ export default function ConfirmOrderPage() {
             description: "Đơn hàng đã được xác nhận, nhanh như một cơn gió! 🌪️",
           });
         } else {
-          throw new Error(response.data?.error || "Xác nhận đơn thất bại");
+          throw new Error("Xác nhận đơn thất bại");
         }
       } catch (error: any) {
         console.error("Lỗi khi xác nhận đơn:", error);

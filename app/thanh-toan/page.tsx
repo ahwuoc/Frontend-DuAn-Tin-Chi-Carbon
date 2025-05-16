@@ -22,15 +22,10 @@ import {
   AlertCircle,
   ArrowLeft,
   Loader2,
-  LogIn,
   Copy,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/context/auth-context";
-import { getFormSchema } from "@/schema/checkout.schema";
-import { apiCarbon } from "../fetch/fetch.carbon";
 
-// Định nghĩa các liên kết PayPal
 const paypalLinks = {
   "khoa-hoc-chung-chi-chuyen-gia":
     "https://www.paypal.com/ncp/payment/Q32WT8EFBBFYQ",
@@ -50,14 +45,32 @@ interface FormData {
   note: string;
 }
 
-import { ICarbonProduct } from "../fetch/fetch.carbon";
+interface Product {
+  _id: string;
+  name: string;
+  title: string;
+  description: string;
+  price: number;
+}
+
+interface User {
+  userId: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+}
+
+import { useAuth } from "@/context/auth-context";
+import { apiOrders } from "../fetch/fetch.order";
+import { apiProducts } from "../fetch/fetch.products";
 
 export default function CheckoutPage() {
   const searchParams = useSearchParams();
   const productId = searchParams.get("product") || "carbon-toan-thu-nghien-cuu";
   const { toast } = useToast();
   const router = useRouter();
-  const { user, isAuthenticated, registerUser, addUserProduct } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
     email: "",
@@ -65,7 +78,8 @@ export default function CheckoutPage() {
     address: "",
     note: "",
   });
-  const [product, setProduct] = useState<ICarbonProduct | null>(null);
+
+  const [product, setProduct] = useState<Product | null>(null);
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -74,12 +88,12 @@ export default function CheckoutPage() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await apiCarbon.getId(productId);
-        if (response.status === 200) {
+        const response = await apiProducts.getById(productId);
+        if (response && response.data) {
           setProduct(response.data);
           setFormData((prev) => ({
             ...prev,
-            note: `${prev.fullName} - ${prev.phone} - ${response.name}`,
+            note: `${prev.fullName} - ${prev.phone} - ${response.data.name}`,
           }));
         } else {
           throw new Error("Không tìm thấy sản phẩm");
@@ -95,6 +109,7 @@ export default function CheckoutPage() {
     };
     fetchProduct();
   }, [productId, toast]);
+
   useEffect(() => {
     if (isAuthenticated && user && product) {
       const fullName = user.name || formData.fullName;
@@ -109,8 +124,20 @@ export default function CheckoutPage() {
       }));
     }
   }, [isAuthenticated, user, product]);
+
+  const validateForm = (): boolean => {
+    const newErrors: Partial<FormData> = {};
+    if (!formData.fullName.trim()) newErrors.fullName = "Vui lòng nhập họ và tên";
+    if (!formData.email.trim()) newErrors.email = "Vui lòng nhập email";
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email không hợp lệ";
+    if (!formData.phone.trim()) newErrors.phone = "Vui lòng nhập số điện thoại";
+    if (!formData.address.trim()) newErrors.address = "Vui lòng nhập địa chỉ";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -118,35 +145,22 @@ export default function CheckoutPage() {
       [name]: value,
       note:
         name === "fullName" || name === "phone"
-          ? `${name === "fullName" ? value : formData.fullName} - ${name === "phone" ? value : formData.phone
-          } - ${product?.name || ""}`
+          ? `${name === "fullName" ? value : formData.fullName} - ${name === "phone" ? value : formData.phone} - ${product?.name || ""}`
           : prev.note,
     }));
     if (errors[name as keyof FormData]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!product) return;
+    if (!product || !validateForm()) return;
+
     setIsSubmitting(true);
     try {
-      await registerUser({
-        name: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-      });
-
-      await addUserProduct({
-        productId,
-        name: product.title,
-        price: product.price,
-        description: product.description,
-      });
-      const user_id = JSON.parse(localStorage.getItem("user_id") ?? "null");
-      const orderResponse = await apiCarbon.createOrder({
-        userId: user_id,
+      const orderResponse = await apiOrders.createOrder({
+        userId: user?.userId,
         productId: product._id,
         buyerName: formData.fullName,
         email: formData.email,
@@ -165,7 +179,15 @@ export default function CheckoutPage() {
           description: "Đơn hàng của bạn đã được tạo thành công!",
         });
         const linkthanhtoan = orderResponse.data.linkthanhtoan;
-        router.push(linkthanhtoan);
+        if (linkthanhtoan) {
+          router.push(linkthanhtoan);
+        } else {
+          toast({
+            title: "Cảnh báo",
+            description: "Không tìm thấy link thanh toán. Vui lòng liên hệ hỗ trợ.",
+            variant: "destructive",
+          });
+        }
       } else {
         throw new Error("Không thể tạo đơn hàng");
       }
@@ -179,6 +201,11 @@ export default function CheckoutPage() {
       setIsSubmitting(false);
     }
   };
+
+  const handleGoToLogin = () => {
+    router.push("/login");
+  };
+
   const formatCurrency = (amount: number | null) => {
     if (amount === null) return "Liên hệ";
     return new Intl.NumberFormat("vi-VN", {
@@ -187,9 +214,11 @@ export default function CheckoutPage() {
       minimumFractionDigits: 0,
     }).format(amount);
   };
-  const getPaypalLink = (productId: string): string | null => {
-    return paypalLinks[productId as keyof typeof paypalLinks] || null;
+
+  const getPaypalLink = (productId: string): string => {
+    return paypalLinks[productId as keyof typeof paypalLinks] || "#";
   };
+
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
@@ -197,6 +226,7 @@ export default function CheckoutPage() {
       description: `${text} đã được sao chép vào clipboard.`,
     });
   };
+
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-gray-50 py-12">
@@ -345,7 +375,7 @@ export default function CheckoutPage() {
                     )}
                   </div>
                   <a
-                    href={getPaypalLink(productId) || "#"}
+                    href={getPaypalLink(productId)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block w-full inline-flex justify-center items-center px-6 py-2 rounded-md shadow-md text-base font-medium text-white bg-[#ebf5fa] hover:bg-[#d4e9f7] border border-[#0070ba] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0070ba] transition-all duration-300 transform hover:scale-[1.02]"
@@ -509,7 +539,7 @@ export default function CheckoutPage() {
                         "Hoàn tất đơn hàng"
                       )}
                     </Button>
-                    {getPaypalLink(productId) && (
+                    {getPaypalLink(productId) !== "#" && (
                       <div className="mt-4">
                         <div className="relative">
                           <div className="absolute inset-0 flex items-center">
@@ -522,7 +552,7 @@ export default function CheckoutPage() {
                           </div>
                         </div>
                         <a
-                          href={getPaypalLink(productId) || "#"}
+                          href={getPaypalLink(productId)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="w-full mt-4 inline-flex justify-center items-center px-6 py-3 rounded-md shadow-md text-base font-medium text-white bg-[#ebf5fa] hover:bg-[#d4e9f7] border border-[#0070ba] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0070ba] transition-colors transition-all duration-300 transform hover:scale-[1.02]"

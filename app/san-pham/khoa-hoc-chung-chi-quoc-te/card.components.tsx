@@ -3,64 +3,17 @@ import Link from "next/link";
 import { FC, useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { apiCarbon } from "@/app/fetch/fetch.carbon";
-
-// Interface từ bạn cung cấp
-interface IFeature {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-}
-
-interface IAccountManager {
-  name: string;
-  email: string;
-  phone: string;
-}
-
-interface IProduct {
-  _id: string; // Giả sử có _id từ API
-  name: string;
-  type: "carbon_credits" | "carbon_accounting" | "international_certificates";
-  description: string;
-  purchaseDate: Date;
-  status: "active" | "pending" | "expired";
-  expiryDate?: Date;
-  image?: string;
-  price?: number;
-  billingCycle: string;
-  projectLocation?: string;
-  carbonAmount?: number;
-  carbonUsed?: number;
-  verificationStandard?: string;
-  usageStats?: {
-    totalUsage: number;
-    lastMonthUsage: number;
-    trend: "up" | "down" | "stable";
-  };
-  features: IFeature[];
-  subscriptionTier?: "basic" | "professional" | "enterprise";
-  nextPayment?: Date;
-  certificationLevel?: string;
-  courseProgress?: number;
-  lastAccessed?: Date;
-  issuer?: string;
-  accountManager: IAccountManager;
-  area?: number;
-}
-
-// Component
+import { apiProducts } from "../../fetch/fetch.products";
 export const PricingSection: FC = () => {
-  const [products, setProducts] = useState<IProduct[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await apiCarbon.getProductType(
+        const response = await  apiProducts.getProducts(
           "international_certificates",
         );
-        setProducts(response.data); // Giả sử API trả về { data: IProduct[] }
+        setProducts(response.data);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -76,11 +29,10 @@ export const PricingSection: FC = () => {
         products.map((plan, index) => (
           <Card
             key={plan._id || index} // Dùng _id nếu có, fallback về index
-            className={`hover:shadow-xl transition-all duration-300 border-2 flex flex-col ${
-              plan.subscriptionTier === "professional"
-                ? "border-green-600 transform scale-105"
-                : "border-gray-200"
-            }`}
+            className={`hover:shadow-xl transition-all duration-300 border-2 flex flex-col ${plan.subscriptionTier === "professional"
+              ? "border-green-600 transform scale-105"
+              : "border-gray-200"
+              }`}
           >
             {plan.subscriptionTier === "professional" && (
               <div className="bg-green-600 text-white text-center py-2 text-sm font-medium">

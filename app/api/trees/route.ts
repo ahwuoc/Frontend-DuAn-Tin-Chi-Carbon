@@ -1,19 +1,34 @@
-import { NextResponse } from "next/server"
+import { NextResponse } from "next/server";
 
-// Giả lập database trong memory
-const trees = []
+interface Position {
+  x: number;
+  y: number;
+  z: number;
+}
+
+interface Tree {
+  id: string;
+  type: number;
+  position: Position;
+  scale: number;
+  contributorId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+let trees: Tree[] = [];
 
 export async function GET() {
   try {
-    return NextResponse.json(trees)
+    return NextResponse.json(trees);
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: error }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const { type, position, contributorId } = await request.json()
+    const { type, position, contributorId } = await request.json();
 
     if (
       typeof type !== "number" ||
@@ -23,10 +38,13 @@ export async function POST(request: Request) {
       typeof position.z !== "number" ||
       !contributorId
     ) {
-      return NextResponse.json({ error: "Type, position, and contributorId are required" }, { status: 400 })
+      return NextResponse.json(
+        { error: "Type, position, and contributorId are required" },
+        { status: 400 }
+      );
     }
 
-    const newTree = {
+    const newTree: Tree = {
       id: `tree-${Date.now()}`,
       type,
       position,
@@ -34,12 +52,12 @@ export async function POST(request: Request) {
       contributorId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-    }
+    };
 
-    trees.push(newTree)
+    trees.push(newTree);
 
-    return NextResponse.json(newTree)
+    return NextResponse.json(newTree);
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: error }, { status: 500 });
   }
 }

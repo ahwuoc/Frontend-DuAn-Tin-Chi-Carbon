@@ -116,7 +116,6 @@ const translations = {
     certifiersDesc:
       "Khám phá tầm quan trọng của các tổ chức chứng nhận trong thị trường tín chỉ carbon và thách thức họ phải đối mặt.",
 
-    practicalProjects: "Dự án thực tế và nghiên cứu tình huống",
     practicalProjectsHours: "10 giờ",
     practicalProjectsDesc:
       "Áp dụng kiến thức vào dự án thực tế, phân tích các tình huống thực tế và rút kinh nghiệm.",
@@ -575,7 +574,6 @@ const translations = {
     certifiersDesc:
       "Explore the importance of certification organizations in the carbon credit market and the challenges they face.",
 
-    practicalProjects: "Practical Projects and Case Studies",
     practicalProjectsHours: "10 hours",
     practicalProjectsDesc:
       "Apply knowledge to real projects, analyze real-world situations, and draw lessons.",

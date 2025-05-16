@@ -2,35 +2,35 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import HTTP from "@/app/common/http";
 import AffiliateRegisterForm from "./components/AffiliateRegisterForm";
 import AffiliateDashboard from "./components/AffiliateDashboard";
 import { IAffiliate, apiAffiliates } from "@/app/fetch/fetch.affiliate";
-
+import { useAuth } from "../../../context/auth-context";
 export default function AffiliateManager() {
   const { toast } = useToast();
   const [affiliateData, setAffiliateData] = useState<IAffiliate | null>(null);
   const [loading, setLoading] = useState(true);
-
+  const { user } = useAuth()
   useEffect(() => {
     const fetchAffiliateData = async () => {
       try {
-        const userId = JSON.parse(localStorage.getItem("user_id") || '""');
-        if (!userId) {
+        if (!user?.userId) {
           setLoading(false);
           return;
         }
-        const response = await apiAffiliates.getByUserId(userId);
-        if (response && response.data) {
-          setAffiliateData(response.data.affiliates[0]);
+        const response = await apiAffiliates.getByUserId(user.userId);
+        if (response?.data) {
+          setAffiliateData(response.data.affiliate);
         }
       } catch (error) {
+        console.error("Failed to fetch affiliate:", error);
       } finally {
         setLoading(false);
       }
     };
+
     fetchAffiliateData();
-  }, [toast]);
+  }, [user]);
 
   if (loading) {
     return <div>Loading...Bạn vui lòng đợi 1 tý!</div>;
