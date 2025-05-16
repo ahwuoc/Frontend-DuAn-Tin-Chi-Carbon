@@ -1,7 +1,7 @@
-"use client";
+"use client"
 import { useState } from "react";
 import { useToast } from "../../../../../hooks/use-toast";
-import { ProductForm, ProductFormData } from "./ProductForm";
+import { ProductFormData } from "./ProductForm";
 // Next.js Page Component
 export default function CreateProductPage() {
     const { toast } = useToast();
