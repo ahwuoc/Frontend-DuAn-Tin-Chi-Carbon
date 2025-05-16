@@ -8,31 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { IProject } from "../../../fetch/fetch.projects";
 
-// Cập nhật interface IProject để bao gồm area, carbonCreditsTotal, carbonCreditsClaimed
-interface IProject {
-    _id: string;
-    name: string;
-    description?: string;
-    status: "pending" | "active" | "completed" | "archived";
-    registrationDate?: string;
-    startDate?: string;
-    endDate?: string;
-    carbonCredits?: number; // Available credits
-    carbonCreditsTotal?: number; // Total potential credits
-    carbonCreditsClaimed?: number; // Credits claimed/used
-    type?: string;
-    location?: string;
-    coordinates?: { lat: number; lng: number } | string; // Cập nhật kiểu dữ liệu nếu cần
-    area?: number; // Thêm diện tích
-    participants?: string[] | number; // Cập nhật kiểu dữ liệu nếu cần
-    progress?: number;
-    documents?: any[]; // Có thể định nghĩa interface chi tiết hơn nếu cần
-    activities?: any[]; // Có thể định nghĩa interface chi tiết hơn nếu cần
-    userId: string | null; // userId có thể là null
-    createdAt?: string;
-    updatedAt?: string;
-}
 import { apiProjects } from "../../../fetch/fetch.projects";
 
 
@@ -95,7 +72,7 @@ export default function AdminProjectCarbonPage() {
         }
     };
 
-    const formatDate = (dateString?: string) => {
+    const formatDate = (dateString?: Date) => {
         if (!dateString) return "N/A";
         const date = new Date(dateString);
         // Kiểm tra tính hợp lệ của ngày

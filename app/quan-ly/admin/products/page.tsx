@@ -77,7 +77,7 @@ export default function AdminProductsPage() {
         // Refetch products or filter out locally
         setProducts((prevProducts) => prevProducts.filter(p => p._id !== productId));
       } else {
-        throw new Error(res.data?.error || "Xóa sản phẩm thất bại");
+        throw new Error("Xóa sản phẩm thất bại");
       }
     } catch (err: any) {
       console.error("Delete API error:", err.response?.data || err.message);
@@ -90,7 +90,7 @@ export default function AdminProductsPage() {
   };
 
 
-  const formatDate = (dateString?: Date | string) => {
+  const formatDate = (dateString?: Date) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
     return date.toLocaleDateString("vi-VN", {

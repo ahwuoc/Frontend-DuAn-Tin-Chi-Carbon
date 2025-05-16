@@ -37,12 +37,12 @@ export default function SettingsPage() {
     return storedUser
       ? JSON.parse(storedUser)
       : {
-          name: "",
-          email: "",
-          avatar: "",
-          phone: "",
-          address: "",
-        };
+        name: "",
+        email: "",
+        avatar: "",
+        phone: "",
+        address: "",
+      };
   });
 
   const handleInputChange = (
@@ -59,7 +59,7 @@ export default function SettingsPage() {
   const handleSaveProfile = async () => {
     try {
       const res = await apiAuth.update(formData);
-      if (res.status === 200) {
+      if (res && res.success) {
         toast({
           title: language === "vi" ? "Đã lưu thông tin" : "Profile saved",
           description:

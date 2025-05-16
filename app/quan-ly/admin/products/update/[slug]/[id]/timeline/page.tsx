@@ -175,9 +175,6 @@ export default function CarbonCreditTimelinePage() {
         } catch (err) {
             console.error("Lỗi cập nhật timeline API (xóa):", err);
             setError("Không thể xóa sự kiện trên máy chủ. Vui lòng tải lại trang và thử lại.");
-            // Rollback state (phải tìm lại item đã xóa để thêm lại vào đúng vị trí nếu cần) - khá phức tạp
-            // Đơn giản nhất là yêu cầu người dùng tải lại trang hoặc fetch lại toàn bộ timeline
-            fetchTimeline(); // Thử fetch lại toàn bộ timeline để đồng bộ hóa state
         } finally {
             setDeletingId(null); // Kết thúc xóa
         }

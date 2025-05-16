@@ -52,11 +52,12 @@ export default function UserDrawer({
     try {
       if (selectedUser?._id) {
         // Update user
-        const res = await apiAuth.updateUser(selectedUser._id, {
+        const data = {
           name: formData.name,
           email: formData.email,
           role: formData.role,
-        });
+        }
+        const res = await apiAuth.updateUser(selectedUser._id, data);
         if (res.status === 200) {
           setUsers((prev) =>
             prev.map((u) => (u._id === selectedUser._id ? res.data.user : u)),
@@ -119,7 +120,7 @@ export default function UserDrawer({
 
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
-      <DrawerContent side="left" className="w-full sm:w-96">
+      <DrawerContent className="w-full sm:w-96">
         <DrawerHeader>
           <DrawerTitle>
             {selectedUser?._id ? "Sửa người dùng" : "Thêm người dùng mới"}

@@ -12,9 +12,9 @@ import {
   DrawerFooter,
 } from "@/components/ui/drawer";
 import { useToast } from "@/hooks/use-toast";
-import { apiOrders, IOrder } from "@/app/fetch/fetch.order";
+import { apiOrders } from "@/app/fetch/fetch.order";
 import { Trash2 } from "lucide-react";
-
+import { IOrder } from "./page";
 interface OrderDrawerProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
@@ -58,7 +58,7 @@ export default function OrderDrawer({
         const res = await apiOrders.update(selectedOrder._id, formData);
         if (res?.status === 200 && res.data) {
           setOrders((prev = []) =>
-            prev.map((o) => (o._id === selectedOrder?._id ? (res.data as IOrder) : o))
+            prev.map((o) => (o._id === selectedOrder._id ? (res.data as IOrder) : o))
           );
 
           toast({
@@ -69,13 +69,11 @@ export default function OrderDrawer({
           throw new Error("Sửa đơn hàng thất bại");
         }
       } else {
+        // Tạo mới đơn hàng thì add mới vào array, ko phải map
         const res = await apiOrders.createOrder(formData);
-        if (res.status && res.data) {
-          setOrders((prev) =>
-            prev.map((o) =>
-              o._id === selectedOrder?._id ? (res.data as IOrder) : o
-            )
-          );
+        if (res.status === 200 && res.data) {
+          setOrders((prev) => [...prev, res.data as IOrder]); // push item mới
+
           toast({
             title: "Thành công",
             description: "Thêm đơn hàng mới thành công!",
@@ -102,7 +100,6 @@ export default function OrderDrawer({
       });
     }
   };
-
   const handleDelete = async () => {
     if (!selectedOrder?._id) return;
     try {

@@ -19,7 +19,9 @@ type TheLoai =
   | "international_certificates";
 
 export interface IProduct extends Document {
+  _id: string;
   name: string;
+  createdAt: Date;
   type: "carbon_credits" | "carbon_accounting" | "international_certificates";
   description: string;
   purchaseDate: Date;
@@ -47,20 +49,31 @@ export interface IProduct extends Document {
   accountManager: IAccountManager;
   area?: number;
 }
+interface ReportItem {
+  date: string;
+  // các trường khác
+}
+interface ApiResponse {
+  data: {
+    reports: ReportItem[];
+  };
+}
 
 export const apiProducts = {
   create: (body: Record<string, any>) => HTTP.POST("/products", { body }),
-  getAll: () => HTTP.GET("/products"),
-  getById: (id: string) => HTTP.GET(`/products/${id}`),
+  getAll: () => HTTP.GET<IProduct[]>("/products"),
+  getById: (id: string) => HTTP.GET<any>(`/products/${id}`),
   updateById: (id: string, body: any) => HTTP.PUT(`/${id}`, { body }),
   delete: (id: string) => HTTP.DELETE(`/${id}`),
   getFreeTrial: () => HTTP.GET("/free/trial"),
   updatetimeline: (id: string, body: any) =>
-    HTTP.PUT(`/products/timelines/${id}`, { body }),
+    HTTP.PUT<any>(`/products/timelines/${id}`, { body }),
   updateReport: (id: string, body: any) =>
-    HTTP.PUT(`/products/reports/${id}`, { body }),
+    HTTP.PUT<any>(`/products/reports/${id}`, { body }),
   updatecertificates: (id: string, body: any) =>
-    HTTP.PUT(`/products/certificates/${id}`, { body }),
+    HTTP.PUT<any>(`/products/certificates/${id}`, { body }),
   getProducts: (type: TheLoai) =>
     HTTP.GET<IProduct[]>(`/products?type=${type}`),
+  updateProduct: (id: string, body: any) =>
+    HTTP.PUT<any>(`products/${id}`, { body }),
 };

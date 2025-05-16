@@ -61,6 +61,7 @@ export interface IProject {
   location: string;
   coordinates: string;
   area: number;
+  createdAt: Date;
   participants: number;
   progress: number;
   documents: IProjectDocument[];

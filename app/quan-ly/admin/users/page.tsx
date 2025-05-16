@@ -46,8 +46,8 @@ export default function AdminUsersPage() {
       setError(null);
       try {
         const res = await apiAuth.getAll();
-        if (res?.data) {
-          setUsers(res.data);
+        if (res && Array.isArray(res)) {
+          setUsers(res);
         } else {
           throw new Error("Không lấy được danh sách người dùng");
         }

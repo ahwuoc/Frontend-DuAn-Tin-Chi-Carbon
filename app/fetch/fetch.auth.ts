@@ -9,6 +9,7 @@ export type TUser = {
   address?: string;
   avatar?: string;
   role: "admin" | "user";
+  createdAt: Date;
 };
 
 export type TLoginResponse = {
@@ -48,13 +49,15 @@ const apiAuth = {
     }
     return httpResponse.data;
   },
-
+  createUser: (body: any) => HTTP.POST<any>("/register", { body }),
+  updateUser: async (id: string, body: any) =>
+    await HTTP.POST<any>("/register", { body }),
   logout: async (): Promise<TLogoutResponse> => {
     const httpResponse = await HTTP.POST<TLogoutResponse>("/logout");
     Cookies.remove("token", { path: "/" });
     return httpResponse.data;
   },
-  getAll: async (): Promise<TUser[]> => {
+  getAll: async (): Promise<any[]> => {
     const httpResponse = await HTTP.GET<TUser[]>("/users");
     return httpResponse.data;
   },
@@ -64,7 +67,7 @@ const apiAuth = {
     });
     return httpResponse.data;
   },
-
+  deleteUser: (id: string) => HTTP.DELETE<any>("/user"),
   update: async (body: Record<string, any>): Promise<TUpdateResponse> => {
     const token = Cookies.get("token");
     const requestOptions: Parameters<typeof HTTP.PUT>[1] = { body };

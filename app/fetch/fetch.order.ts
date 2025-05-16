@@ -39,12 +39,15 @@ interface ResTOrder {
 interface ResTOrder2 {
   order?: IOrder[];
 }
+interface ResTOrder2 {
+  data?: IOrder[];
+}
 
 export const apiOrders = {
   getInfoOrderByUserId: (id: any) => HTTP.GET<ResTOrder>(`/orders/info/${id}`),
   cancelOrder: (orderCode: string) => HTTP.DELETE(`/orders/${orderCode}`),
   getOrderByUser: (id: string) => HTTP.GET(`/orders/user/${id}`),
-  getAll: () => HTTP.GET("/orders"),
+  getAll: () => HTTP.GET<any[]>("/orders"),
   deleteID: (id: string) => HTTP.DELETE(`/orders/id/${id}`),
   createOrder: (body: any) => HTTP.POST<ResTOrder2>("/orders", { body }),
   update: (id: string, body: any) => HTTP.PUT(`/orders/${id}`, { body }),

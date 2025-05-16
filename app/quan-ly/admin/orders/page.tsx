@@ -20,8 +20,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import OrderDrawer from "./OrderDrawer";
-import { apiOrders, IOrder } from "@/app/fetch/fetch.order";
-
+import { apiOrders } from "@/app/fetch/fetch.order";
+export interface IOrder {
+  _id: string;
+  orderCode?: string;
+  buyerName?: string;
+  buyerEmail?: string;
+  buyerPhone?: string;
+  buyerAddress?: string;
+  amount?: number;
+  status?: "pending" | "completed" | "cancelled";
+  createdAt?: string | Date; // dạng string hoặc Date đều ổn, rồi xử lý ở `formatDate`
+}
 export default function AdminOrdersPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<IOrder[]>([]);
@@ -84,8 +94,9 @@ export default function AdminOrdersPage() {
     setIsOrderDrawerOpen(true);
   };
 
-  const formatDate = (dateString: Date) => {
-    const date = new Date(dateString);
+  const formatDate = (dateInput?: string | Date) => {
+    if (!dateInput) return "N/A";
+    const date = new Date(dateInput);
     return date.toLocaleDateString("vi-VN", {
       day: "2-digit",
       month: "2-digit",
@@ -93,10 +104,10 @@ export default function AdminOrdersPage() {
     });
   };
 
-  const formatAmount = (amount: number) => {
+  const formatAmount = (amount?: number) => {
+    if (amount === undefined || amount === null) return "0 VNĐ";
     return amount.toLocaleString("vi-VN") + " VNĐ";
   };
-
   if (loading) {
     return (
       <div className="container mx-auto py-10 px-4 text-center">

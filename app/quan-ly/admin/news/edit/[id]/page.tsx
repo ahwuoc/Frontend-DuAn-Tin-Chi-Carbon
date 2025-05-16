@@ -93,12 +93,14 @@ export default function NewsFormPage() {
                     if (response?.data?.data) {
                         const newsData = response.data.data;
                         setFormData({
-                            ...newsData,
-                            tags: newsData.tags || [],
+                            ...newsData[0],                // lấy phần tử đầu
+                            tags: newsData[0]?.tags || [], // lấy tags phần tử đầu hoặc []
                         });
-                        if (newsData.image) {
-                            setImagePreview(newsData.image);
+
+                        if (newsData[0]?.image) {
+                            setImagePreview(newsData[0].image);
                         }
+
                     } else {
                         toast({ title: "Lỗi", description: "Không tìm thấy dữ liệu tin tức.", variant: "destructive" });
                         router.push("/quan-ly/admin/news");
