@@ -4,13 +4,11 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { apiProducts } from "../../../../../../../fetch/fetch.products";
 
-// Import các component từ shadcn/ui
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
-// Import Table components từ shadcn/ui
 import {
     Table,
     TableBody,
@@ -20,7 +18,6 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
-// Import icon từ lucide-react (hoặc thư viện icon bạn đang dùng)
 import { Trash2 } from 'lucide-react';
 
 
@@ -31,10 +28,20 @@ interface Certificate {
     url: string;
 }
 
-// Lấy tên cloud từ biến môi trường
 const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-// Tên upload preset không có chữ ký (unsigned)
-const uploadPreset = "my_unsigned_preset"; // Thay thế bằng tên preset của bạn
+const uploadPreset = "my_unsigned_preset";
+
+const formatDate = (dateString: string | undefined): string => {
+    if (!dateString) return "N/A";
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return "Invalid Date";
+        return date.toLocaleDateString("vi-VN");
+    } catch (e) {
+        console.error("Error formatting date:", e);
+        return "Invalid Date";
+    }
+};
 
 export default function CarbonCreditCertificatesPage() {
     const { id } = useParams();
@@ -43,40 +50,47 @@ export default function CarbonCreditCertificatesPage() {
     const [newDate, setNewDate] = useState("");
     const [newUrl, setNewUrl] = useState("");
     const [error, setError] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(true); // State loading tải danh sách
+    const [isLoading, setIsLoading] = useState(true);
 
-    // States mới cho chức năng upload
     const [uploading, setUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
     const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
 
 
-    useEffect(() => {
-        const fetchCertificates = async () => {
-            setIsLoading(true);
-            try {
-                const productId = Array.isArray(id) ? id[0] : id;
-                if (!productId) {
-                    setError("Không tìm thấy ID sản phẩm.");
-                    setIsLoading(false);
-                    return;
-                }
-                const product = await apiProducts.getById(productId);
-                setCertificates(product.data.certificates || []);
-                setError(null);
-            } catch (err) {
-                console.error("Error fetching certificates:", err);
-                setError("Không thể tải danh sách chứng chỉ. Vui lòng thử lại sau.");
-            } finally {
+    const fetchCertificates = async () => {
+        setIsLoading(true);
+        try {
+            const productId = Array.isArray(id) ? id[0] : id;
+            if (!productId) {
+                setError("Không tìm thấy ID sản phẩm.");
                 setIsLoading(false);
+                return;
             }
-        };
+            const product = await apiProducts.getById(productId);
+            if (product?.data?.certificates && Array.isArray(product.data.certificates)) {
+                setCertificates(product.data.certificates);
+            } else {
+                console.warn("Certificates data not found or not an array in API response:", product?.data?.certificates);
+                setCertificates([]);
+            }
+
+            setError(null);
+        } catch (err) {
+            console.error("Error fetching certificates:", err);
+            setError("Không thể tải danh sách chứng chỉ. Vui lòng thử lại sau.");
+            setCertificates([]); // Đảm bảo state là mảng rỗng khi có lỗi fetch
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+
+    useEffect(() => {
         if (id) {
             fetchCertificates();
         }
     }, [id]);
 
-    // Hàm xử lý upload tệp lên Cloudinary
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -114,7 +128,7 @@ export default function CarbonCreditCertificatesPage() {
 
             if (res.ok && data.secure_url) {
                 setUploadedFileUrl(data.secure_url);
-                setNewUrl(data.secure_url); // Cập nhật input URL
+                setNewUrl(data.secure_url);
                 setUploadError(null);
                 console.log("File uploaded successfully:", data.secure_url);
             } else {
@@ -131,7 +145,7 @@ export default function CarbonCreditCertificatesPage() {
             setNewUrl("");
         } finally {
             setUploading(false);
-            e.target.value = ''; // Reset input file
+            e.target.value = '';
         }
     };
     const handleDeleteCertificate = async (certificateId: string) => {
@@ -140,7 +154,7 @@ export default function CarbonCreditCertificatesPage() {
             setError("Không tìm thấy ID sản phẩm để xóa chứng chỉ.");
             return;
         }
-        const previousCertificates = certificates; // Lưu lại trạng thái trước đó để rollback nếu lỗi
+        const previousCertificates = certificates;
         const updatedCertificates = certificates.filter(cert => cert.id !== certificateId);
         setCertificates(updatedCertificates);
         if (error && !error.includes("xóa chứng chỉ")) {
@@ -149,14 +163,11 @@ export default function CarbonCreditCertificatesPage() {
 
 
         try {
-            // Gọi API để cập nhật sản phẩm (xóa chứng chỉ)
             await apiProducts.updatecertificates(productId, { certificates: updatedCertificates });
-            // Nếu API thành công, state đã được cập nhật
             console.log(`Certificate ${certificateId} deleted successfully from API.`);
 
         } catch (err) {
             console.error(`Error deleting certificate ${certificateId}:`, err);
-            // Rollback UI nếu API lỗi
             setCertificates(previousCertificates);
             setError("Không thể xóa chứng chỉ. Vui lòng thử lại.");
         }
@@ -177,7 +188,7 @@ export default function CarbonCreditCertificatesPage() {
         }
 
         const newCert: Certificate = {
-            id: Date.now().toString(), // tạo id tạm thời bằng timestamp
+            id: Date.now().toString(),
             title: newTitle.trim(),
             date: newDate,
             url: newUrl.trim(),
@@ -216,154 +227,152 @@ export default function CarbonCreditCertificatesPage() {
                 <p className="text-red-600 text-center mb-6 text-lg font-medium">{error}</p>
             ) : (
                 <>
-                    {/* Phần Danh sách Chứng chỉ */}
-                    <Card className="mb-10">
-                        <CardHeader>
-                            <CardTitle className="text-2xl font-bold text-gray-800">Danh sách chứng chỉ hiện tại</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            {certificates.length === 0 ? (
-                                <p className="text-gray-600 italic text-lg">Chưa có chứng chỉ nào cho dự án này.</p>
-                            ) : (
-                                <div className="overflow-x-auto"> {/* Wrapper cho table để responsive */}
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead className="min-w-[150px]">Tiêu đề</TableHead> {/* Thêm min-width */}
-                                                <TableHead className="min-w-[100px]">Ngày</TableHead> {/* Thêm min-width */}
-                                                <TableHead className="min-w-[200px]">Link</TableHead> {/* Thêm min-width */}
-                                                <TableHead className="text-right">Hành động</TableHead> {/* Căn phải */}
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {certificates.map((cert) => (
-                                                <TableRow key={cert.id}>
-                                                    <TableCell className="font-medium">{cert.title}</TableCell>
-                                                    <TableCell>{cert.date}</TableCell>
-                                                    <TableCell>
-                                                        <a href={cert.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline break-all"> {/* Sử dụng break-all */}
-                                                            {cert.url}
-                                                        </a>
-                                                    </TableCell>
-                                                    <TableCell className="text-right"> {/* Căn phải */}
-                                                        <Button
-                                                            variant="destructive" // Variant màu đỏ cho xóa
-                                                            size="icon" // Kích thước nhỏ, chỉ chứa icon
-                                                            onClick={() => handleDeleteCertificate(cert.id)}
-                                                            // Disable khi đang tải danh sách hoặc upload
-                                                            disabled={isLoading || uploading}
-                                                        >
-                                                            <Trash2 className="h-4 w-4" /> {/* Icon thùng rác */}
-                                                            <span className="sr-only">Xóa chứng chỉ {cert.title}</span> {/* Label cho screen reader */}
-                                                        </Button>
-                                                    </TableCell>
+                    {error && !isLoading && !error.includes("tải danh sách") && certificates.length > 0 && <p className="text-red-600 text-sm mb-4 font-medium">{error}</p>}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        <Card className="md:col-span-1">
+                            <CardHeader>
+                                <CardTitle className="text-2xl font-bold text-gray-800">Danh sách chứng chỉ hiện tại</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {certificates.length === 0 ? (
+                                    <p className="text-gray-600 italic text-lg">Chưa có chứng chỉ nào cho dự án này.</p>
+                                ) : (
+                                    <div className="overflow-x-auto">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead className="min-w-[150px]">Tiêu đề</TableHead>
+                                                    <TableHead className="min-w-[100px]">Ngày</TableHead>
+                                                    <TableHead className="min-w-[200px]">Link</TableHead>
+                                                    <TableHead className="text-right">Hành động</TableHead>
                                                 </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {certificates.map((cert) => (
+                                                    <TableRow key={cert.id}>
+                                                        <TableCell className="font-medium">{cert.title}</TableCell>
+                                                        <TableCell>{cert.date}</TableCell>
+                                                        <TableCell>
+                                                            <a href={cert.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline break-all">
+                                                                {cert.url}
+                                                            </a>
+                                                        </TableCell>
+                                                        <TableCell className="text-right">
+                                                            <Button
+                                                                variant="destructive"
+                                                                size="icon"
+                                                                onClick={() => handleDeleteCertificate(cert.id)}
+                                                                disabled={isLoading || uploading}
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                                <span className="sr-only">Xóa chứng chỉ {cert.title}</span>
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
 
-                    {/* Phần Thêm Chứng chỉ mới */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-2xl font-bold text-gray-800">Thêm chứng chỉ mới</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            {/* Hiển thị lỗi của form (thêm chứng chỉ), không hiển thị lỗi tải danh sách */}
-                            {error && !isLoading && !error.includes("tải danh sách") && <p className="text-red-600 text-sm mb-4 font-medium">{error}</p>}
+                        <Card className="md:col-span-1">
+                            <CardHeader>
+                                <CardTitle className="text-2xl font-bold text-gray-800">Thêm chứng chỉ mới</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {uploadError && <p className="text-red-600 text-sm mb-4 font-medium">{uploadError}</p>}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
 
-                                {/* Input Tiêu đề */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="title">Tiêu đề</Label>
-                                    <Input
-                                        id="title"
-                                        type="text"
-                                        value={newTitle}
-                                        onChange={(e) => setNewTitle(e.target.value)}
-                                        placeholder="Nhập tiêu đề chứng chỉ"
-                                    />
-                                </div>
-                                {/* Input Ngày */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="date">Ngày cấp</Label>
-                                    <Input
-                                        id="date"
-                                        type="date"
-                                        value={newDate}
-                                        onChange={(e) => setNewDate(e.target.value)}
-                                    />
-                                </div>
-
-                                {/* Phần Upload File */}
-                                <div className="col-span-1 md:col-span-2 space-y-2">
-                                    <Label htmlFor="certificate-file-upload">Tải lên tệp chứng chỉ (PDF, hình ảnh)</Label>
-                                    <div className="flex items-center gap-4 flex-wrap">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="title">Tiêu đề</Label>
                                         <Input
-                                            id="certificate-file-upload"
-                                            type="file"
-                                            onChange={handleFileUpload}
-                                            className="hidden"
-                                            accept=".pdf, image/*"
+                                            id="title"
+                                            type="text"
+                                            value={newTitle}
+                                            onChange={(e) => setNewTitle(e.target.value)}
+                                            placeholder="Nhập tiêu đề chứng chỉ"
                                         />
-                                        <Button
-                                            type="button"
-                                            onClick={() => document.getElementById('certificate-file-upload')?.click()}
-                                            disabled={uploading}
-                                            variant="outline"
-                                            className="min-w-[150px]"
-                                        >
-                                            {uploading ? 'Đang tải lên...' : 'Chọn tệp'}
-                                        </Button>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="date">Ngày cấp</Label>
+                                        <Input
+                                            id="date"
+                                            type="date"
+                                            value={newDate}
+                                            onChange={(e) => setNewDate(e.target.value)}
+                                        />
+                                    </div>
 
-                                        {uploading && (
-                                            <span className="text-gray-500 text-sm italic">Đang xử lý tệp...</span>
-                                        )}
-                                        {uploadError && (
-                                            <p className="text-red-600 text-sm font-medium">{uploadError}</p>
-                                        )}
+                                    <div className="col-span-1 md:col-span-2 space-y-2">
+                                        <Label htmlFor="certificate-file-upload">Tải lên tệp chứng chỉ (PDF, hình ảnh)</Label>
+                                        <div className="flex items-center gap-4 flex-wrap">
+                                            <Input
+                                                id="certificate-file-upload"
+                                                type="file"
+                                                onChange={handleFileUpload}
+                                                className="hidden"
+                                                accept=".pdf, image/*"
+                                            />
+                                            <Button
+                                                type="button"
+                                                onClick={() => document.getElementById('certificate-file-upload')?.click()}
+                                                disabled={uploading}
+                                                variant="outline"
+                                                className="min-w-[150px]"
+                                            >
+                                                {uploading ? 'Đang tải lên...' : 'Chọn tệp'}
+                                            </Button>
+
+                                            {uploading && (
+                                                <span className="text-gray-500 text-sm italic">Đang xử lý tệp...</span>
+                                            )}
+                                            {uploadedFileUrl && !uploading && !uploadError && (
+                                                <span className="text-green-600 text-sm font-medium">Tải lên thành công!</span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="col-span-1 md:col-span-2 space-y-2">
+                                        <Label htmlFor="url">Link chứng chỉ (URL)</Label>
+                                        <Input
+                                            id="url"
+                                            type="url"
+                                            value={newUrl}
+                                            onChange={(e) => {
+                                                setNewUrl(e.target.value);
+                                                if (uploadedFileUrl) setUploadedFileUrl(null);
+                                            }}
+                                            placeholder="Link chứng chỉ (URL) hoặc tự động điền sau khi tải lên"
+                                            disabled={uploading}
+                                        />
                                         {uploadedFileUrl && !uploading && !uploadError && (
-                                            <span className="text-green-600 text-sm font-medium">Tải lên thành công!</span>
+                                            <p className="text-sm text-gray-600 break-words mt-1">
+                                                <span className="font-medium">Link đã tải lên:</span> <a href={uploadedFileUrl} target="_blank" rel="noopener noreferrer" className="underline text-blue-600 hover:text-blue-800">{uploadedFileUrl}</a>
+                                            </p>
                                         )}
                                     </div>
+
                                 </div>
 
-                                {/* Input Link (sẽ được điền tự động từ upload hoặc nhập tay) */}
-                                <div className="col-span-1 md:col-span-2 space-y-2">
-                                    <Label htmlFor="url">Link chứng chỉ (URL)</Label>
-                                    <Input
-                                        id="url"
-                                        type="url"
-                                        value={newUrl}
-                                        onChange={(e) => {
-                                            setNewUrl(e.target.value);
-                                            if (uploadedFileUrl) setUploadedFileUrl(null);
-                                        }}
-                                        placeholder="Link chứng chỉ (URL) hoặc tự động điền sau khi tải lên"
-                                        disabled={uploading} // Disable khi đang upload
-                                    />
-                                    {uploadedFileUrl && !uploading && !uploadError && (
-                                        <p className="text-sm text-gray-600 break-words mt-1">
-                                            <span className="font-medium">Link đã tải lên:</span> <a href={uploadedFileUrl} target="_blank" rel="noopener noreferrer" className="underline text-blue-600 hover:text-blue-800">{uploadedFileUrl}</a>
-                                        </p>
-                                    )}
-                                </div>
+                                <Button
+                                    onClick={handleAddCertificate}
+                                    disabled={isLoading || uploading || !newTitle.trim() || !newDate || !newUrl.trim()}
+                                    className="w-full md:w-auto bg-purple-600 hover:bg-purple-700"
+                                >
+                                    ➕ Thêm chứng chỉ
+                                </Button>
+                                {error && !isLoading && !uploadError && !error.includes("tải danh sách") && certificates.length === 0 && <p className="text-red-600 text-sm mt-4 font-medium">{error}</p>}
 
-                            </div>
 
-                            <Button
-                                onClick={handleAddCertificate}
-                                disabled={isLoading || uploading} // Disable khi đang tải danh sách HOẶC đang upload
-                                className="w-full md:w-auto bg-purple-600 hover:bg-purple-700"
-                            >
-                                ➕ Thêm chứng chỉ
-                            </Button>
-                        </CardContent>
-                    </Card>
+                            </CardContent>
+                        </Card>
+
+                    </div>
                 </>
             )}
         </div>
