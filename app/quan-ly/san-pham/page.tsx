@@ -40,10 +40,9 @@ export default function ProductsManagementPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [pendingOrders, setPendingOrders] = useState<any[]>([]);
-
+  const { user } = useAuth();
   useEffect(() => {
     setIsClient(true);
-    const { user } = useAuth();
     const fetchProductByUser = async () => {
       try {
 
@@ -88,8 +87,6 @@ export default function ProductsManagementPage() {
       );
     return matchesStatusTab || matchesTypeTab && matchesSearch;
   });
-
-  // Lấy sản phẩm cho đơn hàng pending
   const pendingProducts = pendingOrders
     .map((order) => ({
       order,

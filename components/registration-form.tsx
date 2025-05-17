@@ -677,29 +677,6 @@ export default function RegistrationForm() {
 
         <ConfettiEffect isActive={showConfetti} />
       </form>
-      {/* <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold">
-              Đăng nhập
-            </DialogTitle>
-            <DialogDescription>
-              Bạn cần đăng nhập để gửi yêu cầu tư vấn.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                router.push("/dang-nhap");
-                setIsModalOpen(false);
-              }}
-            >
-              Đăng nhập
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog> */}
     </>
   );
 }
