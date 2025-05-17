@@ -154,12 +154,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       if (!userData.email) return false;
       const response = await apiAuth.register(userData);
-      if (response.success) {
-        return false;
-      }
+      if (!response.success) return false;
       const storedUsers = localStorage.getItem("users");
       const users = storedUsers ? JSON.parse(storedUsers) : {};
-
       users[userData.email] = {
         ...users[userData.email],
         ...userData,
