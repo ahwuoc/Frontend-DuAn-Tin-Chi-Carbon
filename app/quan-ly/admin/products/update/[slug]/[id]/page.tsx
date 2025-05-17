@@ -148,7 +148,7 @@ export default function ViewCarbonCreditPage() {
                 return (editedValue || 0) !== (originalValue || 0);
             }
             if (key === 'purchaseDate' || key === 'expiryDate') {
-                // So sánh ngày sau khi chuyển về cùng định dạng YYYY-MM-DD
+
                 const originalDateFormatted = originalValue ? new Date(originalValue).toISOString().split('T')[0] : "";
                 return editedValue !== originalDateFormatted;
             }
@@ -179,7 +179,6 @@ export default function ViewCarbonCreditPage() {
 
         try {
             const res = await apiProducts.updateProduct(id as string, editedCarbonCredit);
-
             if (res?.data) {
                 setCarbonCredit(res.data);
                 setEditedCarbonCredit({
