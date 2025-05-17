@@ -245,7 +245,7 @@ export default function CarbonCreditCertificatesPage() {
                                                 <TableRow>
                                                     <TableHead className="min-w-[150px]">Tiêu đề</TableHead>
                                                     <TableHead className="min-w-[100px]">Ngày</TableHead>
-                                                    <TableHead className="min-w-[200px]">Link</TableHead>
+                                                    <TableHead className="min-w-[200px]">File</TableHead>
                                                     <TableHead className="text-right">Hành động</TableHead>
                                                 </TableRow>
                                             </TableHeader>
@@ -255,9 +255,19 @@ export default function CarbonCreditCertificatesPage() {
                                                         <TableCell className="font-medium">{cert.title}</TableCell>
                                                         <TableCell>{cert.date}</TableCell>
                                                         <TableCell>
-                                                            <a href={cert.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline break-all">
-                                                                {cert.url}
-                                                            </a>
+                                                            {cert.url ? (
+                                                                <a
+                                                                    href={cert.url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="text-blue-600 hover:text-blue-800 underline break-all"
+                                                                    title={cert.url}
+                                                                >
+                                                                    {cert.url.length > 30 ? cert.url.slice(0, 47) + "..." : cert.url}
+                                                                </a>
+                                                            ) : (
+                                                                <span className="text-gray-500 italic">Không có file</span>
+                                                            )}
                                                         </TableCell>
                                                         <TableCell className="text-right">
                                                             <Button

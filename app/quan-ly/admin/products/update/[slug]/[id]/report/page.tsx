@@ -266,14 +266,14 @@ export default function CarbonCreditReportsPage() {
                                         </p>
                                         <p className="text-sm text-gray-700 flex items-center gap-1 truncate">
                                             <LinkIcon className="h-4 w-4 text-gray-500" />
-                                            Link: {" "}
+                                            File: {" "}
                                             <a
                                                 href={report.url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="text-blue-600 hover:underline truncate"
                                             >
-                                                {report.url}
+                                                {report.url.split("/").pop()}
                                             </a>
                                         </p>
                                     </div>
