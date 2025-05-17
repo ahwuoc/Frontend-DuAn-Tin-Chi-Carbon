@@ -173,11 +173,8 @@ export default function CarbonCreditTimelinePage() {
                 <CalendarDays className="mr-2 h-6 w-6" />
                 Dòng thời gian dự án #{id}
             </h1>
-
             {error && timeline.length > 0 && <p className="text-red-500 mb-4">{error}</p>}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
+            <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card className="md:col-span-1">
                     <CardHeader>
                         <CardTitle>Các sự kiện</CardTitle>
