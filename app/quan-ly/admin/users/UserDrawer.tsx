@@ -60,7 +60,7 @@ export default function UserDrawer({
         const res = await apiAuth.updateUser(selectedUser._id, data);
         if (res.status === 200) {
           setUsers((prev) =>
-            prev.map((u) => (u._id === selectedUser._id ? res.data.user : u)),
+            prev.map((u) => (u._id === selectedUser._id ? res.payload.user : u)),
           );
           toast({
             title: "Thành công",
@@ -73,7 +73,7 @@ export default function UserDrawer({
         // Create user
         const res = await apiAuth.createUser(formData);
         if (res.status === 201) {
-          setUsers((prev) => [...prev, res.data.user]);
+          setUsers((prev) => [...prev, res.payload.user]);
           toast({
             title: "Thành công",
             description: "Thêm user mới nhanh hơn ánh sáng! 🚀",

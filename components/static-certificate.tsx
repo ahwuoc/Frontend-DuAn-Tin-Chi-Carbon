@@ -36,7 +36,7 @@ export default function StaticCertificate({
     day: "numeric",
   }).format(date);
 
-  // Hàm để vẽ chứng nhận trên canvas
+
   const drawCertificate = (
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,

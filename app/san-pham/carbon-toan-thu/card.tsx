@@ -14,7 +14,7 @@ export default function CarbonCard() {
     const fetchProducts = async () => {
       try {
         const response = await apiProducts.getProducts("carbon_credits");
-        const productData = response.data || [];
+        const productData = response.payload || [];
         if (Array.isArray(productData)) {
           setProducts(productData);
         } else {

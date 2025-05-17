@@ -85,7 +85,7 @@ export default function ConsultationDrawer({
         if (res.status === 200) {
           setConsultations((prev) =>
             prev.map((c) =>
-              c._id === selectedConsultation._id ? res.data.consultation : c,
+              c._id === selectedConsultation._id ? res.payload.consultation : c,
             ),
           );
           toast({
@@ -97,8 +97,8 @@ export default function ConsultationDrawer({
         }
       } else {
         const res = await apiConsultations.createConsultation(formData);
-        if (res && res.data) {
-          setConsultations((prev) => [...prev, res.data.consultation]);
+        if (res && res.payload) {
+          setConsultations((prev) => [...prev, res.payload.consultation]);
           toast({
             title: "Thành công",
             description: "Thêm yêu cầu tư vấn mới thành công!",

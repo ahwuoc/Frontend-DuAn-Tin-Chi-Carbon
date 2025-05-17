@@ -5,120 +5,85 @@ interface ProcessedContributorData {
   name: string;
   trees: number;
 }
-
 export async function getContributors(): Promise<ProcessedContributorData[]> {
+  const mergeStatic = false;
   try {
-    // Bước 1: Cố gắng tải và xử lý dữ liệu thật từ API
     const response = await apiDonation.getInfor();
-
-    // Kiểm tra phản hồi API và cấu trúc dữ liệu cơ bản
     if (
       !response ||
-      !response.data ||
-      !Array.isArray(response.data.donations)
+      !response.payload ||
+      !Array.isArray(response.payload.donations)
     ) {
-      console.error(
-        "Phản hồi hoặc cấu trúc dữ liệu không hợp lệ từ apiDonation.getInfor:",
-        response
-      );
-      // Ném một lỗi để nhảy vào khối catch (và kích hoạt fallback)
-      throw new Error(
-        "Cấu trúc dữ liệu nhận được từ API đóng góp không hợp lệ"
-      );
+      throw new Error("Cấu trúc dữ liệu không hợp lệ từ API");
     }
-
-    const donations = response.data.donations;
+    const donations = response.payload.donations;
     const dynamicAggregatedMap = new Map<
       string,
-      { name: string; totalTrees: number }
+      { name: string; trees: number }
     >();
 
     donations.forEach((donation: any) => {
       const key =
-        donation.email && donation.email.trim() !== ""
-          ? donation.email.trim().toLowerCase()
-          : donation.name && donation.name.trim() !== ""
-          ? donation.name.trim().toLowerCase()
-          : ""; // Đảm bảo key không rỗng
+        donation.email?.trim().toLowerCase() ||
+        donation.name?.trim().toLowerCase() ||
+        "";
 
       if (!key) {
-        console.warn(
-          "Bỏ qua giao dịch không xác định người đóng góp (key rỗng):",
-          donation
-        );
+        console.warn("⚠️ Bỏ qua giao dịch không xác định:", donation);
         return;
       }
 
       if (!dynamicAggregatedMap.has(key)) {
         dynamicAggregatedMap.set(key, {
-          name:
-            donation.name && donation.name.trim() !== ""
-              ? donation.name.trim()
-              : "Anonymous", // Dùng tên, mặc định 'Anonymous'
-          totalTrees: 0, // Khởi tạo tổng số cây
+          name: donation.name?.trim() || "Anonymous",
+          trees: 0,
         });
       }
 
-      // Cộng dồn số lượng (quantity) vào tổng số cây của người đóng góp này
-      const contributor = dynamicAggregatedMap.get(key)!; // Lấy object người đóng góp
-      // Đảm bảo quantity là số, mặc định 0 nếu không hợp lệ
-      contributor.totalTrees +=
+      const contributor = dynamicAggregatedMap.get(key)!;
+      contributor.trees +=
         typeof donation.quantity === "number"
           ? donation.quantity
           : parseInt(donation.quantity, 10) || 0;
     });
 
-    const processedDynamicContributors: any[] = Array.from(
-      dynamicAggregatedMap.values()
-    );
-
     const mergedContributorsMap = new Map<string, ProcessedContributorData>();
 
-    // Thêm tất cả dữ liệu động đã xử lý vào Map trước
-    processedDynamicContributors.forEach((contributor) => {
-      // Sử dụng tên (chữ thường) làm key cho Map gộp
+    // Add dynamic data
+    for (const contributor of dynamicAggregatedMap.values()) {
       mergedContributorsMap.set(contributor.name.toLowerCase(), contributor);
-    });
+    }
 
-    defaultContributors.forEach((staticContributor) => {
-      const key = staticContributor.name.toLowerCase(); // Key cho dữ liệu tĩnh
-
-      if (mergedContributorsMap.has(key)) {
-        mergedContributorsMap.get(key)!.trees += staticContributor.trees;
-      } else {
-        mergedContributorsMap.set(key, {
-          name: staticContributor.name,
-          trees: staticContributor.trees,
-        });
+    // Conditionally merge static data
+    if (mergeStatic) {
+      for (const staticContributor of defaultContributors) {
+        const key = staticContributor.name.toLowerCase();
+        if (mergedContributorsMap.has(key)) {
+          mergedContributorsMap.get(key)!.trees += staticContributor.trees;
+        } else {
+          mergedContributorsMap.set(key, {
+            name: staticContributor.name,
+            trees: staticContributor.trees,
+          });
+        }
       }
-    });
+    }
 
-    const finalMergedContributors: ProcessedContributorData[] = Array.from(
-      mergedContributorsMap.values()
-    );
+    const finalContributors = Array.from(mergedContributorsMap.values());
+    finalContributors.sort((a, b) => b.trees - a.trees);
 
-    finalMergedContributors.sort((a, b) => b.trees - a.trees);
-
-    console.log(
-      "Dữ liệu đóng góp (động + tĩnh) đã gộp:",
-      finalMergedContributors
-    );
-
-    return finalMergedContributors;
+    console.log("✅ Danh sách đóng góp đã xử lý:", finalContributors);
+    return finalContributors;
   } catch (error) {
-    console.error(
-      "Lỗi khi tải hoặc xử lý dữ liệu đóng góp từ API. Trả về dữ liệu tĩnh dự phòng:",
-      error
-    );
-    return defaultContributors;
+    console.error("❌ Lỗi khi xử lý dữ liệu đóng góp:", error);
+    return mergeStatic ? defaultContributors : [];
   }
 }
-// Trong tương lai, khi tích hợp database
+
 export async function addContributor(
   name: string,
   trees: number
 ): Promise<Contributor> {
-  // Giả lập API call
   return new Promise((resolve) => {
     setTimeout(() => {
       const newContributor = {
@@ -137,7 +102,6 @@ export async function updateContributor(
   id: string,
   data: Partial<Contributor>
 ): Promise<Contributor> {
-  // Giả lập API call
   return new Promise((resolve) => {
     setTimeout(() => {
       const contributor = defaultContributors.find((c) => c.id === id) || {
@@ -156,29 +120,74 @@ export async function updateContributor(
 }
 
 export async function getTrees(): Promise<TreeData[]> {
-  // Giả lập API call
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Tạo dữ liệu mẫu
-      const trees: TreeData[] = [];
-      for (let i = 0; i < 15; i++) {
-        const x = Math.random() * 120 - 60;
-        const z = Math.random() * 120 - 60;
-        const contributorIndex = i % defaultContributors.length;
+  let numberOfTreesToGenerate = 20;
+  let contributors: ProcessedContributorData[] = [];
 
-        trees.push({
-          id: `tree-${i}`,
-          type: Math.floor(Math.random() * 5),
-          position: { x, y: 0, z },
-          scale: 0.8 + Math.random() * 0.5,
-          contributorId: `contributor-${contributorIndex}`,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
-      }
-      resolve(trees);
-    }, 500);
-  });
+  try {
+    const response = await apiDonation.getInfor();
+
+    if (
+      response &&
+      response.status === 200 &&
+      response.payload &&
+      typeof response.payload.totalQuantity === "number" &&
+      response.payload.totalQuantity >= 0
+    ) {
+      numberOfTreesToGenerate = response.payload.totalQuantity;
+      console.log(
+        `Đang tạo ${numberOfTreesToGenerate} cây dựa trên totalQuantity từ API.`
+      );
+    } else {
+      console.warn(
+        "Could not get valid totalQuantity from API for getTrees. Falling back to generating 20 trees.",
+        response
+      );
+    }
+  } catch (error) {
+    console.error("Error fetching donation info for getTrees:", error);
+    console.warn(
+      "Falling back to generating 20 trees and using default contributors due to API error."
+    );
+    numberOfTreesToGenerate = 20; // Fallback number of trees
+  }
+  try {
+    contributors = await getContributors();
+    if (contributors.length === 0 && numberOfTreesToGenerate > 0) {
+      console.warn(
+        "getContributors returned an empty list, but totalQuantity > 0. Trees will be assigned to a generic ID."
+      );
+    }
+  } catch (error) {
+    console.error("Error fetching contributors for getTrees:", error);
+    console.warn(
+      "Falling back to using an empty contributor list. Trees will be assigned to a generic ID."
+    );
+    contributors = [];
+  }
+
+  const trees: TreeData[] = [];
+  for (let i = 0; i < numberOfTreesToGenerate; i++) {
+    const x = Math.random() * 120 - 60;
+    const z = Math.random() * 120 - 60;
+    let assignedContributorId: string;
+    if (contributors.length > 0) {
+      const contributorIndex = i % contributors.length;
+      assignedContributorId = `mock-contributor-${contributorIndex}`;
+    } else {
+      assignedContributorId = "anonymous-contributor";
+    }
+
+    trees.push({
+      id: `tree-${i}`,
+      type: Math.floor(Math.random() * 5),
+      position: { x, y: 0, z },
+      scale: 0.8 + Math.random() * 0.5,
+      contributorId: assignedContributorId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+  }
+  return trees;
 }
 
 export async function addTree(
@@ -186,7 +195,6 @@ export async function addTree(
   position: { x: number; y: number; z: number },
   contributorId: string
 ): Promise<TreeData> {
-  // Giả lập API call
   return new Promise((resolve) => {
     setTimeout(() => {
       const newTree = {

@@ -35,8 +35,8 @@ export default function AdminProductsPage() {
     setError(null);
     try {
       const response = await apiProducts.getAll();
-      if (response && response?.data) {
-        setProducts(response.data);
+      if (response && response?.payload) {
+        setProducts(response.payload);
       } else {
         throw new Error("Không lấy được danh sách sản phẩm");
       }

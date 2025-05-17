@@ -86,7 +86,7 @@ export default function AffiliateRegisterForm() {
       const payload = { ...formData, userId };
       const response = await apiAffiliates.create(payload);
 
-      if (response?.data) {
+      if (response?.payload) {
         toast({
           title: "Thành công 🎉",
           description: "Đăng ký affiliate thành công. Kiếm tiền thôi nào! 💰",

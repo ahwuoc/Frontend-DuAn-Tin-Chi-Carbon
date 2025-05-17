@@ -95,8 +95,8 @@ export default function AdminConsultationsPage() {
       setError(null);
       try {
         const response = await apiConsultations.getAll();
-        if (response && response?.data) {
-          setConsultations(response.data.data);
+        if (response && response?.payload) {
+          setConsultations(response.payload.data);
         } else {
           throw new Error("Không lấy được danh sách yêu cầu tư vấn");
         }

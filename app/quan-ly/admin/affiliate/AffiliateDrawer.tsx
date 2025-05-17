@@ -61,7 +61,7 @@ export default function AffiliateDrawer({
         if (res.status === 200) {
           setAffiliates((prev) =>
             prev.map((a) =>
-              a._id === selectedAffiliate._id ? res.data.affiliate : a
+              a._id === selectedAffiliate._id ? res.payload.affiliate : a
             )
           );
           toast({
@@ -74,7 +74,7 @@ export default function AffiliateDrawer({
       } else {
         const res = await apiAffiliates.create(formData);
         if (res.status === 201) {
-          setAffiliates((prev) => [...prev, res.data.affiliate]);
+          setAffiliates((prev) => [...prev, res.payload.affiliate]);
           toast({
             title: "Thành công",
             description: "Thêm affiliate mới thành công!",

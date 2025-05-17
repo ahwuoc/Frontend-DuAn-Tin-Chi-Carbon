@@ -62,8 +62,6 @@ export default function AdminPage() {
       const position = { x: newTree.x, y: 0, z: newTree.z }
       const tree = await addTree(newTree.type, position, newTree.contributorId)
       setTrees([...trees, tree])
-
-      // Update contributor's tree count
       const contributor = contributors.find((c) => c.id === newTree.contributorId)
       if (contributor) {
         const updatedContributor = { ...contributor, trees: contributor.trees + 1 }

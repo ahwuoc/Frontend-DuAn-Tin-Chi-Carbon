@@ -125,8 +125,8 @@ export default function EditCarbonCreditPage() {
                 const idStr = Array.isArray(id) ? id[0] : id; // fix id kiểu string | string[]
                 const response = await apiCarbonCredits.getById(idStr);
 
-                if (response?.data) {
-                    const data = response.data;
+                if (response?.payload) {
+                    const data = response.payload;
                     setCarbonCredit({
                         ...data,
                         image: data.image || "",

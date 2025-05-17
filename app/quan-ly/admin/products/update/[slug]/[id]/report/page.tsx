@@ -73,11 +73,11 @@ export default function CarbonCreditReportsPage() {
         }
         try {
             const product = await apiProducts.getById(id as string);
-            if (product?.data?.reports && Array.isArray(product.data.reports)) { // Thêm kiểm tra Array.isArray
-                const sortedReports = product.data.reports.sort((a: ReportItem, b: ReportItem) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            if (product?.payload?.reports && Array.isArray(product.payload.reports)) { // Thêm kiểm tra Array.isArray
+                const sortedReports = product.payload.reports.sort((a: ReportItem, b: ReportItem) => new Date(a.date).getTime() - new Date(b.date).getTime());
                 setReports(sortedReports);
             } else {
-                console.warn("Reports data not found or not an array in API response:", product?.data?.reports);
+                console.warn("Reports data not found or not an array in API response:", product?.payload?.reports);
                 setReports([]);
             }
             setError(null);
@@ -172,11 +172,11 @@ export default function CarbonCreditReportsPage() {
         try {
             const apiResponse = await apiProducts.updateReport(id as string, { reports: updatedReportsOptimistic });
 
-            if (apiResponse?.data?.reports && Array.isArray(apiResponse.data.reports)) {
-                const sortedReports = apiResponse.data.reports.sort((a: ReportItem, b: ReportItem) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            if (apiResponse?.payload?.reports && Array.isArray(apiResponse.payload.reports)) {
+                const sortedReports = apiResponse.payload.reports.sort((a: ReportItem, b: ReportItem) => new Date(a.date).getTime() - new Date(b.date).getTime());
                 setReports(sortedReports);
             } else {
-                console.error("API response for update (add) is invalid:", apiResponse?.data);
+                console.error("API response for update (add) is invalid:", apiResponse?.payload);
                 setError("Cập nhật thành công nhưng dữ liệu trả về không hợp lệ. Vui lòng tải lại trang.");
                 setReports(updatedReportsOptimistic);
             }
@@ -208,11 +208,11 @@ export default function CarbonCreditReportsPage() {
         try {
             const apiResponse = await apiProducts.updateReport(id as string, { reports: updatedReportsOptimistic });
 
-            if (apiResponse?.data?.reports && Array.isArray(apiResponse.data.reports)) {
-                const sortedReports = apiResponse.data.reports.sort((a: ReportItem, b: ReportItem) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            if (apiResponse?.payload?.reports && Array.isArray(apiResponse.payload.reports)) {
+                const sortedReports = apiResponse.payload.reports.sort((a: ReportItem, b: ReportItem) => new Date(a.date).getTime() - new Date(b.date).getTime());
                 setReports(sortedReports);
             } else {
-                console.error("API response for update (delete) is invalid:", apiResponse?.data);
+                console.error("API response for update (delete) is invalid:", apiResponse?.payload);
                 setError("Xóa báo cáo thành công nhưng dữ liệu trả về không hợp lệ. Vui lòng tải lại trang.");
                 setReports(updatedReportsOptimistic);
             }

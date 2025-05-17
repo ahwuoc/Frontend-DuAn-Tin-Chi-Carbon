@@ -26,11 +26,11 @@ export default function AdminProjectCarbonPage() {
         try {
             // Giả định apiProjects.getAll() trả về dữ liệu theo cấu trúc đã cung cấp
             const response = await apiProjects.getAll();
-            if (Array.isArray(response.data)) {
-                setProjects(response.data);
+            if (Array.isArray(response.payload)) {
+                setProjects(response.payload);
             } else {
                 // Xử lý trường hợp response.data không phải là mảng
-                console.error("Expected array from API, but received:", response.data);
+                console.error("Expected array from API, but received:", response.payload);
                 setProjects([]); // Đặt lại thành mảng rỗng để tránh lỗi
             }
         } catch (err) {

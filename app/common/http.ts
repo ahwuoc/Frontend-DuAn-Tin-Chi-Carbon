@@ -1,12 +1,14 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 type Method = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
-type RequestOptions = Omit<RequestInit, "body"> & {
-  body?: any;
+type RequestOptions = Omit<RequestInit, "body" | "headers"> & {
+  body?: StrictObject;
+  headers?: Record<string, string>;
 };
 type TResponse<T> = {
   status: number;
-  data: T;
+  payload: T;
 };
+type StrictObject = Record<string, any>;
 async function request<T>(
   method: Method,
   endpoint: string,
@@ -15,6 +17,12 @@ async function request<T>(
   const fullPath = endpoint.startsWith("/")
     ? `${API_URL}${endpoint}`
     : `${API_URL}/${endpoint}`;
+
+  console.log(`[HTTP ${method}] → ${fullPath}`);
+  if (options?.body) {
+    console.log("Request body:", options.body);
+  }
+
   const response = await fetch(fullPath, {
     method,
     headers: {
@@ -25,16 +33,24 @@ async function request<T>(
     body:
       options?.body !== undefined ? JSON.stringify(options.body) : undefined,
   });
+
+  console.log(`[HTTP ${method}] ← Status: ${response.status}`);
+
   if (!response.ok) {
     const error = await response.text();
+    console.error(`[HTTP ${method}] ❌ Error ${response.status}: ${error}`);
     throw new Error(`Error ${response.status}: ${error}`);
   }
+
   const data = await response.json();
+  console.log(`[HTTP ${method}] ✅ Response:`, data);
+
   return {
     status: response.status,
-    data: data as T,
+    payload: data as T,
   };
 }
+
 const HTTP = {
   GET: <T>(url: string) => request<T>("GET", url),
   POST: <T>(url: string, options?: RequestOptions) =>

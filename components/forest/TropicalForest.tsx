@@ -17,7 +17,6 @@ import { Maximize } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Contributor, ForestElement } from "@/lib/types"
 import { ElementTooltip } from "@/components/ui/ElementTooltip"
-
 interface TropicalForestProps {
   contributors: Contributor[]
 }
@@ -34,11 +33,9 @@ export function TropicalForest({ contributors }: TropicalForestProps) {
   const cameraControllerRef = useRef(null)
   const [language, setLanguage] = useState("en") // Default language
 
-  // Reduced settings for better performance
-  const treeCount = 15 // Reduced from 20
-  const flowerDensity = 50 // Reduced from 100
 
-  // Handle search
+  const treeCount = 15
+  const flowerDensity = 50
   const handleSearch = (query: string) => {
     setSearchQuery(query)
     if (query) {
@@ -50,7 +47,6 @@ export function TropicalForest({ contributors }: TropicalForestProps) {
       setFilteredContributors(contributors)
     }
   }
-
   return (
     <div className="w-full h-full bg-gradient-to-b from-emerald-400 to-teal-600 relative overflow-hidden">
       {/* Decorative background elements */}
@@ -151,10 +147,9 @@ export function TropicalForest({ contributors }: TropicalForestProps) {
         </>
       )}
 
-      {/* Enhanced Info Panel */}
-      {/* {showInfo && <InfoPanel treeCount={treeCount} onClose={() => setShowInfo(false)} contributors={contributors} />} */}
 
-      {/* Show UI button (when UI is hidden) - Enhanced */}
+      {showInfo && <InfoPanel treeCount={treeCount} onClose={() => setShowInfo(false)} contributors={contributors} totalStats={contributors} />}
+
       {!showUI && (
         <Button
           className="absolute bottom-4 right-4 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg z-10 rounded-full px-4"

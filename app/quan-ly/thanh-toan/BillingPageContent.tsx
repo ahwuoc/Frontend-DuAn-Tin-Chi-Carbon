@@ -41,9 +41,9 @@ const BillingPageContent = () => {
         const fetchOrders = async () => {
             if (!user?.userId) return;
             const response = await apiOrders.getInfoOrderByUserId(user?.userId)
-            if (response && response.data) {
-                setOrders(response.data.orders)
-                setToTotal(response.data.totalAmount ?? 0)
+            if (response && response.payload) {
+                setOrders(response.payload.orders)
+                setToTotal(response.payload.totalAmount ?? 0)
             }
         }
         fetchOrders();
@@ -54,8 +54,8 @@ const BillingPageContent = () => {
         try {
             if (user?.userId) {
                 const paymentMethodsResponse = await apiPayMethod.getAll(user.userId);
-                if (paymentMethodsResponse.data) {
-                    const formattedMethods = paymentMethodsResponse.data.map((method: any) => ({
+                if (paymentMethodsResponse.payload) {
+                    const formattedMethods = paymentMethodsResponse.payload.map((method: any) => ({
                         ...method,
                         id: method.id || method._id,
                         affiliateId: method.affiliateId.toString(),
@@ -100,19 +100,19 @@ const BillingPageContent = () => {
         if (tab && ["overview", "invoices", "subscriptions", "payment_methods"].includes(tab)) {
             setActiveTab(tab);
         } else if (!tab && activeTab !== "overview") {
-             // Nếu không có tab trên URL nhưng state activeTab khác overview,
-             // có thể bạn muốn đồng bộ lại URL khi mount mà không có param
-             // hoặc chỉ đơn giản là giữ nguyên state activeTab nếu không có param.
-             // Đoạn này có thể cần điều chỉnh tùy theo logic mong muốn khi URL không có param 'tab'.
-             // Hiện tại, nó chỉ set activeTab dựa trên URL.
+            // Nếu không có tab trên URL nhưng state activeTab khác overview,
+            // có thể bạn muốn đồng bộ lại URL khi mount mà không có param
+            // hoặc chỉ đơn giản là giữ nguyên state activeTab nếu không có param.
+            // Đoạn này có thể cần điều chỉnh tùy theo logic mong muốn khi URL không có param 'tab'.
+            // Hiện tại, nó chỉ set activeTab dựa trên URL.
         }
     }, [searchParams]); // Chỉ phụ thuộc vào searchParams
 
     // useEffect này xử lý việc cập nhật URL khi state activeTab thay đổi
     useEffect(() => {
-      const currentTabInUrl = searchParams.get("tab");
+        const currentTabInUrl = searchParams.get("tab");
         // Chỉ push khi activeTab state khác với tab trên URL để tránh loop vô tận
-      if (activeTab !== currentTabInUrl) {
+        if (activeTab !== currentTabInUrl) {
             // Sử dụng replace thay vì push nếu bạn không muốn tạo entry mới trong lịch sử trình duyệt
             router.replace(`?tab=${activeTab}`, { scroll: false });
         }
@@ -186,13 +186,13 @@ const BillingPageContent = () => {
                     isDefault: newMethod.isDefault,
                 };
                 const response = await apiPayMethod.create(payload);
-                if (response.data) {
+                if (response.payload) {
                     const formattedMethod = {
-                        ...response.data,
-                        id: response.data.id || response.data._id,
-                        affiliateId: response.data.affiliateId.toString(),
-                        createdAt: new Date(response.data.createdAt).toISOString(),
-                        updatedAt: new Date(response.data.updatedAt).toISOString(),
+                        ...response.payload,
+                        id: response.payload.id || response.payload._id,
+                        affiliateId: response.payload.affiliateId.toString(),
+                        createdAt: new Date(response.payload.createdAt).toISOString(),
+                        updatedAt: new Date(response.payload.updatedAt).toISOString(),
                     };
                     setCurrentPaymentMethods((prev) => [...prev, formattedMethod as IAffiliatePaymentMethod]);
                     toast({
@@ -239,7 +239,7 @@ const BillingPageContent = () => {
                     <Button
                         variant="outline"
                         onClick={() => {
-                             // Chỉ cập nhật state, useEffect sẽ xử lý cập nhật URL
+                            // Chỉ cập nhật state, useEffect sẽ xử lý cập nhật URL
                             setActiveTab("invoices");
                         }}
                     >
@@ -296,7 +296,7 @@ const BillingPageContent = () => {
             </div>
             <Tabs
                 value={activeTab}
-                 // Khi giá trị tab thay đổi, chỉ cập nhật state activeTab
+                // Khi giá trị tab thay đổi, chỉ cập nhật state activeTab
                 onValueChange={(value) => {
                     setActiveTab(value);
                 }}

@@ -90,11 +90,11 @@ export default function CheckoutPage() {
     const fetchProduct = async () => {
       try {
         const response = await apiProducts.getById(productId);
-        if (response && response.data) {
-          setProduct(response.data);
+        if (response && response.payload) {
+          setProduct(response.payload);
           setFormData((prev) => ({
             ...prev,
-            note: `${prev.fullName} - ${prev.phone} - ${response.data.name}`,
+            note: `${prev.fullName} - ${prev.phone} - ${response.payload.name}`,
           }));
         } else {
           throw new Error("Không tìm thấy sản phẩm");
@@ -177,7 +177,7 @@ export default function CheckoutPage() {
           title: "Thành công",
           description: "Đơn hàng của bạn đã được tạo thành công!",
         });
-        const linkthanhtoan = orderResponse.data.linkthanhtoan;
+        const linkthanhtoan = orderResponse.payload.linkthanhtoan;
         if (linkthanhtoan) {
           router.push(linkthanhtoan);
         } else {

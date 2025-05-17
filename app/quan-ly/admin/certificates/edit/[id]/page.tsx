@@ -16,8 +16,8 @@ export default function EditCertificatePage() {
         const fetchData = async () => {
             try {
                 const res = await apiCertificates.getById(_id);
-                if (res && res.data) {
-                    setForm(res.data);
+                if (res && res.payload) {
+                    setForm(res.payload);
                 } else {
                     setError("Không tìm thấy chứng chỉ");
                 }

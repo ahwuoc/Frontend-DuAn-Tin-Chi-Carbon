@@ -8,6 +8,7 @@ import { LoadingScreen } from "@/components/ui/LoadingScreen"
 export default function ForestExplorer() {
   const [contributors, setContributors] = useState([])
   const [loading, setLoading] = useState(true)
+
   useEffect(() => {
     async function loadData() {
       try {
@@ -19,11 +20,13 @@ export default function ForestExplorer() {
         setLoading(false)
       }
     }
+
     loadData()
   }, [])
 
   if (loading) {
     return <LoadingScreen />
   }
+
   return <TropicalForest contributors={contributors} />
 }

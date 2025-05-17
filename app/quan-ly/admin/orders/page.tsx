@@ -54,8 +54,8 @@ export default function AdminOrdersPage() {
       setError(null);
       try {
         const response = await apiOrders.getAll();
-        if (response && response?.data) {
-          setOrders(response.data);
+        if (response && response?.payload) {
+          setOrders(response.payload);
         } else {
           throw new Error("Không lấy được danh sách đơn hàng");
         }

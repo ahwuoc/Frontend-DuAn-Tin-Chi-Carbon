@@ -53,10 +53,10 @@ export default function CarbonCreditCertificatesPage() {
                 return;
             }
             const product = await apiProducts.getById(productId);
-            if (product?.data?.certificates && Array.isArray(product.data.certificates)) {
-                setCertificates(product.data.certificates);
+            if (product?.payload?.certificates && Array.isArray(product.payload.certificates)) {
+                setCertificates(product.payload.certificates);
             } else {
-                console.warn("Certificates data not found or not an array in API response:", product?.data?.certificates);
+                console.warn("Certificates data not found or not an array in API response:", product?.payload?.certificates);
                 setCertificates([]);
             }
 

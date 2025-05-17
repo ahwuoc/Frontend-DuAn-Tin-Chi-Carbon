@@ -37,8 +37,8 @@ export default function NewsPage() {
       setLoading(true);
       try {
         const response = await apiNews.getAll();
-        if (response?.data) {
-          setNews(response.data.data);
+        if (response?.payload) {
+          setNews(response.payload.data);
         } else {
           throw new Error("Không lấy được danh sách tin tức");
         }

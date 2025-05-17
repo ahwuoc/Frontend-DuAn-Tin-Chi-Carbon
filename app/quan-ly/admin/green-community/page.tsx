@@ -37,8 +37,8 @@ export default function AdminDonationsPage() {
         setError(null);
         try {
             const response = await apiDonation.getInfor();
-            if (response?.data) {
-                const { donations, totalQuantity, contributorCount } = response.data
+            if (response?.payload) {
+                const { donations, totalQuantity, contributorCount } = response.payload
                 setDonations(donations);
                 setTotalQuantity(totalQuantity);
                 setContributorCount(contributorCount);

@@ -56,9 +56,9 @@ export default function OrderDrawer({
     try {
       if (selectedOrder?._id) {
         const res = await apiOrders.update(selectedOrder._id, formData);
-        if (res?.status === 200 && res.data) {
+        if (res?.status === 200 && res.payload) {
           setOrders((prev = []) =>
-            prev.map((o) => (o._id === selectedOrder._id ? (res.data as IOrder) : o))
+            prev.map((o) => (o._id === selectedOrder._id ? (res.payload as IOrder) : o))
           );
 
           toast({
@@ -71,8 +71,8 @@ export default function OrderDrawer({
       } else {
         // Tạo mới đơn hàng thì add mới vào array, ko phải map
         const res = await apiOrders.createOrder(formData);
-        if (res.status === 200 && res.data) {
-          setOrders((prev) => [...prev, res.data as IOrder]); // push item mới
+        if (res.status === 200 && res.payload) {
+          setOrders((prev) => [...prev, res.payload as IOrder]); // push item mới
 
           toast({
             title: "Thành công",

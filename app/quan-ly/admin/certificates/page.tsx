@@ -12,8 +12,8 @@ export default function CertificatesPage() {
         const fetchCertificate = async () => {
             try {
                 const response = await apiCertificates.getAll();
-                if (response && response.data) {
-                    setCertificates(response.data);
+                if (response && response.payload) {
+                    setCertificates(response.payload);
                 } else {
                     setError("Không có dữ liệu");
                 }

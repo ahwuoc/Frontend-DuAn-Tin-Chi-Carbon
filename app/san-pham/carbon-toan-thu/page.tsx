@@ -50,8 +50,8 @@ export default function CarbonToanThuPage() {
   useEffect(() => {
     const fetchFreeProduct = async () => {
       const response = await HTTP.GET<any>("/products/free/trial");
-      if (response && response.data) {
-        setFreeProduct(response.data);
+      if (response && response.payload) {
+        setFreeProduct(response.payload);
       }
     };
     fetchFreeProduct();

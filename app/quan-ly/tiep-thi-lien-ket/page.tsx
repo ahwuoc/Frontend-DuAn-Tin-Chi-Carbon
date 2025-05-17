@@ -19,8 +19,8 @@ export default function AffiliateManager() {
           return;
         }
         const response = await apiAffiliates.getByUserId(user.userId);
-        if (response?.data) {
-          setAffiliateData(response.data.affiliate);
+        if (response?.payload) {
+          setAffiliateData(response.payload.affiliate);
         }
       } catch (error) {
         console.error("Failed to fetch affiliate:", error);

@@ -136,16 +136,16 @@ export default function DashboardSidebar() {
       icon: <MessageSquareText className="w-5 h-5" />,
       href: "/quan-ly/admin/consultations",
     },
-    {
-      title: language === "vi" ? "Quản lý dụ án chứng chỉ" : "Consulting",
-      icon: <MessageSquareText className="w-5 h-5" />,
-      href: "/quan-ly/admin/certificates",
-    },
-    {
-      title: language === "vi" ? "Quản lý dụ án carboncredits" : "Consulting",
-      icon: <MessageSquareText className="w-5 h-5" />,
-      href: "/quan-ly/admin/carboncredits",
-    },
+    // {
+    //   title: language === "vi" ? "Quản lý dụ án chứng chỉ" : "Consulting",
+    //   icon: <MessageSquareText className="w-5 h-5" />,
+    //   href: "/quan-ly/admin/certificates",
+    // },
+    // {
+    //   title: language === "vi" ? "Quản lý dụ án carboncredits" : "Consulting",
+    //   icon: <MessageSquareText className="w-5 h-5" />,
+    //   href: "/quan-ly/admin/carboncredits",
+    // },
 
   ];
   const isActive = (href: string) => pathname === href;

@@ -103,23 +103,23 @@ export default function ViewCarbonCreditPage() {
             }
             try {
                 const res = await apiProducts.getById(id as string);
-                if (res?.data) {
-                    setCarbonCredit(res.data);
+                if (res?.payload) {
+                    setCarbonCredit(res.payload);
                     setEditedCarbonCredit({
-                        _id: res.data._id,
-                        name: res.data.name || "",
-                        description: res.data.description || "",
-                        projectLocation: res.data.projectLocation || res.data.location || "",
-                        price: res.data.price,
-                        carbonAmount: res.data.carbonAmount || res.data.amount,
-                        carbonUsed: res.data.carbonUsed,
-                        status: res.data.status || "",
-                        purchaseDate: res.data.purchaseDate ? new Date(res.data.purchaseDate).toISOString().split('T')[0] : "",
-                        expiryDate: res.data.expiryDate ? new Date(res.data.expiryDate).toISOString().split('T')[0] : "",
-                        verificationStandard: res.data.verificationStandard || "",
-                        subscriptionTier: res.data.subscriptionTier || "",
-                        issuer: res.data.issuer || "",
-                        billingCycle: res.data.billingCycle || "",
+                        _id: res.payload._id,
+                        name: res.payload.name || "",
+                        description: res.payload.description || "",
+                        projectLocation: res.payload.projectLocation || res.payload.location || "",
+                        price: res.payload.price,
+                        carbonAmount: res.payload.carbonAmount || res.payload.amount,
+                        carbonUsed: res.payload.carbonUsed,
+                        status: res.payload.status || "",
+                        purchaseDate: res.payload.purchaseDate ? new Date(res.payload.purchaseDate).toISOString().split('T')[0] : "",
+                        expiryDate: res.payload.expiryDate ? new Date(res.payload.expiryDate).toISOString().split('T')[0] : "",
+                        verificationStandard: res.payload.verificationStandard || "",
+                        subscriptionTier: res.payload.subscriptionTier || "",
+                        issuer: res.payload.issuer || "",
+                        billingCycle: res.payload.billingCycle || "",
                     });
                     setHasChanges(false);
                 } else {
@@ -179,23 +179,23 @@ export default function ViewCarbonCreditPage() {
 
         try {
             const res = await apiProducts.updateProduct(id as string, editedCarbonCredit);
-            if (res?.data) {
-                setCarbonCredit(res.data);
+            if (res?.payload) {
+                setCarbonCredit(res.payload);
                 setEditedCarbonCredit({
-                    _id: res.data._id,
-                    name: res.data.name || "",
-                    description: res.data.description || "",
-                    projectLocation: res.data.projectLocation || res.data.location || "",
-                    price: res.data.price,
-                    carbonAmount: res.data.carbonAmount || res.data.amount,
-                    carbonUsed: res.data.carbonUsed,
-                    status: res.data.status || "",
-                    purchaseDate: res.data.purchaseDate ? new Date(res.data.purchaseDate).toISOString().split('T')[0] : "",
-                    expiryDate: res.data.expiryDate ? new Date(res.data.expiryDate).toISOString().split('T')[0] : "",
-                    verificationStandard: res.data.verificationStandard || "",
-                    subscriptionTier: res.data.subscriptionTier || "",
-                    issuer: res.data.issuer || "",
-                    billingCycle: res.data.billingCycle || "",
+                    _id: res.payload._id,
+                    name: res.payload.name || "",
+                    description: res.payload.description || "",
+                    projectLocation: res.payload.projectLocation || res.payload.location || "",
+                    price: res.payload.price,
+                    carbonAmount: res.payload.carbonAmount || res.payload.amount,
+                    carbonUsed: res.payload.carbonUsed,
+                    status: res.payload.status || "",
+                    purchaseDate: res.payload.purchaseDate ? new Date(res.payload.purchaseDate).toISOString().split('T')[0] : "",
+                    expiryDate: res.payload.expiryDate ? new Date(res.payload.expiryDate).toISOString().split('T')[0] : "",
+                    verificationStandard: res.payload.verificationStandard || "",
+                    subscriptionTier: res.payload.subscriptionTier || "",
+                    issuer: res.payload.issuer || "",
+                    billingCycle: res.payload.billingCycle || "",
                 });
                 setHasChanges(false);
                 console.log("Lưu dữ liệu thành công!");

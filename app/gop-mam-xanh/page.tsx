@@ -33,11 +33,11 @@ export default function GopMamXanhPage() {
     setForestStats((prev) => ({ ...prev, isLoading: true }));
     try {
       const response = await apiDonation.getInfor();
-      if (response.status === 200 && response.data) {
+      if (response.status === 200 && response.payload) {
         setForestStats({
-          treeCount: response.data.totalQuantity ?? 0,
-          contributorCount: response.data.contributorCount ?? 0,
-          co2Reduction: (response.data.totalQuantity ?? 0) * 21,
+          treeCount: response.payload.totalQuantity ?? 0,
+          contributorCount: response.payload.contributorCount ?? 0,
+          co2Reduction: (response.payload.totalQuantity ?? 0) * 21,
           isLoading: false,
         });
       } else {
@@ -570,11 +570,10 @@ export default function GopMamXanhPage() {
               <div
                 className="bg-green-600 h-4 rounded-full transition-all duration-500 ease-in-out"
                 style={{
-                  width: `${
-                    forestStats.isLoading
+                  width: `${forestStats.isLoading
                       ? 0
                       : (forestStats.treeCount / 10000) * 100
-                  }%`,
+                    }%`,
                 }}
               ></div>
             </div>
@@ -660,11 +659,10 @@ export default function GopMamXanhPage() {
                           <nav className="flex -mb-px" aria-label="Tabs">
                             <button
                               onClick={() => setActiveTab("video")}
-                              className={`py-2 px-4 text-center border-b-2 font-medium text-sm flex-1 ${
-                                activeTab === "video"
+                              className={`py-2 px-4 text-center border-b-2 font-medium text-sm flex-1 ${activeTab === "video"
                                   ? "border-green-500 text-green-600"
                                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                              }`}
+                                }`}
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -690,11 +688,10 @@ export default function GopMamXanhPage() {
                             </button>
                             <button
                               onClick={() => setActiveTab("image")}
-                              className={`py-2 px-4 text-center border-b-2 font-medium text-sm flex-1 ${
-                                activeTab === "image"
+                              className={`py-2 px-4 text-center border-b-2 font-medium text-sm flex-1 ${activeTab === "image"
                                   ? "border-green-500 text-green-600"
                                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                              }`}
+                                }`}
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"

@@ -49,9 +49,7 @@ export default function PlantPage() {
 
     try {
       setPlanting(true)
-
       if (activeTab === "new") {
-        // Thêm người đóng góp mới
         const response = await fetch("/api/contributors", {
           method: "POST",
           headers: {
@@ -66,17 +64,11 @@ export default function PlantPage() {
         if (!response.ok) {
           throw new Error("Failed to add contributor")
         }
-
         const newContributor = await response.json()
         formData.contributorId = newContributor.id
       }
-
-      // Thêm cây mới
       await addTree(formData.treeType, { x: formData.x, y: 0, z: formData.z }, formData.contributorId)
-
       setSuccess(true)
-
-      // Reset form sau 3 giây
       setTimeout(() => {
         setSuccess(false)
         setFormData({

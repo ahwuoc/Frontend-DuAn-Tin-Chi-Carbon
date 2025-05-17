@@ -146,7 +146,7 @@ export default function CertificateGenerator({
       console.error("Lỗi tạo chứng nhận hình ảnh:", err);
       setError(
         "Lỗi khi tạo chứng nhận hình ảnh: " +
-          (err instanceof Error ? err.message : String(err)),
+        (err instanceof Error ? err.message : String(err)),
       );
     }
   };
@@ -225,7 +225,7 @@ export default function CertificateGenerator({
             mimeType: "video/webm; codecs=vp8",
             videoBitsPerSecond: 5000000,
           };
-        } catch (e2) {}
+        } catch (e2) { }
       }
 
       let mediaRecorder;
@@ -341,7 +341,7 @@ export default function CertificateGenerator({
       console.error("Lỗi tạo chứng nhận video:", err);
       setError(
         "Lỗi khi tạo chứng nhận video: " +
-          (err instanceof Error ? err.message : String(err)),
+        (err instanceof Error ? err.message : String(err)),
       );
       setIsGeneratingVideo(false);
 

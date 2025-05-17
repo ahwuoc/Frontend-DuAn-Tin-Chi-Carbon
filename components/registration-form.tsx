@@ -172,7 +172,7 @@ export default function RegistrationForm() {
     setIsSubmitting(true);
     try {
       const response = await apiConsultation.registerConsultation({ formData });
-      if (response.status === 200 && response.data) {
+      if (response.status === 200 && response.payload) {
         setIsSuccess(true);
         setShowConfetti(true);
 
@@ -219,7 +219,7 @@ export default function RegistrationForm() {
       } else {
         toast({
           title: "Gửi thất bại",
-          description: response.data?.error || "Gửi thất bại, vui lòng thử lại sau!",
+          description: response.payload?.error || "Gửi thất bại, vui lòng thử lại sau!",
           variant: "destructive",
         });
       }

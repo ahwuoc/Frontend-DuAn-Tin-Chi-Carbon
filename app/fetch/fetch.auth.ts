@@ -41,13 +41,16 @@ const apiAuth = {
   login: async (body: Record<string, any>): Promise<TLoginResponse> => {
     const httpResponse = await HTTP.POST<TLoginResponse>("/login", { body });
     if (
-      httpResponse.data &&
-      httpResponse.data.success &&
-      httpResponse.data.token
+      httpResponse.payload &&
+      httpResponse.payload.success &&
+      httpResponse.payload.token
     ) {
-      Cookies.set("token", httpResponse.data.token, { expires: 7, path: "/" });
+      Cookies.set("token", httpResponse.payload.token, {
+        expires: 7,
+        path: "/",
+      });
     }
-    return httpResponse.data;
+    return httpResponse.payload;
   },
   createUser: (body: any) => HTTP.POST<any>("/register", { body }),
   updateUser: async (id: string, body: any) =>
@@ -55,14 +58,14 @@ const apiAuth = {
   logout: async (): Promise<TLogoutResponse> => {
     const httpResponse = await HTTP.POST<TLogoutResponse>("/logout");
     Cookies.remove("token", { path: "/" });
-    return httpResponse.data;
+    return httpResponse.payload;
   },
   getAll: async () => await HTTP.GET<any>("/users"),
   register: async (body: Record<string, any>): Promise<TRegisterResponse> => {
     const httpResponse = await HTTP.POST<TRegisterResponse>("/register", {
       body,
     });
-    return httpResponse.data;
+    return httpResponse.payload;
   },
   deleteUser: (id: string) => HTTP.DELETE<any>(`/user${id}`),
   update: async (body: Record<string, any>): Promise<TUpdateResponse> => {
@@ -79,7 +82,7 @@ const apiAuth = {
       "/users/update",
       requestOptions
     );
-    return httpResponse.data;
+    return httpResponse.payload;
   },
 };
 

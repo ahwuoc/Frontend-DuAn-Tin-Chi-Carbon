@@ -114,9 +114,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (!currentUser) return null;
             return {
               ...currentUser,
-              projects: projectRes?.data?.project || [],
-              products: orderRes?.data?.orders || [],
-              orders: orderRes.data.orders || []
+              projects: projectRes?.payload?.project || [],
+              products: orderRes?.payload?.orders || [],
+              orders: orderRes.payload.orders || []
             };
           });
         } catch (err) {

@@ -89,8 +89,8 @@ export default function NewsFormPage() {
             const fetchNews = async () => {
                 try {
                     const response = await apiNews.getById(newsId);
-                    if (response && response.data) {
-                        const newsData = response.data.data;
+                    if (response && response.payload) {
+                        const newsData = response.payload.data;
                         setFormData({
                             ...newsData[0],
                             tags: newsData[0]?.tags ?? [],

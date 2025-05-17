@@ -14,8 +14,8 @@ export default function CarbonCreditsPage() {
         const fetchCarbonCredits = async () => {
             try {
                 const response = await apiCarbonCredits.getAll();
-                if (response && response.data) {
-                    const formatted = response.data.map((item: any) => ({
+                if (response && response.payload) {
+                    const formatted = response.payload.map((item: any) => ({
                         ...item,
                         id: item._id,
                     }));

@@ -13,7 +13,7 @@ export const PricingSection: FC = () => {
         const response = await apiProducts.getProducts(
           "international_certificates",
         );
-        setProducts(response.data);
+        setProducts(response.payload);
       } catch (error) {
         console.error("Error fetching products:", error);
       }

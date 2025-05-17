@@ -113,11 +113,11 @@ export default function DonationDrawer({
             const payload = { ...formData };
             if (selectedDonation?._id) {
                 const res = await apiDonation.updateDonation(selectedDonation._id, payload);
-                if (res?.data) {
-                    const updated = res.data as IDonation;
+                if (res?.payload) {
+                    const updated = res.payload as IDonation;
                     setDonations((prev: any[]) =>
                         Array.isArray(prev)
-                            ? prev.map((d) => (d._id === selectedDonation._id ? res.data : d))
+                            ? prev.map((d) => (d._id === selectedDonation._id ? res.payload : d))
                             : prev
                     );
                     toast({
@@ -129,8 +129,8 @@ export default function DonationDrawer({
                 }
             } else {
                 const res = await apiDonation.addDonate(payload);
-                if (res?.data) {
-                    setDonations((prev) => [...prev, res.data.savedDonation]);
+                if (res?.payload) {
+                    setDonations((prev) => [...prev, res.payload.savedDonation]);
                     toast({
                         title: "Thành công",
                         description: "Thêm thông tin đóng góp mới thành công!",

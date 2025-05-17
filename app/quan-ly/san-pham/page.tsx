@@ -50,7 +50,7 @@ export default function ProductsManagementPage() {
         }
         const response = await apiOrders.getOrderByUser(user.userId);
         if (response.status === 200) {
-          const { orders = [], products = [] } = response.data ?? {};
+          const { orders = [], products = [] } = response.payload ?? {};
           setOrders(orders);
           setProducts(products.length > 0 ? products : userProducts);
           setPendingOrders(

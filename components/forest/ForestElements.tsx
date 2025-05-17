@@ -160,18 +160,12 @@ export function ForestElements({
       storePositions(treePositions)
     }
   }, [treePositions, storePositions])
-
-  // Tối ưu hóa ForestElements để giảm số lượng đối tượng
-
-  // Giảm số lượng điểm trên đường mòn và điều chỉnh để nằm trong bản đồ mới
   const pathPoints = useMemo(() => {
     const points = []
     for (let i = 0; i < 6; i++) {
       // Giảm từ 10 xuống 6
       const angle = (i / 6) * Math.PI * 2
       const radius = 15 + Math.sin(i * 0.5) * 5
-
-      // Đảm bảo đường mòn nằm trong bản đồ
       if (radius < 65) {
         points.push([Math.cos(angle) * radius, -0.4, Math.sin(angle) * radius])
       }

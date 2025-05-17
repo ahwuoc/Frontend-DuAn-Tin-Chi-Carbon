@@ -79,8 +79,8 @@ export default function ProjectsList() {
   useEffect(() => {
     const getlistProject = async () => {
       const response = await apiProjects.getAll();
-      if (response && response.data) {
-        setProjects(response.data);
+      if (response && response.payload) {
+        setProjects(response.payload);
       }
     };
     getlistProject();

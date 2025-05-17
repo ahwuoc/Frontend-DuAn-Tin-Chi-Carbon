@@ -44,9 +44,8 @@ export default function DonationForm({
     accountNumber: "686820248888",
     bank: "MB Bank",
     branch: "Chi nhánh Hà Nội",
-    content: `GOP XANH - ${formData.name || ""} - ${formData.quantity}${
-      formData.note ? ` - NOTE: ${formData.note}` : ""
-    }`.trim(),
+    content: `GOP XANH - ${formData.name || ""} - ${formData.quantity}${formData.note ? ` - NOTE: ${formData.note}` : ""
+      }`.trim(),
   };
 
   const validate = () => {
@@ -81,7 +80,7 @@ export default function DonationForm({
         bankInfo,
       };
       const response = await apiDonation.addDonate(data);
-      if (response && response.data) {
+      if (response && response.payload) {
         toast({
           title: "Lỗi!",
           description: "Có lỗi xảy ra, thử lại sau nhé!",
@@ -139,9 +138,8 @@ export default function DonationForm({
               id="name"
               value={formData.name}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-md ${
-                errors.name ? "border-red-500" : "border-gray-300"
-              } focus:outline-none focus:ring-2 focus:ring-green-500`}
+              className={`w-full px-3 py-2 border rounded-md ${errors.name ? "border-red-500" : "border-gray-300"
+                } focus:outline-none focus:ring-2 focus:ring-green-500`}
               placeholder="Nhập họ và tên của bạn"
             />
             {errors.name && (
@@ -161,9 +159,8 @@ export default function DonationForm({
               id="email"
               value={formData.email}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-md ${
-                errors.email ? "border-red-500" : "border-gray-300"
-              } focus:outline-none focus:ring-2 focus:ring-green-500`}
+              className={`w-full px-3 py-2 border rounded-md ${errors.email ? "border-red-500" : "border-gray-300"
+                } focus:outline-none focus:ring-2 focus:ring-green-500`}
               placeholder="Nhập email của bạn"
             />
             {errors.email && (
@@ -183,9 +180,8 @@ export default function DonationForm({
               id="phone"
               value={formData.phone}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-md ${
-                errors.phone ? "border-red-500" : "border-gray-300"
-              } focus:outline-none focus:ring-2 focus:ring-green-500`}
+              className={`w-full px-3 py-2 border rounded-md ${errors.phone ? "border-red-500" : "border-gray-300"
+                } focus:outline-none focus:ring-2 focus:ring-green-500`}
               placeholder="Nhập số điện thoại của bạn"
             />
             {errors.phone && (

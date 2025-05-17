@@ -31,12 +31,11 @@ export function InfoPanel({
 }: InfoPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Tính tổng số cây từ quantity (thay vì trees)
+
   const totalContributed = contributors.reduce(
     (sum, contributor) => sum + contributor.quantity,
     0,
   );
-
   return (
     <div className="absolute top-20 right-4 w-80 bg-white/90 backdrop-blur-md p-5 rounded-xl shadow-xl z-10 border border-emerald-100">
       <div className="flex justify-between items-center mb-4">

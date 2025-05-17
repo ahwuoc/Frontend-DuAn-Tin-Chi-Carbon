@@ -103,7 +103,7 @@ export default function ProjectDetailPage() {
       setLoading(true);
       const response = await apiProjects.getProject(id);
       if (response.status === 200) {
-        setProject(response.data as IProject);
+        setProject(response.payload as IProject);
       } else {
         setProject(null);
       }

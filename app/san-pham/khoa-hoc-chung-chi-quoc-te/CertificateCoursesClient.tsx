@@ -27,8 +27,8 @@ export default function CertificateCoursesClient() {
         const response = await apiProducts.getProducts(
           "international_certificates",
         );
-        if (response?.data) {
-          setProducts(response.data);
+        if (response?.payload) {
+          setProducts(response.payload);
         }
       } catch (error: any) {
         console.error("Lỗi khi fetch product:", error);

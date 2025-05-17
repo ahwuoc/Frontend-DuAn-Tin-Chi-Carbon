@@ -47,8 +47,8 @@ export default function AdminAffiliatesPage() {
       setError(null);
       try {
         const response = await apiAffiliates.getAll();
-        if (response && response?.data) {
-          setAffiliates(response.data.affiliates);
+        if (response && response?.payload) {
+          setAffiliates(response.payload.affiliates);
         } else {
           throw new Error("Không lấy được danh sách affiliates");
         }

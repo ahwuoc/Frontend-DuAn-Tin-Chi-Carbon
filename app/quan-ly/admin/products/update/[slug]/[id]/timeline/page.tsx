@@ -63,11 +63,11 @@ export default function CarbonCreditTimelinePage() {
             }
             try {
                 const product = await apiProducts.getById(id as string);
-                if (product?.data?.timeline && Array.isArray(product.data.timeline)) {
-                    const sortedTimeline = product.data.timeline.sort((a: TimelineEvent, b: TimelineEvent) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                if (product?.payload?.timeline && Array.isArray(product.payload.timeline)) {
+                    const sortedTimeline = product.payload.timeline.sort((a: TimelineEvent, b: TimelineEvent) => new Date(a.date).getTime() - new Date(b.date).getTime());
                     setTimeline(sortedTimeline);
                 } else {
-                    console.warn("Timeline data not found or not an array in API response:", product?.data?.timeline);
+                    console.warn("Timeline data not found or not an array in API response:", product?.payload?.timeline);
                     setTimeline([]);
                 }
             } catch (err) {
@@ -105,11 +105,11 @@ export default function CarbonCreditTimelinePage() {
         try {
             const apiResponse = await apiProducts.updatetimeline(id as string, { timeline: updatedTimelineOptimistic });
 
-            if (apiResponse?.data?.timeline && Array.isArray(apiResponse.data.timeline)) {
-                const sortedTimeline = apiResponse.data.timeline.sort((a: TimelineEvent, b: TimelineEvent) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            if (apiResponse?.payload?.timeline && Array.isArray(apiResponse.payload.timeline)) {
+                const sortedTimeline = apiResponse.payload.timeline.sort((a: TimelineEvent, b: TimelineEvent) => new Date(a.date).getTime() - new Date(b.date).getTime());
                 setTimeline(sortedTimeline);
             } else {
-                console.error("API response for update (add) is invalid:", apiResponse?.data);
+                console.error("API response for update (add) is invalid:", apiResponse?.payload);
                 setError("Cập nhật thành công nhưng dữ liệu trả về không hợp lệ. Vui lòng tải lại trang.");
                 setTimeline(updatedTimelineOptimistic);
             }
@@ -140,11 +140,11 @@ export default function CarbonCreditTimelinePage() {
         try {
             const apiResponse = await apiProducts.updatetimeline(id as string, { timeline: updatedTimelineOptimistic });
 
-            if (apiResponse?.data?.timeline && Array.isArray(apiResponse.data.timeline)) {
-                const sortedTimeline = apiResponse.data.timeline.sort((a: TimelineEvent, b: TimelineEvent) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            if (apiResponse?.payload?.timeline && Array.isArray(apiResponse.payload.timeline)) {
+                const sortedTimeline = apiResponse.payload.timeline.sort((a: TimelineEvent, b: TimelineEvent) => new Date(a.date).getTime() - new Date(b.date).getTime());
                 setTimeline(sortedTimeline);
             } else {
-                console.error("API response for update (delete) is invalid:", apiResponse?.data);
+                console.error("API response for update (delete) is invalid:", apiResponse?.payload);
                 setError("Xóa sự kiện thành công nhưng dữ liệu trả về không hợp lệ. Vui lòng tải lại trang.");
                 setTimeline(updatedTimelineOptimistic);
             }
