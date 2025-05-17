@@ -150,7 +150,7 @@ export default function NewsPage() {
                     </div>
                     <div className="flex items-center">
                       <User className="h-4 w-4 mr-2" />
-                      <span>{featuredNews.userId.name}</span>
+                      0
                     </div>
                   </div>
                   <h2 className="text-3xl font-bold mb-4 text-gray-800">
@@ -191,7 +191,7 @@ export default function NewsPage() {
                         </div>
                         <div className="flex items-center">
                           <User className="h-3 w-3 mr-1" />
-                          <span>{newsItem.userId?.name || t("admin")}</span>
+                          <span>Admun</span>
                         </div>
                       </div>
                       <CardTitle className="text-xl">
