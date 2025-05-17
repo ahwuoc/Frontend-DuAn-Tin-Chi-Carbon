@@ -1,6 +1,10 @@
 import HTTP from "../common/http";
+interface userId {
+  _id: string;
+  name: string;
+}
 export interface INews extends Document {
-  userId?: string;
+  userId?: userId;
   _id: string;
   title: string;
   content: string;

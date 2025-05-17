@@ -1,5 +1,4 @@
 "use client";
-
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,7 +21,6 @@ export default function NewsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Xử lý video background
   useEffect(() => {
     const preloadedVideo = document.querySelector(
       'video[data-preloaded="true"]',
@@ -34,8 +32,6 @@ export default function NewsPage() {
       });
     }
   }, []);
-
-  // Gọi API để lấy dữ liệu tin tức
   useEffect(() => {
     const fetchNews = async () => {
       setLoading(true);
@@ -56,7 +52,6 @@ export default function NewsPage() {
     fetchNews();
   }, []);
 
-  // Hàm định dạng ngày tháng dựa trên ngôn ngữ
   const formatDate = (dateString: Date) => {
     const date = new Date(dateString);
     const locale = language === "en" ? "en-US" : "vi-VN";
@@ -81,11 +76,10 @@ export default function NewsPage() {
       </div>
     );
   }
-
-  // Phân loại dữ liệu cho các phần khác nhau
-  const featuredNews = news[0]; // Tin nổi bật
-  const gridNews = news.slice(1, 7); // Lưới tin tức (6 tin)
-  const recentPosts = news.slice(0, 4); // Bài viết gần đây (4 tin)
+  const hasNews = news.length > 0;
+  const featuredNews = hasNews ? news[0] : null;
+  const gridNews = hasNews ? news.slice(1, 7) : [];
+  const recentPosts = hasNews ? news.slice(0, 4) : [];
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -156,7 +150,7 @@ export default function NewsPage() {
                     </div>
                     <div className="flex items-center">
                       <User className="h-4 w-4 mr-2" />
-                      <span>{featuredNews.userId}</span>
+                      <span>{featuredNews.userId.name}</span>
                     </div>
                   </div>
                   <h2 className="text-3xl font-bold mb-4 text-gray-800">
@@ -173,7 +167,7 @@ export default function NewsPage() {
 
               {/* News Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {gridNews.map((newsItem: any, index) => (
+                {gridNews.length > 0 && gridNews.map((newsItem: any, index) => (
                   <Card
                     key={index}
                     className="hover:shadow-lg transition-shadow duration-300"
@@ -268,7 +262,7 @@ export default function NewsPage() {
                   {t("recent_posts")}
                 </h3>
                 <div className="space-y-4">
-                  {recentPosts.map((post, index) => (
+                  {recentPosts.length > 0 && recentPosts.map((post, index) => (
                     <div key={index} className="flex gap-4">
                       <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                         <Image
