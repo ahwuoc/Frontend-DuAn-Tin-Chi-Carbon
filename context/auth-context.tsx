@@ -155,14 +155,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!userData.email) return false;
       const response = await apiAuth.register(userData);
       if (!response.success) return false;
-      const storedUsers = localStorage.getItem("users");
-      const users = storedUsers ? JSON.parse(storedUsers) : {};
-      users[userData.email] = {
-        ...users[userData.email],
-        ...userData,
-        products: users[userData.email]?.products || [],
-        projects: users[userData.email]?.projects || [],
-      };
       return true;
     } catch (error) {
       return false;
