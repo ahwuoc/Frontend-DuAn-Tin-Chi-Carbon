@@ -58,7 +58,7 @@ export default function RegisterPage() {
         userType: 2, // Giá trị mặc định
       };
       const response = await apiAuth.register(userData);
-      if (response && response.success) {
+      if (response?.success) {
         toast({
           title: language === "vi" ? "Đăng ký thành công" : "Registration successful",
           description: `${language === "vi" ? "Chào mừng" : "Welcome"} ${userData.name}!`,
@@ -66,7 +66,7 @@ export default function RegisterPage() {
         });
         router.push("/dang-nhap");
       } else {
-        throw new Error("Registration failed");
+        throw new Error(response?.message || "Registration failed");
       }
     } catch (error: any) {
       toast({
