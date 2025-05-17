@@ -58,7 +58,7 @@ export default function RegisterPage() {
         userType: 2, // Giá trị mặc định
       };
       const response = await apiAuth.register(userData);
-      if (response && response.user) {
+      if (response && response.success) {
         toast({
           title: language === "vi" ? "Đăng ký thành công" : "Registration successful",
           description: `${language === "vi" ? "Chào mừng" : "Welcome"} ${userData.name}!`,
@@ -68,7 +68,6 @@ export default function RegisterPage() {
       } else {
         throw new Error("Registration failed");
       }
-
     } catch (error: any) {
       toast({
         title: language === "vi" ? "Đăng ký thất bại" : "Registration failed",
