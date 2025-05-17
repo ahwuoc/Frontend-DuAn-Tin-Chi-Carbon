@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import DashboardSidebar from "@/components/dashboard/sidebar";
 import UserDrawer from "./UserDrawer";
-
+import { formatDateUtil } from "../../../utils/common";
 export default function AdminUsersPage() {
   const { user } = useAuth();
   const router = useRouter();
@@ -57,7 +57,6 @@ export default function AdminUsersPage() {
         setLoading(false);
       }
     };
-
     fetchUsers();
   }, [router, user]);
 
@@ -77,14 +76,6 @@ export default function AdminUsersPage() {
     setIsUserDrawerOpen(true);
   };
 
-  const formatDate = (dateString: Date) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  };
 
   if (loading) {
     return (
@@ -148,7 +139,7 @@ export default function AdminUsersPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.map((user) => (
+                    {users.length > 0 && users.map((user) => (
                       <TableRow key={user._id}>
                         <TableCell className="font-medium">
                           {user.name || "N/A"}
@@ -159,7 +150,7 @@ export default function AdminUsersPage() {
                             ? "Quản trị viên"
                             : "Người dùng"}
                         </TableCell>
-                        <TableCell>{formatDate(user.createdAt)}</TableCell>
+                        <TableCell>{formatDateUtil(user.createdAt)}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
                             <Button
@@ -189,7 +180,6 @@ export default function AdminUsersPage() {
           </CardContent>
         </Card>
       </div>
-      {/* Drawer xử lý user (create/update/delete) */}
       <UserDrawer
         isOpen={isUserDrawerOpen}
         setIsOpen={setIsUserDrawerOpen}
