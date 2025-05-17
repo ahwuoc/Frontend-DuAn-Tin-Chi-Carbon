@@ -250,7 +250,7 @@ export default function CarbonCreditCertificatesPage() {
                                                                     className="text-blue-600 hover:text-blue-800 underline break-all"
                                                                     title={"Chứng chỉ"}
                                                                 >
-                                                                    {cert.url.length > 30 ? cert.url.slice(0, 30) + "..." : cert.url}
+                                                                    Tài liệu
                                                                 </a>
                                                             ) : (
                                                                 <span className="text-gray-500 italic">Không có file</span>
