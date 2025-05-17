@@ -28,17 +28,12 @@ export async function getContributors(): Promise<ProcessedContributorData[]> {
     }
 
     const donations = response.data.donations;
-
-    // Xử lý dữ liệu động: Tổng hợp từ các giao dịch thành { name, totalTrees }
-    // Sử dụng Map để nhóm, key có thể là email (ưu tiên) hoặc tên để đảm bảo duy nhất
     const dynamicAggregatedMap = new Map<
       string,
       { name: string; totalTrees: number }
     >();
 
     donations.forEach((donation: any) => {
-      // Sử dụng 'any' nếu bạn không định nghĩa interface BackendDonation
-      // Chọn key duy nhất: ưu tiên email, nếu không có email dùng tên. Chuẩn hóa về chữ thường.
       const key =
         donation.email && donation.email.trim() !== ""
           ? donation.email.trim().toLowerCase()
