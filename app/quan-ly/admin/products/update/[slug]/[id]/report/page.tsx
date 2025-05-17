@@ -235,18 +235,13 @@ export default function CarbonCreditReportsPage() {
 
     return (
         <div className="max-w-3xl mx-auto py-6 px-4">
-
             <h1 className="text-2xl font-bold mb-6 flex items-center">
                 <FileText className="mr-2 h-6 w-6" />
                 Danh sách báo cáo dự án #{id}
             </h1>
-
             {error && reports.length > 0 && <p className="text-red-500 mb-4">{error}</p>}
-
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                <Card className="md:col-span-1">
+            <div className="md:flex gap-6">
+                <Card className="md:w-1/2">
                     <CardHeader>
                         <CardTitle>Các báo cáo hiện có</CardTitle>
                         {reports.length === 0 && !loading && !error && (
@@ -301,7 +296,7 @@ export default function CarbonCreditReportsPage() {
                     </CardContent>
                 </Card>
 
-                <Card className="md:col-span-1">
+                <Card className="md:w[60%]">
                     <CardHeader>
                         <CardTitle>Thêm báo cáo mới</CardTitle>
                     </CardHeader>
