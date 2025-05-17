@@ -28,8 +28,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProductTabs } from "./components/product-tab";
-import { useAuth } from "../../../context/auth-context";
 import { apiOrders } from "../../fetch/fetch.order";
+import { getUserFromLocalStorage } from "../../utils/common";
 export default function ProductsManagementPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("all");
@@ -39,10 +39,10 @@ export default function ProductsManagementPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [pendingOrders, setPendingOrders] = useState<any[]>([]);
-  const { user } = useAuth();
-  useEffect(() => {
 
+  useEffect(() => {
     const fetchProductByUser = async () => {
+      const user = getUserFromLocalStorage();
       try {
         if (!user?.userId) {
           console.warn("No user ID found in localStorage");

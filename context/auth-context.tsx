@@ -173,21 +173,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         products: [],
         projects: [],
       };
-
       setUser(userData);
       setIsAuthenticated(true);
-      // Store token in cookie and user info in localStorage
-      setCookie("token", token, 7); // Store token in cookie for 7 days
-      localStorage.setItem("user", JSON.stringify({ // Store basic user info (without projects/products initially)
+      setCookie("token", token, 7);
+      localStorage.setItem("user", JSON.stringify({
         userId: decoded.userId,
         name: decoded.name,
         email: decoded.email,
         role: decoded.role,
-        phone: undefined, // These fields might need to be fetched from a /me endpoint
+        phone: undefined,
         address: undefined,
         avatar: undefined,
       }));
-
     } catch (error) {
       console.error("Error setting user from token:", error);
       logout(); // Log out if token is invalid or decoding fails
