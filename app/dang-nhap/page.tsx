@@ -239,7 +239,7 @@ export default function LoginPage() {
                       htmlFor="register"
                       className="ml-2 block text-sm text-blue-500"
                     >
-                      <Link href="/register">
+                      <Link href="/dang-ky">
                         Don't have an account?
                       </Link>
                     </Label>
