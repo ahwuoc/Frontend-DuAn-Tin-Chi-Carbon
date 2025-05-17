@@ -167,7 +167,7 @@ export default function CarbonCreditTimelinePage() {
 
 
     return (
-        <div className="max-w-3xl mx-auto py-6 px-4">
+        <div className="container mx-auto py-6 px-4">
 
             <h1 className="text-2xl font-bold mb-6 flex items-center">
                 <CalendarDays className="mr-2 h-6 w-6" />
