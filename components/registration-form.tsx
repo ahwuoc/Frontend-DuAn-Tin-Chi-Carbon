@@ -677,7 +677,7 @@ export default function RegistrationForm() {
 
         <ConfettiEffect isActive={showConfetti} />
       </form>
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      {/* <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="text-lg font-bold">
@@ -699,7 +699,7 @@ export default function RegistrationForm() {
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </>
   );
 }
