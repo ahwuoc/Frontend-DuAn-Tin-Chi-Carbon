@@ -18,8 +18,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
-import { Trash2 } from 'lucide-react';
-
+import { FileBadge, FileBadge2, Trash2 } from 'lucide-react';
 
 interface Certificate {
     id: string;
@@ -203,11 +202,11 @@ export default function CarbonCreditCertificatesPage() {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <h1 className="text-3xl font-extrabold text-gray-800 mb-8 border-b-2 border-purple-600 pb-4">
-                🎖️ Chứng chỉ dự án <span className="text-purple-700">{Array.isArray(id) ? id[0] : id}</span>
+        <div className="container mx-auto px-4 py-8 ">
+            <h1 className="text-3xl font-extrabold text-gray-800 mb-8 border-b-2 border-purple-600 pb-4 flex items-center gap-2">
+                <FileBadge2 className="w-8 h-8 text-purple-700" />
+                Chứng chỉ dự án <span className="text-purple-700">{Array.isArray(id) ? id[0] : id}</span>
             </h1>
-
             {isLoading ? (
                 <div className="text-center text-gray-600 text-lg">Đang tải chứng chỉ...</div>
             ) : error && certificates.length === 0 ? (
