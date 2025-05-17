@@ -82,7 +82,7 @@ export default function ProductsManagementPage() {
       (product.description?.toLowerCase() ?? "").includes(
         searchTerm.toLowerCase(),
       );
-    return matchesStatusTab || matchesTypeTab && matchesSearch;
+    return matchesStatusTab && matchesTypeTab && matchesSearch;
   });
   const pendingProducts = pendingOrders
     .map((order) => ({
