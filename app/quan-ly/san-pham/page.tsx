@@ -32,7 +32,6 @@ import { useAuth } from "../../../context/auth-context";
 import { apiOrders } from "../../fetch/fetch.order";
 export default function ProductsManagementPage() {
   const router = useRouter();
-  const [isClient, setIsClient] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [activeTypeTab, setActiveTypeTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -42,10 +41,9 @@ export default function ProductsManagementPage() {
   const [pendingOrders, setPendingOrders] = useState<any[]>([]);
   const { user } = useAuth();
   useEffect(() => {
-    setIsClient(true);
+
     const fetchProductByUser = async () => {
       try {
-
         if (!user?.userId) {
           console.warn("No user ID found in localStorage");
           return;
@@ -67,7 +65,6 @@ export default function ProductsManagementPage() {
     };
     fetchProductByUser();
   }, []);
-
   const filteredProducts = products.filter((product) => {
     const relatedOrder = orders.find(
       (order) => order.productId === product._id && order.status === "pending",
@@ -92,7 +89,7 @@ export default function ProductsManagementPage() {
       order,
       product: products.find((p) => p._id === order.productId),
     }))
-    .filter((item) => item.product); // Loại bỏ nếu không tìm thấy sản phẩm
+    .filter((item) => item.product);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
