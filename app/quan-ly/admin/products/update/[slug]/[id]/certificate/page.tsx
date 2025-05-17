@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-
+import { formatDateUtil } from "../../../../../../../utils/common";
 import {
     Table,
     TableBody,
@@ -30,19 +30,6 @@ interface Certificate {
 
 const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const uploadPreset = "my_unsigned_preset";
-
-const formatDate = (dateString: string | undefined): string => {
-    if (!dateString) return "N/A";
-    try {
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return "Invalid Date";
-        return date.toLocaleDateString("vi-VN");
-    } catch (e) {
-        console.error("Error formatting date:", e);
-        return "Invalid Date";
-    }
-};
-
 export default function CarbonCreditCertificatesPage() {
     const { id } = useParams();
     const [certificates, setCertificates] = useState<Certificate[]>([]);
@@ -253,7 +240,7 @@ export default function CarbonCreditCertificatesPage() {
                                                 {certificates.map((cert) => (
                                                     <TableRow key={cert.id}>
                                                         <TableCell className="font-medium">{cert.title}</TableCell>
-                                                        <TableCell>{cert.date}</TableCell>
+                                                        <TableCell> {formatDateUtil(cert.date)} </TableCell>
                                                         <TableCell>
                                                             {cert.url ? (
                                                                 <a
@@ -261,9 +248,9 @@ export default function CarbonCreditCertificatesPage() {
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
                                                                     className="text-blue-600 hover:text-blue-800 underline break-all"
-                                                                    title={cert.url}
+                                                                    title={"Chứng chỉ"}
                                                                 >
-                                                                    {cert.url.length > 30 ? cert.url.slice(0, 47) + "..." : cert.url}
+                                                                    {cert.url.length > 30 ? cert.url.slice(0, 30) + "..." : cert.url}
                                                                 </a>
                                                             ) : (
                                                                 <span className="text-gray-500 italic">Không có file</span>
