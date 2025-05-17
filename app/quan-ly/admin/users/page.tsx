@@ -139,7 +139,7 @@ export default function AdminUsersPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.length > 0 && users.map((user) => (
+                    {Array.isArray(user) && users.map((user) => (
                       <TableRow key={user._id}>
                         <TableCell className="font-medium">
                           {user.name || "N/A"}
