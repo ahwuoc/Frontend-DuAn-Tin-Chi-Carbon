@@ -57,10 +57,7 @@ const apiAuth = {
     Cookies.remove("token", { path: "/" });
     return httpResponse.data;
   },
-  getAll: async (): Promise<any[]> => {
-    const httpResponse = await HTTP.GET<TUser[]>("/users");
-    return httpResponse.data;
-  },
+  getAll: async () => await HTTP.GET<any>("/users"),
   register: async (body: Record<string, any>): Promise<TRegisterResponse> => {
     const httpResponse = await HTTP.POST<TRegisterResponse>("/register", {
       body,
