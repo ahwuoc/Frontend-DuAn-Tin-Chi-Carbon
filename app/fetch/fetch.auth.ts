@@ -64,7 +64,7 @@ const apiAuth = {
     });
     return httpResponse.data;
   },
-  deleteUser: (id: string) => HTTP.DELETE<any>("/user"),
+  deleteUser: (id: string) => HTTP.DELETE<any>(`/user${id}`),
   update: async (body: Record<string, any>): Promise<TUpdateResponse> => {
     const token = Cookies.get("token");
     const requestOptions: Parameters<typeof HTTP.PUT>[1] = { body };
