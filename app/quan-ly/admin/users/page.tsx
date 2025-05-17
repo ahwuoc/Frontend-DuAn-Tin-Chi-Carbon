@@ -46,13 +46,12 @@ export default function AdminUsersPage() {
       setError(null);
       try {
         const res = await apiAuth.getAll();
-        if (res && Array.isArray(res)) {
+        if (res && res.data) {
           setUsers(res.data.data);
         } else {
           throw new Error("Không lấy được danh sách người dùng");
         }
       } catch (err) {
-        console.error("Lỗi khi lấy dữ liệu user:", err);
         setError("Không thể tải danh sách người dùng. Vui lòng thử lại.");
       } finally {
         setLoading(false);
