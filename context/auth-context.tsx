@@ -154,8 +154,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       if (!userData.email) return false;
       const response = await apiAuth.register(userData);
-      if (!response.success) return false;
-      return true;
+      if (response.success) {
+        return true;
+      }
+      return false;
     } catch (error) {
       return false;
     }
@@ -163,8 +165,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const setUserFromToken = (token: string) => {
     try {
       const decoded = jwtDecode<TokenPayload>(token);
-      // Check token expiry if needed: if (decoded.exp * 1000 < Date.now()) { throw new Error("Token expired"); }
-
       const userData: User = {
         userId: decoded.userId, // Set userId from token
         name: decoded.name,
