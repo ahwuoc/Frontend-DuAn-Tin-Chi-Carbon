@@ -121,7 +121,7 @@ export default function GopMamXanhPage() {
                     forestStats.treeCount || 0
                   )}
                 </div>
-                <div className="text-sm text-gray-500 mt-1">Cây đã trồng</div>
+                <div className="text-sm text-gray-500 mt-1">Cây đã góp</div>
               </div>
               <div className="p-6 text-center border-b md:border-b-0 md:border-r border-emerald-100">
                 <div className="text-3xl font-bold text-emerald-600">
@@ -571,8 +571,8 @@ export default function GopMamXanhPage() {
                 className="bg-green-600 h-4 rounded-full transition-all duration-500 ease-in-out"
                 style={{
                   width: `${forestStats.isLoading
-                      ? 0
-                      : (forestStats.treeCount / 10000) * 100
+                    ? 0
+                    : (forestStats.treeCount / 10000) * 100
                     }%`,
                 }}
               ></div>
@@ -660,8 +660,8 @@ export default function GopMamXanhPage() {
                             <button
                               onClick={() => setActiveTab("video")}
                               className={`py-2 px-4 text-center border-b-2 font-medium text-sm flex-1 ${activeTab === "video"
-                                  ? "border-green-500 text-green-600"
-                                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                ? "border-green-500 text-green-600"
+                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                 }`}
                             >
                               <svg
@@ -689,8 +689,8 @@ export default function GopMamXanhPage() {
                             <button
                               onClick={() => setActiveTab("image")}
                               className={`py-2 px-4 text-center border-b-2 font-medium text-sm flex-1 ${activeTab === "image"
-                                  ? "border-green-500 text-green-600"
-                                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                ? "border-green-500 text-green-600"
+                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                 }`}
                             >
                               <svg

@@ -17,10 +17,15 @@ import { Maximize } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Contributor, ForestElement } from "@/lib/types"
 import { ElementTooltip } from "@/components/ui/ElementTooltip"
+import { apiDonation } from "../../app/fetch/fetch.donation"
 interface TropicalForestProps {
   contributors: Contributor[]
 }
-
+interface TotalStats {
+  totalQuantity: number;
+  totalTreeCount: number;
+  contributorCount: number;
+}
 export function TropicalForest({ contributors }: TropicalForestProps) {
   const [showUI, setShowUI] = useState(true)
   const [isNight, setIsNight] = useState(false)
@@ -31,10 +36,14 @@ export function TropicalForest({ contributors }: TropicalForestProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [filteredContributors, setFilteredContributors] = useState(contributors)
   const cameraControllerRef = useRef(null)
-  const [language, setLanguage] = useState("en") // Default language
+  const [language, setLanguage] = useState("en")
+  const [totalStats, setTotalStats] = useState<TotalStats>({
+    totalQuantity: 0,
+    totalTreeCount: 0,
+    contributorCount: 0,
+  });
 
-
-  const treeCount = 15
+  const treeCount = 100
   const flowerDensity = 50
   const handleSearch = (query: string) => {
     setSearchQuery(query)
@@ -148,7 +157,7 @@ export function TropicalForest({ contributors }: TropicalForestProps) {
       )}
 
 
-      {showInfo && <InfoPanel treeCount={treeCount} onClose={() => setShowInfo(false)} contributors={contributors} totalStats={contributors} />}
+      {showInfo && <InfoPanel treeCount={treeCount} onClose={() => setShowInfo(false)} contributors={contributors} totalStats={totalStats} />}
 
       {!showUI && (
         <Button

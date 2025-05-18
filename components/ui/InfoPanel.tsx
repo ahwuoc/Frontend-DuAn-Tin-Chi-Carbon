@@ -32,10 +32,8 @@ export function InfoPanel({
   const [isOpen, setIsOpen] = useState(false);
 
 
-  const totalContributed = contributors.reduce(
-    (sum, contributor) => sum + contributor.quantity,
-    0,
-  );
+  const totalTrees = contributors.reduce((total, item) => total + item.trees, 0)
+
   return (
     <div className="absolute top-20 right-4 w-80 bg-white/90 backdrop-blur-md p-5 rounded-xl shadow-xl z-10 border border-emerald-100">
       <div className="flex justify-between items-center mb-4">
@@ -56,19 +54,18 @@ export function InfoPanel({
       <div className="space-y-4">
         {/* Tổng quan từ totalStats */}
         <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-4 rounded-lg border border-emerald-100">
-          <p className="text-emerald-800 font-medium">Tổng số cây đóng góp:</p>
+          <p className="text-emerald-800 font-medium">Tổng số cây đóng góp: </p>
           <p className="text-3xl font-bold text-emerald-600 mt-2">
-            {totalStats.totalQuantity} cây
+            {totalTrees} cây
           </p>
           <p className="text-sm text-emerald-600 mt-1">
-            Từ {totalStats.contributorCount} nhà hảo tâm
+            Từ {contributors.length} nhà hảo tâm
           </p>
           <p className="text-sm text-emerald-600">
             Cây đã trồng: {totalStats.totalTreeCount}
           </p>
         </div>
 
-        {/* Danh sách người đóng góp */}
         <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
           <CollapsibleTrigger className="flex w-full items-center justify-between p-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
             <span className="font-medium">
@@ -82,14 +79,14 @@ export function InfoPanel({
               <div className="space-y-2">
                 {contributors.map((contributor) => (
                   <div
-                    key={contributor._id}
+                    key={contributor.id}
                     className="p-2 bg-emerald-50 rounded-md flex justify-between items-center"
                   >
                     <span className="font-medium text-emerald-800 truncate">
                       {contributor.name}
                     </span>
                     <span className="text-sm bg-emerald-100 px-2 py-1 rounded-full text-emerald-700">
-                      {contributor.quantity} cây
+                      {contributor.trees} cây
                     </span>
                   </div>
                 ))}
