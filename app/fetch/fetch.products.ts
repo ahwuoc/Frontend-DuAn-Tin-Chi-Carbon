@@ -69,7 +69,7 @@ export const apiProducts = {
   updatetimeline: (id: string, body: any) =>
     HTTP.PUT<any>(`/products/timelines/${id}`, { body }),
   updateFeatures: (id: string, body: any) =>
-    HTTP.PUT<any>(`/products/updateFeatures/${id}`, { body }),
+    HTTP.PUT<any>(`/products/features/${id}`, { body }),
   updateReport: (id: string, body: any) =>
     HTTP.PUT<any>(`/products/reports/${id}`, { body }),
   updatecertificates: (id: string, body: any) =>

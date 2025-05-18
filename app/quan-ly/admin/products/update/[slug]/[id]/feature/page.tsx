@@ -53,9 +53,6 @@ export default function CarbonCreditDetailsPage() {
     const [newFeatureIcon, setNewFeatureIcon] = useState("");
     const [isAddingFeature, setIsAddingFeature] = useState(false);
     const [deletingFeatureId, setDeletingFeatureId] = useState<string | null>(null);
-    // State cho upload icon (giữ lại nhưng không dùng trong form hiện tại)
-    const [isUploadingFeatureIcon, setIsUploadingFeatureIcon] = useState(false);
-    const [uploadedFeatureIconName, setUploadedFeatureIconName] = useState<string | null>(null);
 
 
     // State chung
@@ -234,9 +231,9 @@ export default function CarbonCreditDetailsPage() {
                                 <div key={feature._id || index} className="border p-4 rounded-md shadow-sm hover:shadow transition flex items-start space-x-3">
                                     {/* Hiển thị icon nếu có URL hợp lệ */}
                                     {feature.icon ? (
-                                        <img src={feature.icon} alt={feature.title} className="h-6 w-6 object-contain flex-shrink-0 mt-1" onError={(e) => (e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmRDb2wiIHN0cm9rZS1saW5lam9pbj0icm91bmRKYXAiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXNldHRpbmdzIj48cGF0aCBkPSJNMTIgMjBhdDggOCAwIDAgMCAwLTE2IDEwIDEwIDAgMCAxIDQgMi41IDEuNSA0IDIuNSA0LjVBIDMuNSAzLjUgMCAwIDAgMTkgMTYuNWEzLjUgMy41IDAgMCAwIDItMi41IDcgNyAwIDAgMCAxLS41IDQgMi41SDQhIi8+PHBhdGggZD0iTTIgMTJoMjAiLz48Y2lyY2xlIGN4PSIxMiIgeXk9IjEyIiByPSIyIi8+PHBhdGggZD0iTTQgNCBsMi41IDIuNSIvPjxwYXRoIGQ9Ik0yMCAyMCBsLTIuNSAtMi41Ii8+PHBhdGggZD0iTTQgMjAgbDIuNSAtMi41Ii8+PHBhdGggZD0iTTIwIDQgbC0yLjUgMi41Ii8+PC9zdmc+')} /> // Thêm onError để hiển thị icon mặc định nếu ảnh lỗi
+                                        <img src={feature.icon} alt={feature.title} className="h-6 w-6 object-contain flex-shrink-0 mt-1" onError={(e) => (e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmRDb2wiIHN0cm9rZS1saW5lam9pbj0icm91bmRKYXAiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXNldHRpbmdzIj48cGF0aCBkPSJNMTIgMjBhdDggOCAwIDAgMCAwLTE2IDEwIDEwIDAgMCAxIDQgMi41IDEuNSA0IDIuNSA0LjVBIDMuNSAzLjUgMCAwIDAgMTkgMTYuNWEzLjUgMy41IDAgMCAwIDItMi41IDcgNyAwIDAgMCAxLS41IDQgMi41SDQhIi8+PHBhdGggZD0iTTIgMTJoMjAiLz48Y2lyY2xlIGN4PSIxMiIgeXk9IjEyIiByPSIyIi8+PHBhdGggZD0iTTQgNCBsMi41IDIuNSIvPjxwYXRoIGQ9Ik0yMCAyMCBsLTIuNSAtMi41Ii8+PHBhdGggZD0iTTQgMjAgbDIuNSAtMi41Ii8+PHBhdGggZD0iTTIwIDQgbC0yLjUgMi41Ii8+PC9zdmc+')} />
                                     ) : (
-                                        <Settings className="h-6 w-6 flex-shrink-0 text-gray-600 mt-1" /> // Icon mặc định nếu không có icon URL
+                                        <Settings className="h-6 w-6 flex-shrink-0 text-gray-600 mt-1" />
                                     )}
                                     <div className="flex-1 space-y-1">
                                         <p className="text-base font-semibold">{feature.title}</p>
