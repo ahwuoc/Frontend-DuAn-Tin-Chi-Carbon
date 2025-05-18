@@ -189,7 +189,7 @@ export default function NewsPage() {
                         </div>
                         <div className="flex items-center">
                           <User className="h-3 w-3 mr-1" />
-                          <span>Admun</span>
+                          <span>Admin</span>
                         </div>
                       </div>
                       <CardTitle className="text-xl">
@@ -202,7 +202,7 @@ export default function NewsPage() {
                       </p>
                     </CardContent>
                     <CardFooter>
-                      <Link href={`/tin-tuc/${featuredNews._id}`}>
+                      <Link href={`/tin-tuc/${newsItem._id}`}>
                         <Button variant="link" className="text-green-600 p-0 hover:text-green-700">
                           Đọc thêm <ArrowRight className="ml-1 h-3 w-3" />
                         </Button>
@@ -239,6 +239,7 @@ export default function NewsPage() {
                   {t("categories")}
                 </h3>
                 <div className="space-y-2">
+
                   {Array.from(new Set(news.map((n) => n.category))).map(
                     (category, index) => (
                       <div
@@ -272,12 +273,15 @@ export default function NewsPage() {
                         />
                       </div>
                       <div>
-                        <h4 className="font-medium text-gray-800 hover:text-green-600 transition-colors duration-200 cursor-pointer">
-                          {post.title}
-                        </h4>
-                        <p className="text-sm text-gray-500 mt-1">
-                          {formatDateUtil(post.createdAt)}
-                        </p>
+
+                        <Link href={`/tin-tuc/${post._id}`}>
+                          <h4 className="font-medium text-gray-800 hover:text-green-600 transition-colors duration-200 cursor-pointer">
+                            {post.title}
+                          </h4>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {formatDateUtil(post.createdAt)}
+                          </p>
+                        </Link>
                       </div>
                     </div>
                   ))}
