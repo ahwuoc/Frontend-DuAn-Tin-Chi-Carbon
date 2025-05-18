@@ -633,8 +633,6 @@ export default function ProjectRegistrationForm() {
               </div>
             )}
           </div>
-
-
           <TabsContent value="forest" className="space-y-6 mt-0">
             <h4 className="text-lg font-semibold text-gray-700">
               Thông tin dự án lâm nghiệp

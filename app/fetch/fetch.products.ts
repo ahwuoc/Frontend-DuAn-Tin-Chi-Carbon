@@ -72,6 +72,8 @@ export const apiProducts = {
     HTTP.PUT<any>(`/products/features/${id}`, { body }),
   updateReport: (id: string, body: any) =>
     HTTP.PUT<any>(`/products/reports/${id}`, { body }),
+  updateBenefits: (id: string, body: any) =>
+    HTTP.PUT<any>(`/products/benefits/${id}`, { body }),
   updatecertificates: (id: string, body: any) =>
     HTTP.PUT<any>(`/products/certificates/${id}`, { body }),
   getProducts: (type: TheLoai) => HTTP.GET<any[]>(`/products?type=${type}`),

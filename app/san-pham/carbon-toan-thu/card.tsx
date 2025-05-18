@@ -54,12 +54,11 @@ export default function CarbonCard() {
   return (
     <div className="flex gap-5  min-w-screen mx-auto">
       {products.map((product) => {
-        const isTrial =
-          product.subscriptionTier === "basic" || product.price === 0;
-        const isEnterprise =
-          product.subscriptionTier === "enterprise" || product.price > 50000000;
-        const isExpert = product.subscriptionTier === "professional";
-        const isResearch = !isTrial && !isEnterprise && !isExpert;
+        const isFree = product.subscriptionTier === "free" || product.price === 0;
+        const isEnterprise = product.subscriptionTier === "enterprise" || product.price > 50000000;
+        const isExpert = product.subscriptionTier === "expert";
+        const isResearch = product.subscriptionTier === "research";
+
         return (
           <Card
             key={product.id}
@@ -78,7 +77,7 @@ export default function CarbonCard() {
                 </h3>
                 <div className="mb-4">
                   <span className="text-3xl font-extrabold text-gray-900">
-                    {isTrial
+                    {isFree
                       ? "Miễn phí"
                       : isEnterprise
                         ? "Liên hệ báo giá"
@@ -87,23 +86,24 @@ export default function CarbonCard() {
                           : "N/A"}
                   </span>
                   <p className="text-sm text-gray-500 mt-1">
-                    {isTrial
+                    {isFree
                       ? "Dùng thử 30 ngày"
                       : isEnterprise
-                        ? "Tùy chỉnh"
+                        ? "Tùy chỉnh theo yêu cầu"
                         : product.billingCycle || "Không xác định"}
                   </p>
                 </div>
                 <p className="text-sm text-gray-600 italic mb-4 line-clamp-2">
                   {product.description ||
-                    (isTrial
+                    (isFree
                       ? "Dành cho sinh viên và người mới bắt đầu"
-                      : isEnterprise
-                        ? "Giải pháp toàn diện cho doanh nghiệp"
-                        : isExpert
-                          ? "Dành cho chuyên gia và đội ngũ chuyên sâu"
-                          : "Dành cho nghiên cứu và doanh nghiệp vừa")}
+                      : isExpert
+                        ? "Dành cho chuyên gia và đội ngũ kỹ thuật"
+                        : isResearch
+                          ? "Phù hợp cho nghiên cứu và các tổ chức học thuật"
+                          : "Giải pháp toàn diện cho doanh nghiệp")}
                 </p>
+
                 <div className="space-y-3 mb-6 max-h-48 overflow-y-auto pr-2">
                   {product.features?.length ? (
                     product.features.map((feature: any) => (
@@ -120,18 +120,17 @@ export default function CarbonCard() {
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-gray-500">
-                      Không có tính năng nào.
-                    </p>
+                    <p className="text-sm text-gray-500">Không có tính năng nào.</p>
                   )}
                 </div>
+
                 <div className="bg-green-50 p-4 rounded-lg mb-6">
                   <p className="text-sm text-green-800 font-semibold mb-2">
                     Lợi ích nổi bật
                   </p>
                   <ul className="text-sm text-green-700 list-disc pl-5 space-y-1">
-                    {product.features?.length ? (
-                      product.features.map((feature: any) => (
+                    {product.benefits?.length ? (
+                      product.benefits.map((feature: any) => (
                         <li key={feature.id}>{feature.title || "N/A"}</li>
                       ))
                     ) : (
@@ -139,28 +138,25 @@ export default function CarbonCard() {
                     )}
                   </ul>
                 </div>
+
                 <p className="text-sm text-gray-500">
                   Phù hợp với: {product.company || "Doanh nghiệp và cá nhân"}
                 </p>
               </div>
+
               <div className="mt-auto pt-6">
                 <Link
                   href={
-                    isTrial
-                      ? `/thanh-toan?product=${product._id}`
-                      : isEnterprise
-                        ? "/dang-ky-tu-van"
-                        : `/thanh-toan?product=${product._id}`
+                    isEnterprise
+                      ? "/dang-ky-tu-van"
+                      : `/thanh-toan?product=${product._id}`
                   }
                   className="block w-full"
                 >
                   <Button
-                    className={`w-full py-3 text-base font-semibold tracking-wide transition-colors duration-200 ${isExpert
-                      ? "bg-green-600 hover:bg-green-700"
-                      : "bg-green-600 hover:bg-green-700"
-                      } text-white rounded-lg`}
+                    className="w-full py-3 text-base font-semibold tracking-wide transition-colors duration-200 bg-green-600 hover:bg-green-700 text-white rounded-lg"
                   >
-                    {isTrial
+                    {isFree
                       ? "Dùng thử ngay"
                       : isEnterprise
                         ? "Liên hệ tư vấn"
@@ -169,6 +165,7 @@ export default function CarbonCard() {
                 </Link>
               </div>
             </CardContent>
+
           </Card>
         );
       })}

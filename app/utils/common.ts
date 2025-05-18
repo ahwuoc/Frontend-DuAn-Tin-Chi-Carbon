@@ -14,6 +14,25 @@ export const getUserFromLocalStorage = (): UserLocalStorage | null => {
   }
 };
 
+export const formatNumberUtil = (
+  num: number | undefined,
+  currency?: string
+): string => {
+  if (num === undefined || num === null) return "N/A";
+  try {
+    const formatter = new Intl.NumberFormat("vi-VN", {
+      style: currency ? "currency" : "decimal",
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: currency ? 0 : 2,
+    });
+    return formatter.format(num);
+  } catch (e) {
+    console.error("Error formatting number:", e);
+    return String(num);
+  }
+};
+
 export const formatDateUtil = (dateString?: string | Date) => {
   if (!dateString) return "N/A";
   const date = new Date(dateString);

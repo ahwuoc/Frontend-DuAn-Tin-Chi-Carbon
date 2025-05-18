@@ -27,6 +27,7 @@ import {
     UploadCloud,
 } from "lucide-react";
 import Link from "next/link";
+import { formatDateUtil } from "../../../../../../../utils/common";
 
 interface ReportItem {
     _id?: string;
@@ -37,19 +38,6 @@ interface ReportItem {
 
 const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
 const uploadPreset = "my_unsigned_preset";
-
-const formatDate = (dateString: string | undefined): string => {
-    if (!dateString) return "N/A";
-    try {
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return "Invalid Date";
-        return date.toLocaleDateString("vi-VN");
-    } catch (e) {
-        console.error("Error formatting date:", e);
-        return "Invalid Date";
-    }
-};
-
 export default function CarbonCreditReportsPage() {
     const { id } = useParams();
     const [reports, setReports] = useState<ReportItem[]>([]);
@@ -257,7 +245,7 @@ export default function CarbonCreditReportsPage() {
                                         <p className="text-base font-semibold">{report.title}</p>
                                         <p className="text-sm text-gray-700 flex items-center gap-1">
                                             <CalendarDays className="h-4 w-4 text-gray-500" />
-                                            Ngày: {formatDate(report.date)}
+                                            Ngày: {formatDateUtil(report.date)}
                                         </p>
                                         <p className="text-sm text-gray-700 flex items-center gap-1 truncate">
                                             <LinkIcon className="h-4 w-4 text-gray-500" />

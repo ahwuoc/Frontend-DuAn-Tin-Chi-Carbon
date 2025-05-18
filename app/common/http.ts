@@ -38,13 +38,10 @@ async function request<T>(
 
   if (!response.ok) {
     const error = await response.text();
-    console.error(`[HTTP ${method}] ❌ Error ${response.status}: ${error}`);
     throw new Error(`Error ${response.status}: ${error}`);
   }
-
   const data = await response.json();
   console.log(`[HTTP ${method}] ✅ Response:`, data);
-
   return {
     status: response.status,
     payload: data as T,
