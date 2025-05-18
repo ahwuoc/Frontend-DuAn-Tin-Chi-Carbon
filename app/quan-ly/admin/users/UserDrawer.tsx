@@ -51,7 +51,6 @@ export default function UserDrawer({
   const handleSubmit = async () => {
     try {
       if (selectedUser?._id) {
-        // Update user
         const data = {
           name: formData.name,
           email: formData.email,
@@ -70,7 +69,6 @@ export default function UserDrawer({
           throw new Error("Sửa user thất bại");
         }
       } else {
-        // Create user
         const res = await apiAuth.createUser(formData);
         if (res.status === 201) {
           setUsers((prev) => [...prev, res.payload.user]);

@@ -39,7 +39,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-  ],
+, "app/quan-ly/admin/news/edit/[id]/page.tsxx"  ],
   "exclude": [
     "node_modules"
   ]

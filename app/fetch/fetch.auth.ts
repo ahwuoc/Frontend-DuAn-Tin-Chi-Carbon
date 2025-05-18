@@ -39,7 +39,9 @@ export type TLogoutResponse = {
 
 const apiAuth = {
   login: async (body: Record<string, any>): Promise<TLoginResponse> => {
-    const httpResponse = await HTTP.POST<TLoginResponse>("/login", { body });
+    const httpResponse = await HTTP.POST<TLoginResponse>("/auth/login", {
+      body,
+    });
     if (
       httpResponse.payload &&
       httpResponse.payload.success &&
@@ -52,36 +54,34 @@ const apiAuth = {
     }
     return httpResponse.payload;
   },
-  createUser: (body: any) => HTTP.POST<any>("/register", { body }),
+  createUser: (body: any) => HTTP.POST<any>("/auth/register", { body }),
   updateUser: async (id: string, body: any) =>
     await HTTP.POST<any>("/register", { body }),
   logout: async (): Promise<TLogoutResponse> => {
-    const httpResponse = await HTTP.POST<TLogoutResponse>("/logout");
+    const httpResponse = await HTTP.POST<TLogoutResponse>("/auth/logout");
     Cookies.remove("token", { path: "/" });
     return httpResponse.payload;
   },
-  getAll: async () => await HTTP.GET<any>("/users"),
+  getAll: async () => await HTTP.GET<any>("/auth/users"),
   register: async (body: Record<string, any>): Promise<TRegisterResponse> => {
-    const httpResponse = await HTTP.POST<TRegisterResponse>("/register", {
+    const httpResponse = await HTTP.POST<TRegisterResponse>("/auth/register", {
       body,
     });
     return httpResponse.payload;
   },
-  deleteUser: (id: string) => HTTP.DELETE<any>(`/user${id}`),
+  deleteUser: (id: string) => HTTP.DELETE<any>(`/auth/user${id}`),
   update: async (body: Record<string, any>): Promise<TUpdateResponse> => {
     const token = Cookies.get("token");
     const requestOptions: Parameters<typeof HTTP.PUT>[1] = { body };
-
     if (token) {
       requestOptions.headers = {
         Authorization: `Bearer ${token}`,
       };
     }
-
     const httpResponse = await HTTP.PUT<TUpdateResponse>(
-      "/users/update",
+      "/auth/users/update",
       requestOptions
-    );
+    );  
     return httpResponse.payload;
   },
 };

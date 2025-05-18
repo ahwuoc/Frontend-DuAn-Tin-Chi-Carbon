@@ -13,7 +13,8 @@ import { Search, Calendar, User, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import { useEffect, useRef, useState } from "react";
 import { apiNews, INews } from "@/app/fetch/fetch.news";
-
+import { formatDateUtil } from "../utils/common";
+import Link from "next/link";
 export default function NewsPage() {
   const { t, language } = useLanguage();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -52,11 +53,6 @@ export default function NewsPage() {
     fetchNews();
   }, []);
 
-  const formatDate = (dateString: Date) => {
-    const date = new Date(dateString);
-    const locale = language === "en" ? "en-US" : "vi-VN";
-    return date.toLocaleDateString(locale);
-  };
 
   if (loading) {
     return (
@@ -146,7 +142,7 @@ export default function NewsPage() {
                   <div className="flex items-center gap-4 mb-4 text-gray-500">
                     <div className="flex items-center">
                       <Calendar className="h-4 w-4 mr-2" />
-                      <span>{formatDate(featuredNews.createdAt)}</span>
+                      <span>{formatDateUtil(featuredNews.createdAt)}</span>
                     </div>
                     <div className="flex items-center">
                       <User className="h-4 w-4 mr-2" />
@@ -159,9 +155,11 @@ export default function NewsPage() {
                   <p className="text-lg text-gray-600 mb-6">
                     {featuredNews.content.substring(0, 150)}...
                   </p>
-                  <Button className="bg-green-600 hover:bg-green-700 text-white">
-                    {t("read_more")} <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
+                  <Link href={`/tin-tuc/${featuredNews._id}`}>
+                    <Button variant="link" className="text-green-600 p-0 hover:text-green-700">
+                      Đọc thêm <ArrowRight className="ml-1 h-3 w-3" />
+                    </Button>
+                  </Link>
                 </div>
               )}
 
@@ -187,7 +185,7 @@ export default function NewsPage() {
                       <div className="flex items-center gap-4 mb-2 text-sm text-gray-500">
                         <div className="flex items-center">
                           <Calendar className="h-3 w-3 mr-1" />
-                          <span>{formatDate(newsItem.createdAt)}</span>
+                          <span>{formatDateUtil(newsItem.createdAt)}</span>
                         </div>
                         <div className="flex items-center">
                           <User className="h-3 w-3 mr-1" />
@@ -204,12 +202,11 @@ export default function NewsPage() {
                       </p>
                     </CardContent>
                     <CardFooter>
-                      <Button
-                        variant="link"
-                        className="text-green-600 p-0 hover:text-green-700"
-                      >
-                        {t("read_more")} <ArrowRight className="ml-1 h-3 w-3" />
-                      </Button>
+                      <Link href={`/tin-tuc/${featuredNews._id}`}>
+                        <Button variant="link" className="text-green-600 p-0 hover:text-green-700">
+                          Đọc thêm <ArrowRight className="ml-1 h-3 w-3" />
+                        </Button>
+                      </Link>
                     </CardFooter>
                   </Card>
                 ))}
@@ -279,7 +276,7 @@ export default function NewsPage() {
                           {post.title}
                         </h4>
                         <p className="text-sm text-gray-500 mt-1">
-                          {formatDate(post.createdAt)}
+                          {formatDateUtil(post.createdAt)}
                         </p>
                       </div>
                     </div>

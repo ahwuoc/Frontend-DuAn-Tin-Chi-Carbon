@@ -21,11 +21,9 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import DashboardSidebar from "@/components/dashboard/sidebar";
 import UserDrawer from "./UserDrawer";
 import { formatDateUtil } from "../../../utils/common";
 export default function AdminUsersPage() {
-  const { user } = useAuth();
   const router = useRouter();
   const [users, setUsers] = useState<TUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +56,7 @@ export default function AdminUsersPage() {
       }
     };
     fetchUsers();
-  }, [router, user]);
+  }, [router]);
 
   const openUserDrawer = (user?: TUser) => {
     if (user) {
@@ -139,7 +137,7 @@ export default function AdminUsersPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {Array.isArray(user) && users.map((user) => (
+                    {Array.isArray(users) && users.map((user) => (
                       <TableRow key={user._id}>
                         <TableCell className="font-medium">
                           {user.name || "N/A"}
