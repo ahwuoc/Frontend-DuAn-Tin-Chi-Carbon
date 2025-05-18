@@ -68,6 +68,8 @@ export const apiProducts = {
   getFreeTrial: () => HTTP.GET("/free/trial"),
   updatetimeline: (id: string, body: any) =>
     HTTP.PUT<any>(`/products/timelines/${id}`, { body }),
+  updateFeatures: (id: string, body: any) =>
+    HTTP.PUT<any>(`/products/updateFeatures/${id}`, { body }),
   updateReport: (id: string, body: any) =>
     HTTP.PUT<any>(`/products/reports/${id}`, { body }),
   updatecertificates: (id: string, body: any) =>

@@ -35,7 +35,9 @@ import {
     CalendarClock,
     ScrollText,
     Layers,
-    Save
+    Save,
+    FileEdit,
+    ArrowRight
 } from "lucide-react";
 
 const formatDate = (dateString: string | undefined): string => {
@@ -229,39 +231,45 @@ export default function ViewCarbonCreditPage() {
         <div className="container mx-auto py-6 px-4">
             <div className="mb-6 flex flex-wrap gap-4 justify-center">
                 <Button asChild>
-                    <Link
-                        href={`/quan-ly/admin/products/update/carbon_credits/${id}/timeline`}
-                    >
-                        <span>
+                    <Link href={`/quan-ly/admin/products/update/carbon_credits/${id}/timeline`}>
+                        <span className="flex items-center">
                             <CalendarDays className="mr-2 h-4 w-4" />
                             Xem dòng thời gian dự án
+                            <ArrowRight className="ml-2 h-4 w-4 text-gray-500" />
                         </span>
                     </Link>
                 </Button>
 
                 <Button asChild variant="secondary">
-                    <Link
-                        href={`/quan-ly/admin/products/update/carbon_credits/${id}/report`}
-                    >
-                        <span>
+                    <Link href={`/quan-ly/admin/products/update/carbon_credits/${id}/report`}>
+                        <span className="flex items-center">
                             <FileText className="mr-2 h-4 w-4" />
                             Cập nhật báo cáo dự án
+                            <ArrowRight className="ml-2 h-4 w-4 text-gray-500" />
+                        </span>
+                    </Link>
+                </Button>
+
+                <Button asChild variant="secondary">
+                    <Link href={`/quan-ly/admin/products/update/carbon_credits/${id}/feature`}>
+                        <span className="flex items-center">
+                            <FileEdit className="mr-2 h-4 w-4" />
+                            Cập nhật tính năng
+                            <ArrowRight className="ml-2 h-4 w-4 text-gray-500" />
                         </span>
                     </Link>
                 </Button>
 
                 <Button asChild variant="outline">
-                    <Link
-                        href={`/quan-ly/admin/products/update/carbon_credits/${id}/certificate`}
-                    >
-                        <span>
+                    <Link href={`/quan-ly/admin/products/update/carbon_credits/${id}/certificate`}>
+                        <span className="flex items-center">
                             <Award className="mr-2 h-4 w-4" />
                             Cập nhật chứng chỉ
+                            <ArrowRight className="ml-2 h-4 w-4 text-gray-500" />
                         </span>
                     </Link>
                 </Button>
             </div>
-
             <Card>
                 <CardHeader>
                     <CardTitle>{editedCarbonCredit.name || "Chỉnh sửa Carbon Credit"}</CardTitle>
