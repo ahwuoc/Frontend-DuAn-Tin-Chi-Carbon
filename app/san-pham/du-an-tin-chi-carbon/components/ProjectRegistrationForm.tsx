@@ -17,6 +17,7 @@ import {
 
 import dynamic from "next/dynamic";
 import ProjectFormContent from "./ProjectFormContent";
+import { apiProjects } from "@/app/fetch/fetch.projects";
 
 interface FormData {
   name: string;
@@ -40,17 +41,20 @@ interface FormData {
   riceSoilType: string;
   riceStartDate: string;
   riceEndDate: string;
-
   biocharRawMaterial: string;
   biocharCarbonContent: string;
   biocharLandArea: string;
   biocharApplicationMethod: string;
-
   additionalInfo: string;
 }
 
 interface FormErrors {
   [key: string]: string;
+}
+interface Project {
+  _id: string;
+  name: string;
+  type: string;
 }
 
 export default function ProjectRegistrationForm() {
@@ -70,6 +74,8 @@ export default function ProjectRegistrationForm() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [kmlFile, setKmlFile] = useState<File | null>(null);
 
+  // Cập nhật kiểu dữ liệu cho Projects
+  const [Projects, setProjects] = useState<Project[]>([]);
   const [formData, setFormData] = useState<FormData>({
     name: user?.name || "",
     organization: "",
@@ -112,6 +118,17 @@ export default function ProjectRegistrationForm() {
       }));
     }
   }, [user]);
+
+  React.useEffect(() => {
+    const getProject = async () => {
+      const response = await apiProjects.getAll();
+      if (response?.payload) {
+        setProjects(response.payload);
+      }
+    };
+
+    getProject();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -292,6 +309,26 @@ export default function ProjectRegistrationForm() {
         kmlFileUrl = await uploadToCloudinary(kmlFile);
       }
 
+      // Xác định projectId dựa trên activeTab
+      let projectId: string | null = null;
+      const projectMapping: Record<string, string> = {
+        forest: "Lâm nghiệp",
+        rice: "Lúa",
+        biochar: "Biochar",
+      };
+      const projectName = projectMapping[activeTab];
+
+      if (projectName) {
+        const foundProject = Projects.find(
+          (project) => project.name === projectName,
+        );
+        if (foundProject) {
+          projectId = foundProject._id;
+        } else {
+          console.warn(`Không tìm thấy Project với tên: ${projectName}`);
+        }
+      }
+
       const dataToSendToBackend: any = {
         name: formData.name,
         organization: formData.organization,
@@ -302,6 +339,8 @@ export default function ProjectRegistrationForm() {
         additionalInfo: formData.additionalInfo,
         landDocuments: landDocumentUrls,
         kmlFile: kmlFileUrl,
+        // Thêm projectId vào dữ liệu gửi đi
+        projectId: projectId,
       };
 
       if (activeTab === "forest") {

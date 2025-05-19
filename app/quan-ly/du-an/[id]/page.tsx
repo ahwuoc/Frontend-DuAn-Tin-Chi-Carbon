@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLanguage } from "@/context/language-context";
 import { useAuth } from "@/context/auth-context";
+import { uploadToCloudinary, formatDateUtil } from "@/app/utils/common";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -15,6 +16,8 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Leaf,
   MapPin,
@@ -26,9 +29,12 @@ import {
   CheckCircle2,
   AlertCircle,
   ArrowLeft,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { apiProjects, IProject } from "@/app/fetch/fetch.projects";
+import { ProjectIcon } from "./_components";
+
 const StatusBadge: React.FC<{
   status: string;
   language: "vi" | "en";
@@ -56,48 +62,19 @@ const StatusBadge: React.FC<{
   );
 };
 
-// Component con để hiển thị icon dự án
-const ProjectIcon: React.FC<{ type: string }> = ({ type }) => {
-  switch (type) {
-    case "forestry":
-      return <Leaf className="w-6 h-6 text-green-600" />;
-    case "renewable":
-      return <FileText className="w-6 h-6 text-blue-600" />;
-    case "conservation":
-      return <FileText className="w-6 h-6 text-yellow-600" />;
-    case "waste":
-      return <FileText className="w-6 h-6 text-purple-600" />;
-    default:
-      return <FileText className="w-6 h-6 text-blue-600" />;
-  }
-};
-
-// Component chính
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { language } = useLanguage();
+  const { user } = useAuth();
   const [project, setProject] = useState<IProject | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
-  const formatDate = useCallback(
-    (dateString: Date) => {
-      const date = new Date(dateString);
-      return language === "vi"
-        ? date.toLocaleDateString("vi-VN", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        })
-        : date.toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        });
-    },
-    [language],
-  );
   const fetchProject = useCallback(async (id: string) => {
     try {
       setLoading(true);
@@ -114,11 +91,89 @@ export default function ProjectDetailPage() {
       setLoading(false);
     }
   }, []);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      console.log("File selected:", event.target.files[0]);
+      setSelectedFile(event.target.files[0]);
+      setUploadError(null);
+      setUploadSuccess(false);
+    } else {
+      console.log("No file selected or file input cleared.");
+      setSelectedFile(null);
+    }
+  };
+
+  const handleUploadDocument = async () => {
+    if (!selectedFile || !project?.id) {
+      setUploadError(
+        language === "vi"
+          ? "Vui lòng chọn một tệp để tải lên."
+          : "Please select a file to upload.",
+      );
+      return;
+    }
+
+    setUploading(true);
+    setUploadError(null);
+    setUploadSuccess(false);
+
+    try {
+      // Gọi trực tiếp hàm uploadToCloudinary và nhận secure_url
+      const fileUrl = await uploadToCloudinary(selectedFile);
+
+      const newDocument = {
+        name: selectedFile.name,
+        url: fileUrl, // Sử dụng trực tiếp fileUrl nhận được
+        type: selectedFile.type || "unknown",
+        date: new Date().toISOString(),
+      };
+
+      const updatedDocuments = project.documents
+        ? [...project.documents, newDocument]
+        : [newDocument];
+
+      const response = await apiProjects.updateProject(
+        project.id,
+        {
+          documents: updatedDocuments,
+        },
+        user?.token,
+      );
+
+      if (response.status === 200) {
+        setProject(response.payload as IProject);
+        setUploadSuccess(true);
+        setSelectedFile(null);
+        alert(
+          language === "vi"
+            ? "Tài liệu đã được tải lên thành công!"
+            : "Document uploaded successfully!",
+        );
+      } else {
+        setUploadError(
+          language === "vi"
+            ? "Lỗi khi cập nhật dự án."
+            : "Error updating project.",
+        );
+        console.error("Error updating project with new document:", response);
+      }
+    } catch (error) {
+      setUploadError(
+        language === "vi" ? "Lỗi khi tải tệp lên." : "Error uploading file.",
+      );
+      console.error("Error uploading document:", error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   useEffect(() => {
     if (params.id) {
       fetchProject(params.id as string);
     }
   }, [params.id, router, fetchProject]);
+
   if (loading) {
     return (
       <div className="container mx-auto py-10 px-4">
@@ -130,6 +185,7 @@ export default function ProjectDetailPage() {
       </div>
     );
   }
+
   if (!project) {
     return (
       <div className="container mx-auto py-10 px-4 text-center">
@@ -168,7 +224,7 @@ export default function ProjectDetailPage() {
             <h1 className="text-3xl font-bold">{project.name}</h1>
             <p className="text-gray-500">
               {language === "vi" ? "Đăng ký ngày: " : "Registered on: "}
-              {formatDate(project.registrationDate)}
+              {formatDateUtil(project.registrationDate)}
             </p>
           </div>
         </div>
@@ -242,8 +298,8 @@ export default function ProjectDetailPage() {
                   </h3>
                   <p className="font-medium flex items-center">
                     <Calendar className="w-4 h-4 mr-1 text-gray-400" />
-                    {formatDate(project.startDate)} -{" "}
-                    {formatDate(project.endDate)}
+                    {formatDateUtil(project.startDate)} -{" "}
+                    {formatDateUtil(project.endDate)}
                   </p>
                 </div>
                 <div>
@@ -326,7 +382,7 @@ export default function ProjectDetailPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {project.documents &&
+                {project.documents && project.documents.length > 0 ? (
                   project.documents.map((doc, index) => (
                     <div
                       key={index}
@@ -344,19 +400,83 @@ export default function ProjectDetailPage() {
                           {language === "vi"
                             ? "Tải lên ngày: "
                             : "Uploaded on: "}
-                          {formatDate(doc.date)}
+                          {formatDateUtil(doc.date)}
                         </p>
+                        {doc.url && (
+                          <a
+                            href={doc.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:underline text-sm"
+                          >
+                            {language === "vi"
+                              ? "Xem tài liệu"
+                              : "View Document"}
+                          </a>
+                        )}
                       </div>
                     </div>
-                  ))}
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-center">
+                    {language === "vi"
+                      ? "Chưa có tài liệu nào được tải lên."
+                      : "No documents uploaded yet."}
+                  </p>
+                )}
               </div>
             </CardContent>
-            <CardFooter>
-              <Button>
-                <Upload className="w-4 h-4 mr-2" />
-                {language === "vi"
-                  ? "Tải lên tài liệu mới"
-                  : "Upload New Document"}
+            <CardFooter className="flex flex-col items-start gap-4">
+              <div className="w-full">
+                <Label htmlFor="document" className="mb-2 block">
+                  {language === "vi"
+                    ? "Chọn tệp để tải lên"
+                    : "Choose file to upload"}
+                </Label>
+                <Input
+                  id="document"
+                  type="file"
+                  onChange={handleFileChange}
+                  className="mb-2"
+                />
+              </div>
+              {selectedFile && (
+                <p className="text-sm text-gray-600">
+                  {language === "vi" ? "Đã chọn tệp: " : "Selected file: "}
+                  <span className="font-medium">{selectedFile.name}</span>
+                </p>
+              )}
+              {uploadError && (
+                <div className="flex items-center text-red-500 text-sm mt-2">
+                  <AlertCircle className="w-4 h-4 mr-1" />
+                  {uploadError}
+                </div>
+              )}
+              {uploadSuccess && (
+                <div className="flex items-center text-green-500 text-sm mt-2">
+                  <CheckCircle2 className="w-4 h-4 mr-1" />
+                  {language === "vi"
+                    ? "Tải lên thành công!"
+                    : "Upload successful!"}
+                </div>
+              )}
+              <Button
+                onClick={handleUploadDocument}
+                disabled={uploading || !selectedFile}
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {language === "vi" ? "Đang tải lên..." : "Uploading..."}
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2" />
+                    {language === "vi"
+                      ? "Tải lên tài liệu mới"
+                      : "Upload New Document"}
+                  </>
+                )}
               </Button>
             </CardFooter>
           </Card>
@@ -386,7 +506,7 @@ export default function ProjectDetailPage() {
                       <div>
                         <p className="font-medium">{activity.description}</p>
                         <p className="text-sm text-gray-500">
-                          {formatDate(activity.date)}
+                          {formatDateUtil(activity.date)}
                         </p>
                       </div>
                     </div>

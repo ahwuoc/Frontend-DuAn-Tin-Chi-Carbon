@@ -80,10 +80,11 @@ const apiAuth = {
     }
     const httpResponse = await HTTP.PUT<TUpdateResponse>(
       "/auth/users/update",
-      requestOptions
-    );  
+      requestOptions,
+    );
     return httpResponse.payload;
   },
+  getInforManager: (id: string) => HTTP.GET(`/auth/user/infor-manger/${id}`),
 };
 
 export default apiAuth;
