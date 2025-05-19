@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import ImageComparison from "@/components/image-comparison";
-import ProjectRegistrationForm from "@/components/project-registration-form";
+import ProjectRegistrationForm from "./components/ProjectRegistrationForm";
 import AnimatedButton from "@/components/animated-button";
 import { useLanguage } from "@/context/language-context";
 
@@ -255,15 +255,13 @@ export default function CarbonProjectsPage() {
             {getText("heroSubtitle")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link href="#register-project">
-              <AnimatedButton
-                size="lg"
-                className="border-green-600 text-black hover:bg-green-600 hover:text-white transition-all duration-150 px-8 py-6 text-lg border-2"
-                hoverText={getText("registerNow")}
-              >
-                {getText("registerProject")}
-              </AnimatedButton>
-            </Link>
+            <AnimatedButton
+              size="lg"
+              className="border-green-600 text-black hover:bg-green-600 hover:text-white transition-all duration-150 px-8 py-6 text-lg border-2"
+              hoverText={getText("registerNow")}
+            >
+              {getText("registerProject")}
+            </AnimatedButton>
             <AnimatedButton
               variant="outline"
               size="lg"

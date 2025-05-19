@@ -324,7 +324,7 @@ export default function ProductsManagementPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {filteredProducts.map((product) => (
           <Card
-            key={product.id}
+            key={product._id}
             className="overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow"
           >
             <div className="relative h-48 w-full">

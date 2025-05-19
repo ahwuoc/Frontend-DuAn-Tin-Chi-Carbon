@@ -53,20 +53,22 @@ export default function CarbonCard() {
   }
 
   return (
-
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
       {products.map((product) => {
-        const isFree = product.subscriptionTier === "free" || product.price === 0;
-        const isEnterprise = product.subscriptionTier === "enterprise" || product.price > 50000000;
+        const isFree =
+          product.subscriptionTier === "free" || product.price === 0;
+        const isEnterprise =
+          product.subscriptionTier === "enterprise" || product.price > 50000000;
         const isExpert = product.subscriptionTier === "expert";
         const isResearch = product.subscriptionTier === "research";
 
         return (
           <Card
-            key={product.id}
+            key={product._id}
             // Đã bỏ lớp w-1/4 để thẻ tự co giãn theo cột grid
-            className={`relative bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 border-2 ${isExpert ? "border-green-600" : "border-gray-200"
-              } flex flex-col min-h-[650px] overflow-hidden`}
+            className={`relative bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 border-2 ${
+              isExpert ? "border-green-600" : "border-gray-200"
+            } flex flex-col min-h-[650px] overflow-hidden`}
           >
             {isExpert && (
               <div className="bg-green-600 text-white text-center py-2 text-sm font-semibold tracking-wide">
@@ -110,7 +112,7 @@ export default function CarbonCard() {
                 <div className="space-y-3 mb-6 max-h-48 overflow-y-auto pr-2">
                   {product.features?.length ? (
                     product.features.map((feature: any) => (
-                      <div key={feature.id} className="flex items-start">
+                      <div key={feature._id} className="flex items-start">
                         <CheckCircle className="h-5 w-5 text-green-600 mr-2 mt-1 flex-shrink-0" />
                         <div>
                           <span className="text-gray-700 font-medium">
@@ -123,7 +125,9 @@ export default function CarbonCard() {
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-gray-500">Không có tính năng nào.</p>
+                    <p className="text-sm text-gray-500">
+                      Không có tính năng nào.
+                    </p>
                   )}
                 </div>
 
@@ -134,7 +138,7 @@ export default function CarbonCard() {
                   <ul className="text-sm text-green-700 list-disc pl-5 space-y-1">
                     {product.benefits?.length ? (
                       product.benefits.map((feature: any) => (
-                        <li key={feature.id}>{feature.title || "N/A"}</li>
+                        <li key={feature._id}>{feature.title || "N/A"}</li>
                       ))
                     ) : (
                       <li>Không có lợi ích nào.</li>
@@ -156,9 +160,7 @@ export default function CarbonCard() {
                   }
                   className="block w-full"
                 >
-                  <Button
-                    className="w-full py-3 text-base font-semibold tracking-wide transition-colors duration-200 bg-green-600 hover:bg-green-700 text-white rounded-lg"
-                  >
+                  <Button className="w-full py-3 text-base font-semibold tracking-wide transition-colors duration-200 bg-green-600 hover:bg-green-700 text-white rounded-lg">
                     {isFree
                       ? "Dùng thử ngay"
                       : isEnterprise
@@ -168,7 +170,6 @@ export default function CarbonCard() {
                 </Link>
               </div>
             </CardContent>
-
           </Card>
         );
       })}
