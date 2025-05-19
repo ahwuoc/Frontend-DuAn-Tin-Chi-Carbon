@@ -1,12 +1,17 @@
-"use client"
-
-import { useState } from "react"
-import { useParams } from "next/navigation"
-import { useLanguage } from "@/context/language-context"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
+"use client";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { useLanguage } from "@/context/language-context";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import {
   Download,
   FileText,
@@ -22,20 +27,42 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock,
-} from "lucide-react"
-import Image from "next/image"
+} from "lucide-react";
+import Image from "next/image";
+import { apiProducts } from "@/app/fetch/fetch.products";
+import products from "@/app/mockup/product.mockup";
 
 export default function CarbonCreditDetailPage() {
-  const { id } = useParams()
-  const { language } = useLanguage()
-  const [progress, setProgress] = useState(65)
-  const [activeTab, setActiveTab] = useState("overview")
-
-
+  const { id } = useParams();
+  const { language } = useLanguage();
+  const [progress, setProgress] = useState(65);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [Product, setProduct] = useState(null);
+  console.log("data =>", id);
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!id) {
+        throw new Error("404");
+      }
+      try {
+        const response = await apiProducts.getById(id as string);
+        if (response && response.payload) {
+          setProduct(response.payload);
+        }
+      } catch {}
+    };
+    fetchData();
+  }, []);
   const carbonCredit = {
     id,
-    title: language === "vi" ? "Tín chỉ Carbon - Dự án Rừng Cát Tiên" : "Carbon Credits - Cat Tien Forest Project",
-    location: language === "vi" ? "Vườn Quốc gia Cát Tiên, Đồng Nai" : "Cat Tien National Park, Dong Nai",
+    title:
+      language === "vi"
+        ? "Tín chỉ Carbon - Dự án Rừng Cát Tiên"
+        : "Carbon Credits - Cat Tien Forest Project",
+    location:
+      language === "vi"
+        ? "Vườn Quốc gia Cát Tiên, Đồng Nai"
+        : "Cat Tien National Park, Dong Nai",
     area: "1,500 hecta",
     startDate: "15/04/2023",
     endDate: "15/04/2028",
@@ -56,14 +83,22 @@ export default function CarbonCreditDetailPage() {
     nextVerificationDate: "30/03/2024",
     verificationBody: "Bureau Veritas",
     communityBenefits: [
-      language === "vi" ? "Tạo việc làm cho cộng đồng địa phương" : "Creating jobs for local communities",
+      language === "vi"
+        ? "Tạo việc làm cho cộng đồng địa phương"
+        : "Creating jobs for local communities",
       language === "vi" ? "Cải thiện sinh kế" : "Improving livelihoods",
-      language === "vi" ? "Đào tạo kỹ năng lâm nghiệp" : "Forestry skills training",
+      language === "vi"
+        ? "Đào tạo kỹ năng lâm nghiệp"
+        : "Forestry skills training",
     ],
     biodiversityBenefits: [
-      language === "vi" ? "Bảo vệ các loài động thực vật quý hiếm" : "Protection of rare plant and animal species",
+      language === "vi"
+        ? "Bảo vệ các loài động thực vật quý hiếm"
+        : "Protection of rare plant and animal species",
       language === "vi" ? "Phục hồi hệ sinh thái" : "Ecosystem restoration",
-      language === "vi" ? "Tăng cường đa dạng sinh học" : "Enhancing biodiversity",
+      language === "vi"
+        ? "Tăng cường đa dạng sinh học"
+        : "Enhancing biodiversity",
     ],
     reports: [
       {
@@ -89,14 +124,20 @@ export default function CarbonCreditDetailPage() {
       },
       {
         id: "rep-004",
-        title: language === "vi" ? "Báo cáo Kiểm chứng 2023" : "2023 Verification Report",
+        title:
+          language === "vi"
+            ? "Báo cáo Kiểm chứng 2023"
+            : "2023 Verification Report",
         date: "15/05/2023",
         size: "4.5 MB",
         type: "verification",
       },
       {
         id: "rep-005",
-        title: language === "vi" ? "Báo cáo Tác động Môi trường" : "Environmental Impact Report",
+        title:
+          language === "vi"
+            ? "Báo cáo Tác động Môi trường"
+            : "Environmental Impact Report",
         date: "10/02/2023",
         size: "5.2 MB",
         type: "impact",
@@ -117,7 +158,8 @@ export default function CarbonCreditDetailPage() {
         type: language === "vi" ? "Sử dụng" : "Usage",
         amount: "500 tCO2e",
         value: "25,000,000 VND",
-        purpose: language === "vi" ? "Bù đắp phát thải Quý 1" : "Q1 Emissions Offset",
+        purpose:
+          language === "vi" ? "Bù đắp phát thải Quý 1" : "Q1 Emissions Offset",
         status: "completed",
       },
       {
@@ -126,7 +168,8 @@ export default function CarbonCreditDetailPage() {
         type: language === "vi" ? "Sử dụng" : "Usage",
         amount: "750 tCO2e",
         value: "37,500,000 VND",
-        purpose: language === "vi" ? "Bù đắp phát thải Quý 2" : "Q2 Emissions Offset",
+        purpose:
+          language === "vi" ? "Bù đắp phát thải Quý 2" : "Q2 Emissions Offset",
         status: "completed",
       },
       {
@@ -142,7 +185,10 @@ export default function CarbonCreditDetailPage() {
     certificates: [
       {
         id: "cert-001",
-        title: language === "vi" ? "Chứng nhận Mua Tín chỉ Carbon" : "Carbon Credit Purchase Certificate",
+        title:
+          language === "vi"
+            ? "Chứng nhận Mua Tín chỉ Carbon"
+            : "Carbon Credit Purchase Certificate",
         date: "15/04/2023",
         size: "1.2 MB",
       },
@@ -166,19 +212,27 @@ export default function CarbonCreditDetailPage() {
       },
       {
         date: "15/02/2023",
-        event: language === "vi" ? "Hoàn thành đánh giá ban đầu" : "Initial Assessment Completed",
+        event:
+          language === "vi"
+            ? "Hoàn thành đánh giá ban đầu"
+            : "Initial Assessment Completed",
       },
       {
         date: "30/03/2023",
-        event: language === "vi" ? "Chứng nhận VCS và CCB" : "VCS and CCB Certification",
+        event:
+          language === "vi"
+            ? "Chứng nhận VCS và CCB"
+            : "VCS and CCB Certification",
       },
       {
         date: "15/04/2023",
-        event: language === "vi" ? "Mua tín chỉ carbon" : "Carbon Credits Purchase",
+        event:
+          language === "vi" ? "Mua tín chỉ carbon" : "Carbon Credits Purchase",
       },
       {
         date: "20/05/2023",
-        event: language === "vi" ? "Sử dụng tín chỉ đầu tiên" : "First Credit Usage",
+        event:
+          language === "vi" ? "Sử dụng tín chỉ đầu tiên" : "First Credit Usage",
       },
       {
         date: "30/03/2024",
@@ -186,21 +240,23 @@ export default function CarbonCreditDetailPage() {
         upcoming: true,
       },
     ],
-  }
+  };
 
   // Tính toán phần trăm tín chỉ đã sử dụng
   const usedPercentage = Math.round(
     (Number.parseInt(carbonCredit.usedCredits.replace(/[^0-9]/g, "")) /
       Number.parseInt(carbonCredit.totalCredits.replace(/[^0-9]/g, ""))) *
       100,
-  )
+  );
 
   return (
     <div className="py-4 md:py-6">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
         <div>
           <div className="flex items-center">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{carbonCredit.title}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+              {carbonCredit.title}
+            </h1>
             <span
               className={`ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                 carbonCredit.status === "active"
@@ -247,36 +303,54 @@ export default function CarbonCreditDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle>{language === "vi" ? "Tổng tín chỉ" : "Total Credits"}</CardTitle>
+            <CardTitle>
+              {language === "vi" ? "Tổng tín chỉ" : "Total Credits"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl md:text-3xl font-bold text-gray-900">{carbonCredit.totalCredits}</div>
+            <div className="text-2xl md:text-3xl font-bold text-gray-900">
+              {carbonCredit.totalCredits}
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle>{language === "vi" ? "Tín chỉ đã sử dụng" : "Used Credits"}</CardTitle>
+            <CardTitle>
+              {language === "vi" ? "Tín chỉ đã sử dụng" : "Used Credits"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl md:text-3xl font-bold text-gray-900">{carbonCredit.usedCredits}</div>
+            <div className="text-2xl md:text-3xl font-bold text-gray-900">
+              {carbonCredit.usedCredits}
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle>{language === "vi" ? "Tín chỉ còn lại" : "Remaining Credits"}</CardTitle>
+            <CardTitle>
+              {language === "vi" ? "Tín chỉ còn lại" : "Remaining Credits"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl md:text-3xl font-bold text-gray-900">{carbonCredit.remainingCredits}</div>
+            <div className="text-2xl md:text-3xl font-bold text-gray-900">
+              {carbonCredit.remainingCredits}
+            </div>
           </CardContent>
         </Card>
       </div>
 
       <Card className="mb-6 md:mb-8">
         <CardHeader>
-          <CardTitle>{language === "vi" ? "Tiến độ dự án" : "Project Progress"}</CardTitle>
-          <CardDescription>{language === "vi" ? "Sử dụng tín chỉ carbon" : "Carbon Credit Usage"}</CardDescription>
+          <CardTitle>
+            {language === "vi" ? "Tiến độ dự án" : "Project Progress"}
+          </CardTitle>
+          <CardDescription>
+            {language === "vi"
+              ? "Sử dụng tín chỉ carbon"
+              : "Carbon Credit Usage"}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -319,7 +393,9 @@ export default function CarbonCreditDetailPage() {
               <AlertTriangle className="h-5 w-5 text-yellow-500 mr-3 mt-0.5" />
               <div>
                 <h4 className="text-sm font-medium text-yellow-800">
-                  {language === "vi" ? "Sắp đến kỳ kiểm chứng" : "Upcoming Verification"}
+                  {language === "vi"
+                    ? "Sắp đến kỳ kiểm chứng"
+                    : "Upcoming Verification"}
                 </h4>
                 <p className="text-xs text-yellow-700 mt-1">
                   {language === "vi"
@@ -332,14 +408,29 @@ export default function CarbonCreditDetailPage() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="overview" className="mb-6 md:mb-8" value={activeTab} onValueChange={setActiveTab}>
+      <Tabs
+        defaultValue="overview"
+        className="mb-6 md:mb-8"
+        value={activeTab}
+        onValueChange={setActiveTab}
+      >
         <div className="overflow-x-auto pb-2">
           <TabsList className="inline-flex w-auto min-w-full md:w-auto">
-            <TabsTrigger value="overview">{language === "vi" ? "Tổng quan" : "Overview"}</TabsTrigger>
-            <TabsTrigger value="reports">{language === "vi" ? "Báo cáo" : "Reports"}</TabsTrigger>
-            <TabsTrigger value="transactions">{language === "vi" ? "Giao dịch" : "Transactions"}</TabsTrigger>
-            <TabsTrigger value="certificates">{language === "vi" ? "Chứng chỉ" : "Certificates"}</TabsTrigger>
-            <TabsTrigger value="timeline">{language === "vi" ? "Dòng thời gian" : "Timeline"}</TabsTrigger>
+            <TabsTrigger value="overview">
+              {language === "vi" ? "Tổng quan" : "Overview"}
+            </TabsTrigger>
+            <TabsTrigger value="reports">
+              {language === "vi" ? "Báo cáo" : "Reports"}
+            </TabsTrigger>
+            <TabsTrigger value="transactions">
+              {language === "vi" ? "Giao dịch" : "Transactions"}
+            </TabsTrigger>
+            <TabsTrigger value="certificates">
+              {language === "vi" ? "Chứng chỉ" : "Certificates"}
+            </TabsTrigger>
+            <TabsTrigger value="timeline">
+              {language === "vi" ? "Dòng thời gian" : "Timeline"}
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -351,63 +442,95 @@ export default function CarbonCreditDetailPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <h3 className="text-lg font-medium mb-4">
-                        {language === "vi" ? "Mô tả dự án" : "Project Description"}
+                        {language === "vi"
+                          ? "Mô tả dự án"
+                          : "Project Description"}
                       </h3>
-                      <p className="text-gray-600 mb-6">{carbonCredit.description}</p>
+                      <p className="text-gray-600 mb-6">
+                        {carbonCredit.description}
+                      </p>
 
                       <h3 className="text-lg font-medium mb-3">
-                        {language === "vi" ? "Lợi ích cộng đồng" : "Community Benefits"}
+                        {language === "vi"
+                          ? "Lợi ích cộng đồng"
+                          : "Community Benefits"}
                       </h3>
                       <ul className="space-y-2 mb-6">
-                        {carbonCredit.communityBenefits.map((benefit, index) => (
-                          <li key={index} className="flex items-start">
-                            <Users className="h-5 w-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
-                            <span className="text-gray-600">{benefit}</span>
-                          </li>
-                        ))}
+                        {carbonCredit.communityBenefits.map(
+                          (benefit, index) => (
+                            <li key={index} className="flex items-start">
+                              <Users className="h-5 w-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
+                              <span className="text-gray-600">{benefit}</span>
+                            </li>
+                          ),
+                        )}
                       </ul>
 
                       <h3 className="text-lg font-medium mb-3">
-                        {language === "vi" ? "Lợi ích đa dạng sinh học" : "Biodiversity Benefits"}
+                        {language === "vi"
+                          ? "Lợi ích đa dạng sinh học"
+                          : "Biodiversity Benefits"}
                       </h3>
                       <ul className="space-y-2">
-                        {carbonCredit.biodiversityBenefits.map((benefit, index) => (
-                          <li key={index} className="flex items-start">
-                            <Shield className="h-5 w-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
-                            <span className="text-gray-600">{benefit}</span>
-                          </li>
-                        ))}
+                        {carbonCredit.biodiversityBenefits.map(
+                          (benefit, index) => (
+                            <li key={index} className="flex items-start">
+                              <Shield className="h-5 w-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
+                              <span className="text-gray-600">{benefit}</span>
+                            </li>
+                          ),
+                        )}
                       </ul>
                     </div>
                     <div className="space-y-6">
                       <div className="relative h-40 sm:h-48 w-full rounded-lg overflow-hidden">
                         <Image
-                          src={carbonCredit.image || "/placeholder.svg?height=200&width=400"}
-                          alt={language === "vi" ? "Trước khi tái trồng rừng" : "Before Reforestation"}
+                          src={
+                            carbonCredit.image ||
+                            "/placeholder.svg?height=200&width=400"
+                          }
+                          alt={
+                            language === "vi"
+                              ? "Trước khi tái trồng rừng"
+                              : "Before Reforestation"
+                          }
                           fill
                           className="object-cover"
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         />
                         <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm">
-                          {language === "vi" ? "Trước khi tái trồng rừng" : "Before Reforestation"}
+                          {language === "vi"
+                            ? "Trước khi tái trồng rừng"
+                            : "Before Reforestation"}
                         </div>
                       </div>
                       <div className="relative h-40 sm:h-48 w-full rounded-lg overflow-hidden">
                         <Image
-                          src={carbonCredit.afterImage || "/placeholder.svg?height=200&width=400"}
-                          alt={language === "vi" ? "Sau khi tái trồng rừng" : "After Reforestation"}
+                          src={
+                            carbonCredit.afterImage ||
+                            "/placeholder.svg?height=200&width=400"
+                          }
+                          alt={
+                            language === "vi"
+                              ? "Sau khi tái trồng rừng"
+                              : "After Reforestation"
+                          }
                           fill
                           className="object-cover"
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         />
                         <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm">
-                          {language === "vi" ? "Sau khi tái trồng rừng" : "After Reforestation"}
+                          {language === "vi"
+                            ? "Sau khi tái trồng rừng"
+                            : "After Reforestation"}
                         </div>
                       </div>
 
                       <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                         <h4 className="font-medium text-green-800 mb-2">
-                          {language === "vi" ? "Tiêu chuẩn chứng nhận" : "Certification Standards"}
+                          {language === "vi"
+                            ? "Tiêu chuẩn chứng nhận"
+                            : "Certification Standards"}
                         </h4>
                         <div className="flex items-center space-x-3 mb-2">
                           <div className="bg-white p-2 rounded-full">
@@ -429,11 +552,15 @@ export default function CarbonCreditDetailPage() {
                             </svg>
                           </div>
                           <div>
-                            <p className="font-medium">VCS (Verified Carbon Standard)</p>
+                            <p className="font-medium">
+                              VCS (Verified Carbon Standard)
+                            </p>
                             <p className="text-xs text-green-700">
                               {language === "vi"
-                                ? "Chứng nhận ngày: " + carbonCredit.verificationDate
-                                : "Certified on: " + carbonCredit.verificationDate}
+                                ? "Chứng nhận ngày: " +
+                                  carbonCredit.verificationDate
+                                : "Certified on: " +
+                                  carbonCredit.verificationDate}
                             </p>
                           </div>
                         </div>
@@ -457,11 +584,15 @@ export default function CarbonCreditDetailPage() {
                             </svg>
                           </div>
                           <div>
-                            <p className="font-medium">CCB (Climate, Community & Biodiversity)</p>
+                            <p className="font-medium">
+                              CCB (Climate, Community & Biodiversity)
+                            </p>
                             <p className="text-xs text-green-700">
                               {language === "vi"
-                                ? "Chứng nhận ngày: " + carbonCredit.verificationDate
-                                : "Certified on: " + carbonCredit.verificationDate}
+                                ? "Chứng nhận ngày: " +
+                                  carbonCredit.verificationDate
+                                : "Certified on: " +
+                                  carbonCredit.verificationDate}
                             </p>
                           </div>
                         </div>
@@ -475,14 +606,20 @@ export default function CarbonCreditDetailPage() {
             <div className="lg:col-span-1">
               <Card>
                 <CardHeader>
-                  <CardTitle>{language === "vi" ? "Thông tin dự án" : "Project Information"}</CardTitle>
+                  <CardTitle>
+                    {language === "vi"
+                      ? "Thông tin dự án"
+                      : "Project Information"}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-start">
                     <Globe className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-500">
-                        {language === "vi" ? "Vị trí dự án" : "Project Location"}
+                        {language === "vi"
+                          ? "Vị trí dự án"
+                          : "Project Location"}
                       </p>
                       <p className="text-sm">{carbonCredit.location}</p>
                     </div>
@@ -491,7 +628,9 @@ export default function CarbonCreditDetailPage() {
                   <div className="flex items-start">
                     <MapPin className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
                     <div>
-                      <p className="text-sm font-medium text-gray-500">{language === "vi" ? "Diện tích" : "Area"}</p>
+                      <p className="text-sm font-medium text-gray-500">
+                        {language === "vi" ? "Diện tích" : "Area"}
+                      </p>
                       <p className="text-sm">{carbonCredit.area}</p>
                     </div>
                   </div>
@@ -500,7 +639,9 @@ export default function CarbonCreditDetailPage() {
                     <Calendar className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-500">
-                        {language === "vi" ? "Thời gian dự án" : "Project Period"}
+                        {language === "vi"
+                          ? "Thời gian dự án"
+                          : "Project Period"}
                       </p>
                       <p className="text-sm">
                         {carbonCredit.startDate} - {carbonCredit.endDate}
@@ -512,7 +653,9 @@ export default function CarbonCreditDetailPage() {
                     <Users className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-500">
-                        {language === "vi" ? "Quản lý dự án" : "Project Manager"}
+                        {language === "vi"
+                          ? "Quản lý dự án"
+                          : "Project Manager"}
                       </p>
                       <p className="text-sm">{carbonCredit.projectManager}</p>
                     </div>
@@ -522,7 +665,9 @@ export default function CarbonCreditDetailPage() {
                     <Info className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-500">
-                        {language === "vi" ? "Đơn vị kiểm chứng" : "Verification Body"}
+                        {language === "vi"
+                          ? "Đơn vị kiểm chứng"
+                          : "Verification Body"}
                       </p>
                       <p className="text-sm">{carbonCredit.verificationBody}</p>
                     </div>
@@ -532,9 +677,13 @@ export default function CarbonCreditDetailPage() {
                     <Clock className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-500">
-                        {language === "vi" ? "Kiểm chứng tiếp theo" : "Next Verification"}
+                        {language === "vi"
+                          ? "Kiểm chứng tiếp theo"
+                          : "Next Verification"}
                       </p>
-                      <p className="text-sm">{carbonCredit.nextVerificationDate}</p>
+                      <p className="text-sm">
+                        {carbonCredit.nextVerificationDate}
+                      </p>
                     </div>
                   </div>
 
@@ -544,7 +693,9 @@ export default function CarbonCreditDetailPage() {
                       className="w-full justify-start text-green-600 border-green-200 hover:bg-green-50"
                     >
                       <ArrowUpRight className="h-4 w-4 mr-2" />
-                      {language === "vi" ? "Xem trang dự án" : "View Project Page"}
+                      {language === "vi"
+                        ? "Xem trang dự án"
+                        : "View Project Page"}
                     </Button>
                   </div>
                 </CardContent>
@@ -552,12 +703,16 @@ export default function CarbonCreditDetailPage() {
 
               <Card className="mt-6">
                 <CardHeader>
-                  <CardTitle>{language === "vi" ? "Hành động nhanh" : "Quick Actions"}</CardTitle>
+                  <CardTitle>
+                    {language === "vi" ? "Hành động nhanh" : "Quick Actions"}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button className="w-full justify-start bg-green-600 hover:bg-green-700">
                     <Download className="h-4 w-4 mr-2" />
-                    {language === "vi" ? "Tải chứng chỉ" : "Download Certificate"}
+                    {language === "vi"
+                      ? "Tải chứng chỉ"
+                      : "Download Certificate"}
                   </Button>
                   <Button variant="outline" className="w-full justify-start">
                     <FileText className="h-4 w-4 mr-2" />
@@ -576,7 +731,9 @@ export default function CarbonCreditDetailPage() {
         <TabsContent value="reports" className="mt-4 md:mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>{language === "vi" ? "Báo cáo dự án" : "Project Reports"}</CardTitle>
+              <CardTitle>
+                {language === "vi" ? "Báo cáo dự án" : "Project Reports"}
+              </CardTitle>
               <CardDescription>
                 {language === "vi"
                   ? "Tất cả báo cáo liên quan đến dự án tín chỉ carbon"
@@ -587,10 +744,18 @@ export default function CarbonCreditDetailPage() {
               <div className="mb-6">
                 <Tabs defaultValue="all">
                   <TabsList>
-                    <TabsTrigger value="all">{language === "vi" ? "Tất cả" : "All"}</TabsTrigger>
-                    <TabsTrigger value="quarterly">{language === "vi" ? "Báo cáo quý" : "Quarterly"}</TabsTrigger>
-                    <TabsTrigger value="verification">{language === "vi" ? "Kiểm chứng" : "Verification"}</TabsTrigger>
-                    <TabsTrigger value="impact">{language === "vi" ? "Tác động" : "Impact"}</TabsTrigger>
+                    <TabsTrigger value="all">
+                      {language === "vi" ? "Tất cả" : "All"}
+                    </TabsTrigger>
+                    <TabsTrigger value="quarterly">
+                      {language === "vi" ? "Báo cáo quý" : "Quarterly"}
+                    </TabsTrigger>
+                    <TabsTrigger value="verification">
+                      {language === "vi" ? "Kiểm chứng" : "Verification"}
+                    </TabsTrigger>
+                    <TabsTrigger value="impact">
+                      {language === "vi" ? "Tác động" : "Impact"}
+                    </TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
@@ -613,7 +778,11 @@ export default function CarbonCreditDetailPage() {
                       </div>
                     </div>
                     <div className="flex gap-2 sm:flex-shrink-0">
-                      <Button variant="outline" size="sm" className="text-blue-600 border-blue-200">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-blue-600 border-blue-200"
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="16"
@@ -631,7 +800,11 @@ export default function CarbonCreditDetailPage() {
                         </svg>
                         {language === "vi" ? "Xem" : "View"}
                       </Button>
-                      <Button variant="outline" size="sm" className="text-green-600 border-green-200">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-green-600 border-green-200"
+                      >
                         <Download className="h-4 w-4 mr-2" />
                         {language === "vi" ? "Tải xuống" : "Download"}
                       </Button>
@@ -646,7 +819,11 @@ export default function CarbonCreditDetailPage() {
         <TabsContent value="transactions" className="mt-4 md:mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>{language === "vi" ? "Lịch sử giao dịch" : "Transaction History"}</CardTitle>
+              <CardTitle>
+                {language === "vi"
+                  ? "Lịch sử giao dịch"
+                  : "Transaction History"}
+              </CardTitle>
               <CardDescription>
                 {language === "vi"
                   ? "Tất cả giao dịch liên quan đến tín chỉ carbon của bạn"
@@ -662,7 +839,9 @@ export default function CarbonCreditDetailPage() {
                         {language === "vi" ? "Ngày" : "Date"}
                       </th>
                       <th className="text-left py-3 px-4 font-medium text-gray-500">
-                        {language === "vi" ? "Loại giao dịch" : "Transaction Type"}
+                        {language === "vi"
+                          ? "Loại giao dịch"
+                          : "Transaction Type"}
                       </th>
                       <th className="text-left py-3 px-4 font-medium text-gray-500">
                         {language === "vi" ? "Số lượng" : "Amount"}
@@ -671,7 +850,9 @@ export default function CarbonCreditDetailPage() {
                         {language === "vi" ? "Giá trị" : "Value"}
                       </th>
                       <th className="text-left py-3 px-4 font-medium text-gray-500">
-                        {language === "vi" ? "Mục đích/Người nhận" : "Purpose/Recipient"}
+                        {language === "vi"
+                          ? "Mục đích/Người nhận"
+                          : "Purpose/Recipient"}
                       </th>
                       <th className="text-left py-3 px-4 font-medium text-gray-500">
                         {language === "vi" ? "Trạng thái" : "Status"}
@@ -680,14 +861,19 @@ export default function CarbonCreditDetailPage() {
                   </thead>
                   <tbody>
                     {carbonCredit.transactions.map((transaction) => (
-                      <tr key={transaction.id} className="border-b hover:bg-gray-50">
+                      <tr
+                        key={transaction.id}
+                        className="border-b hover:bg-gray-50"
+                      >
                         <td className="py-3 px-4">{transaction.date}</td>
                         <td className="py-3 px-4">
                           <span
                             className={`inline-block px-2 py-1 rounded-full text-xs ${
-                              transaction.type === (language === "vi" ? "Mua" : "Purchase")
+                              transaction.type ===
+                              (language === "vi" ? "Mua" : "Purchase")
                                 ? "bg-green-100 text-green-800"
-                                : transaction.type === (language === "vi" ? "Sử dụng" : "Usage")
+                                : transaction.type ===
+                                    (language === "vi" ? "Sử dụng" : "Usage")
                                   ? "bg-blue-100 text-blue-800"
                                   : "bg-purple-100 text-purple-800"
                             }`}
@@ -697,7 +883,9 @@ export default function CarbonCreditDetailPage() {
                         </td>
                         <td className="py-3 px-4">{transaction.amount}</td>
                         <td className="py-3 px-4">{transaction.value}</td>
-                        <td className="py-3 px-4">{transaction.purpose || transaction.recipient || "-"}</td>
+                        <td className="py-3 px-4">
+                          {transaction.purpose || transaction.recipient || "-"}
+                        </td>
                         <td className="py-3 px-4">
                           <span
                             className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
@@ -731,7 +919,9 @@ export default function CarbonCreditDetailPage() {
         <TabsContent value="certificates" className="mt-4 md:mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>{language === "vi" ? "Chứng chỉ" : "Certificates"}</CardTitle>
+              <CardTitle>
+                {language === "vi" ? "Chứng chỉ" : "Certificates"}
+              </CardTitle>
               <CardDescription>
                 {language === "vi"
                   ? "Tất cả chứng chỉ liên quan đến dự án tín chỉ carbon"
@@ -746,11 +936,15 @@ export default function CarbonCreditDetailPage() {
                       <FileText className="h-16 w-16 text-green-300" />
                     </div>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-base">{certificate.title}</CardTitle>
+                      <CardTitle className="text-base">
+                        {certificate.title}
+                      </CardTitle>
                       <CardDescription>{certificate.date}</CardDescription>
                     </CardHeader>
                     <CardContent className="pt-0">
-                      <p className="text-sm text-gray-500 mb-4">{certificate.size}</p>
+                      <p className="text-sm text-gray-500 mb-4">
+                        {certificate.size}
+                      </p>
                       <div className="flex gap-2">
                         <Button variant="outline" size="sm" className="flex-1">
                           <svg
@@ -770,7 +964,10 @@ export default function CarbonCreditDetailPage() {
                           </svg>
                           {language === "vi" ? "Xem" : "View"}
                         </Button>
-                        <Button size="sm" className="flex-1 bg-green-600 hover:bg-green-700">
+                        <Button
+                          size="sm"
+                          className="flex-1 bg-green-600 hover:bg-green-700"
+                        >
                           <Download className="h-4 w-4 mr-2" />
                           {language === "vi" ? "Tải xuống" : "Download"}
                         </Button>
@@ -786,7 +983,11 @@ export default function CarbonCreditDetailPage() {
         <TabsContent value="timeline" className="mt-4 md:mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>{language === "vi" ? "Dòng thời gian dự án" : "Project Timeline"}</CardTitle>
+              <CardTitle>
+                {language === "vi"
+                  ? "Dòng thời gian dự án"
+                  : "Project Timeline"}
+              </CardTitle>
               <CardDescription>
                 {language === "vi"
                   ? "Các sự kiện quan trọng trong dự án tín chỉ carbon"
@@ -810,15 +1011,21 @@ export default function CarbonCreditDetailPage() {
                     </div>
                     <div
                       className={`p-4 rounded-lg border ${
-                        event.upcoming ? "border-yellow-200 bg-yellow-50" : "border-gray-200 bg-white"
+                        event.upcoming
+                          ? "border-yellow-200 bg-yellow-50"
+                          : "border-gray-200 bg-white"
                       }`}
                     >
-                      <p className="text-sm font-medium text-gray-500">{event.date}</p>
+                      <p className="text-sm font-medium text-gray-500">
+                        {event.date}
+                      </p>
                       <p className="font-medium mt-1">{event.event}</p>
                       {event.upcoming && (
                         <div className="mt-2 flex items-center text-sm text-yellow-700">
                           <AlertTriangle className="h-4 w-4 mr-1" />
-                          <span>{language === "vi" ? "Sắp diễn ra" : "Upcoming"}</span>
+                          <span>
+                            {language === "vi" ? "Sắp diễn ra" : "Upcoming"}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -830,5 +1037,5 @@ export default function CarbonCreditDetailPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

@@ -16,7 +16,7 @@ export const getUserFromLocalStorage = (): UserLocalStorage | null => {
 
 export const formatNumberUtil = (
   num: number | undefined,
-  currency?: string
+  currency?: string,
 ): string => {
   if (num === undefined || num === null) return "N/A";
   try {

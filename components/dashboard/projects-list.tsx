@@ -69,43 +69,44 @@ const StatusBadge = ({ status }: { status: string }) => {
 
 import { IProject, apiProjects } from "@/app/fetch/fetch.projects";
 import { useAuth } from "../../context/auth-context";
+import { formatDateUtil } from "@/app/utils/common";
 export default function ProjectsList() {
   const { language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [projects, setProjects] = useState<IProject[]>([]);
-  const { user } = useAuth()
+  const { user } = useAuth();
   useEffect(() => {
-    const getlistProject = async () => {
-      const response = await apiProjects.getAll();
-      if (response && response.payload) {
-        setProjects(response.payload);
+    if (!user?.userId) return; // 👈 chặn khi chưa có user
+
+    const getProjectMyUser = async () => {
+      try {
+        const response = await apiProjects.getMyProject(user.userId);
+        if (response?.payload) {
+          setProjects(response.payload);
+        }
+      } catch (err) {
+        console.error("Lỗi fetch dự án:", err);
       }
     };
-    getlistProject();
-  }, []);
 
-  const filteredProjects = projects.filter((project) => {
-    const matchesSearch =
-      project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || project.status === statusFilter;
-    const matchesType = typeFilter === "all" || project.type === typeFilter;
+    getProjectMyUser();
+  }, [user?.userId]);
 
-    return matchesSearch && matchesStatus && matchesType;
-  });
+  const filteredProjects =
+    Array.isArray(projects) &&
+    projects.filter((project) => {
+      const matchesSearch =
+        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.location.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus =
+        statusFilter === "all" || project.status === statusFilter;
+      const matchesType = typeFilter === "all" || project.type === typeFilter;
 
-  const formatDate = (dateString: Date) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat(language === "vi" ? "vi-VN" : "en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }).format(date);
-  };
+      return matchesSearch && matchesStatus && matchesType;
+    });
 
   return (
     <div className="space-y-6">
@@ -170,7 +171,9 @@ export default function ProjectsList() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div className="flex items-center text-gray-500">
                     <Calendar className="h-4 w-4 mr-2" />
-                    <span>Đăng ký: {formatDate(project.registrationDate)}</span>
+                    <span>
+                      Đăng ký: {formatDateUtil(project.registrationDate)}
+                    </span>
                   </div>
                   <div className="flex items-center text-gray-500">
                     <Filter className="h-4 w-4 mr-2" />

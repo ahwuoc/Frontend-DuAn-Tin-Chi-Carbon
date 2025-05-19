@@ -1,22 +1,30 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import Link from "next/link"
-import { CheckCircle, Leaf, BarChart3, TrendingUp, Award, DollarSign } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-import ImageComparison from "@/components/image-comparison"
-import ProjectRegistrationForm from "@/components/project-registration-form"
-import AnimatedButton from "@/components/animated-button"
-import { useLanguage } from "@/context/language-context"
+import Image from "next/image";
+import Link from "next/link";
+import {
+  CheckCircle,
+  Leaf,
+  BarChart3,
+  TrendingUp,
+  Award,
+  DollarSign,
+} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import ImageComparison from "@/components/image-comparison";
+import ProjectRegistrationForm from "@/components/project-registration-form";
+import AnimatedButton from "@/components/animated-button";
+import { useLanguage } from "@/context/language-context";
 
 export default function CarbonProjectsPage() {
-  const { language } = useLanguage()
+  const { language } = useLanguage();
 
   const translations = {
     en: {
       featuredProduct: "Featured Product",
       heroTitle: "CARBON CREDIT PROJECTS",
-      heroSubtitle: "Developing high-quality carbon credit projects, optimizing value from planted forests",
+      heroSubtitle:
+        "Developing high-quality carbon credit projects, optimizing value from planted forests",
       registerProject: "Register Project",
       registerNow: "Register Now!",
       learnMore: "Learn More",
@@ -34,7 +42,8 @@ export default function CarbonProjectsPage() {
       carbonCreditProject: "Carbon Credit Project",
       realImpact: "Real Impact",
       projectImpact: "Impact of Carbon Credit Projects",
-      seeTheDifference: "See the difference before and after implementing a carbon credit project",
+      seeTheDifference:
+        "See the difference before and after implementing a carbon credit project",
       beforeProject: "Before Project",
       afterProject: "After Project",
       benefits: "Benefits",
@@ -51,7 +60,8 @@ export default function CarbonProjectsPage() {
       timberHarvestingRightsDesc:
         "After the carbon project period, you still have the right to harvest and use the timber resources of your forest",
       costSupport: "Cost Support",
-      costSupportDesc: "TCCV covers all costs related to project setup, data collection, measurement, and verification",
+      costSupportDesc:
+        "TCCV covers all costs related to project setup, data collection, measurement, and verification",
       internationalCertification: "International Certification",
       internationalCertificationDesc:
         "Projects are certified according to reputable international standards such as VCS, Gold Standard, increasing the value of carbon credits",
@@ -60,20 +70,26 @@ export default function CarbonProjectsPage() {
         "Receive technical support throughout the project implementation process, from design to implementation and monitoring",
       process: "Process",
       projectImplementationProcess: "Project Implementation Process",
-      processDescription: "Steps to implement a carbon credit project from survey to credit issuance",
+      processDescription:
+        "Steps to implement a carbon credit project from survey to credit issuance",
       surveyAndAssessment: "Survey and Assessment",
-      surveyAndAssessmentDesc: "Survey the project area, assess carbon credit potential and project feasibility",
+      surveyAndAssessmentDesc:
+        "Survey the project area, assess carbon credit potential and project feasibility",
       projectDesign: "Project Design",
-      projectDesignDesc: "Develop project plan, select appropriate methodology and determine baseline",
+      projectDesignDesc:
+        "Develop project plan, select appropriate methodology and determine baseline",
       verificationAndApproval: "Verification and Approval",
       verificationAndApprovalDesc:
         "Project is verified by an independent entity and approved according to international standards",
       implementationAndMonitoring: "Implementation and Monitoring",
-      implementationAndMonitoringDesc: "Implement project activities and establish continuous monitoring system",
+      implementationAndMonitoringDesc:
+        "Implement project activities and establish continuous monitoring system",
       creditVerificationAndIssuance: "Credit Verification and Issuance",
-      creditVerificationAndIssuanceDesc: "Verify emission reduction results and issue carbon credits on the market",
+      creditVerificationAndIssuanceDesc:
+        "Verify emission reduction results and issue carbon credits on the market",
       tradingAndProfitSharing: "Trading and Profit Sharing",
-      tradingAndProfitSharingDesc: "Sell carbon credits on the market and share profits according to agreement",
+      tradingAndProfitSharingDesc:
+        "Sell carbon credits on the market and share profits according to agreement",
       registerProjectSection: "Register Project",
       registerCarbonProject: "Register Carbon Credit Project",
       registerProjectDesc:
@@ -101,14 +117,16 @@ export default function CarbonProjectsPage() {
       startNow: "Start Now!",
       "3dVisualization": "3D Visualization",
       forestGrowthModel: "Forest Growth Model",
-      exploreForestModel: "Explore our interactive 3D model showing how trees grow and sequester carbon over time",
+      exploreForestModel:
+        "Explore our interactive 3D model showing how trees grow and sequester carbon over time",
       "3dModelDescription":
         "This 3D model illustrates how our technology measures and monitors tree growth to calculate carbon credits accurately.",
     },
     vi: {
       featuredProduct: "Sản phẩm nổi bật",
       heroTitle: "DỰ ÁN TÍN CHỈ CARBON",
-      heroSubtitle: "Phát triển các dự án tín chỉ carbon chất lượng cao, tối ưu hóa giá trị từ các khu rừng trồng",
+      heroSubtitle:
+        "Phát triển các dự án tín chỉ carbon chất lượng cao, tối ưu hóa giá trị từ các khu rừng trồng",
       registerProject: "Đăng ký dự án",
       registerNow: "Đăng ký ngay!",
       learnMore: "Tìm hiểu thêm",
@@ -126,12 +144,14 @@ export default function CarbonProjectsPage() {
       carbonCreditProject: "Dự án tín chỉ carbon",
       realImpact: "Tác động thực tế",
       projectImpact: "Tác động của dự án tín chỉ carbon",
-      seeTheDifference: "Xem sự khác biệt trước và sau khi triển khai dự án tín chỉ carbon",
+      seeTheDifference:
+        "Xem sự khác biệt trước và sau khi triển khai dự án tín chỉ carbon",
       beforeProject: "Trước dự án",
       afterProject: "Sau dự án",
       benefits: "Lợi ích",
       participationBenefits: "Lợi ích khi tham gia dự án",
-      benefitsDescription: "Tham gia dự án tín chỉ carbon mang lại nhiều lợi ích cho chủ rừng và môi trường",
+      benefitsDescription:
+        "Tham gia dự án tín chỉ carbon mang lại nhiều lợi ích cho chủ rừng và môi trường",
       stableIncome: "Thu nhập ổn định",
       stableIncomeDesc:
         "Nhận được nguồn thu nhập từ việc bán tín chỉ carbon với giá trị trung bình khoảng 8 triệu VND/ha/năm",
@@ -152,19 +172,26 @@ export default function CarbonProjectsPage() {
         "Được hỗ trợ kỹ thuật trong suốt quá trình thực hiện dự án, từ thiết kế đến triển khai và giám sát",
       process: "Quy trình",
       projectImplementationProcess: "Quy trình thực hiện dự án",
-      processDescription: "Các bước thực hiện dự án tín chỉ carbon từ khảo sát đến phát hành tín chỉ",
+      processDescription:
+        "Các bước thực hiện dự án tín chỉ carbon từ khảo sát đến phát hành tín chỉ",
       surveyAndAssessment: "Khảo sát và đánh giá",
-      surveyAndAssessmentDesc: "Khảo sát khu vực dự án, đánh giá tiềm năng tín chỉ carbon và tính khả thi của dự án",
+      surveyAndAssessmentDesc:
+        "Khảo sát khu vực dự án, đánh giá tiềm năng tín chỉ carbon và tính khả thi của dự án",
       projectDesign: "Thiết kế dự án",
-      projectDesignDesc: "Xây dựng kế hoạch dự án, lựa chọn phương pháp luận phù hợp và xác định đường cơ sở",
+      projectDesignDesc:
+        "Xây dựng kế hoạch dự án, lựa chọn phương pháp luận phù hợp và xác định đường cơ sở",
       verificationAndApproval: "Thẩm định và phê duyệt",
-      verificationAndApprovalDesc: "Dự án được thẩm định bởi đơn vị độc lập và phê duyệt theo tiêu chuẩn quốc tế",
+      verificationAndApprovalDesc:
+        "Dự án được thẩm định bởi đơn vị độc lập và phê duyệt theo tiêu chuẩn quốc tế",
       implementationAndMonitoring: "Triển khai và giám sát",
-      implementationAndMonitoringDesc: "Triển khai các hoạt động dự án và thiết lập hệ thống giám sát liên tục",
+      implementationAndMonitoringDesc:
+        "Triển khai các hoạt động dự án và thiết lập hệ thống giám sát liên tục",
       creditVerificationAndIssuance: "Xác minh và phát hành tín chỉ",
-      creditVerificationAndIssuanceDesc: "Xác minh kết quả giảm phát thải và phát hành tín chỉ carbon trên thị trường",
+      creditVerificationAndIssuanceDesc:
+        "Xác minh kết quả giảm phát thải và phát hành tín chỉ carbon trên thị trường",
       tradingAndProfitSharing: "Giao dịch và phân chia lợi nhuận",
-      tradingAndProfitSharingDesc: "Bán tín chỉ carbon trên thị trường và phân chia lợi nhuận theo thỏa thuận",
+      tradingAndProfitSharingDesc:
+        "Bán tín chỉ carbon trên thị trường và phân chia lợi nhuận theo thỏa thuận",
       registerProjectSection: "Đăng ký dự án",
       registerCarbonProject: "Đăng ký dự án tín chỉ carbon",
       registerProjectDesc:
@@ -188,7 +215,8 @@ export default function CarbonProjectsPage() {
       faq5Answer:
         "Rừng keo hiện nay chúng tôi chưa hỗ trợ làm tín chỉ. Hiện tại TCCV hỗ trợ thực hiện các dự án từ 20ha trở lên với đất rừng sản xuất, có sổ, đất trống hoặc đất đã có cây trồng, tuổi rừng dưới 5 năm, và cần trồng xen canh 3-5 loài cây bản địa Việt Nam (ví dụ: cây gù hương, giáng hương, thông, dổi, lim, sao đen,...). Nếu bạn có khu rừng khác đạt tiêu chuẩn, cứ báo chúng tôi để kiểm tra thêm.",
       ctaQuestion: "Bạn có khu rừng phù hợp cho dự án tín chỉ carbon?",
-      ctaDescription: "Liên hệ với chúng tôi ngay hôm nay để được tư vấn miễn phí.",
+      ctaDescription:
+        "Liên hệ với chúng tôi ngay hôm nay để được tư vấn miễn phí.",
       startNow: "Bắt đầu ngay!",
       "3dVisualization": "Mô phỏng 3D",
       forestGrowthModel: "Mô hình phát triển rừng",
@@ -197,12 +225,11 @@ export default function CarbonProjectsPage() {
       "3dModelDescription":
         "Mô hình 3D này minh họa cách công nghệ của chúng tôi đo lường và theo dõi sự phát triển của cây để tính toán tín chỉ carbon chính xác.",
     },
-  }
-
-  const getText = (key: keyof typeof translations["vi"]) => {
-    return translations[language][key] || translations["vi"][key];
   };
 
+  const getText = (key: keyof (typeof translations)["vi"]) => {
+    return translations[language][key] || translations["vi"][key];
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -221,8 +248,12 @@ export default function CarbonProjectsPage() {
           <span className="inline-block py-1 px-3 bg-green-600 text-white text-sm font-medium rounded-full mb-4">
             {getText("featuredProduct")}
           </span>
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">{getText("heroTitle")}</h1>
-          <p className="text-white text-xl max-w-2xl mb-8">{getText("heroSubtitle")}</p>
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
+            {getText("heroTitle")}
+          </h1>
+          <p className="text-white text-xl max-w-2xl mb-8">
+            {getText("heroSubtitle")}
+          </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="#register-project">
               <AnimatedButton
@@ -253,25 +284,39 @@ export default function CarbonProjectsPage() {
               <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
                 {getText("overview")}
               </span>
-              <h2 className="text-4xl font-bold mb-6 text-gray-800">{getText("whatIsCarbonProject")}</h2>
-              <p className="text-lg text-gray-600 mb-6">{getText("projectDescription1")}</p>
-              <p className="text-lg text-gray-600 mb-8">{getText("projectDescription2")}</p>
+              <h2 className="text-4xl font-bold mb-6 text-gray-800">
+                {getText("whatIsCarbonProject")}
+              </h2>
+              <p className="text-lg text-gray-600 mb-6">
+                {getText("projectDescription1")}
+              </p>
+              <p className="text-lg text-gray-600 mb-8">
+                {getText("projectDescription2")}
+              </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-700">{getText("projectFrom20ha")}</span>
+                  <span className="text-gray-700">
+                    {getText("projectFrom20ha")}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-700">{getText("forestLandWithCertificate")}</span>
+                  <span className="text-gray-700">
+                    {getText("forestLandWithCertificate")}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-700">{getText("forestAgeLessThan5")}</span>
+                  <span className="text-gray-700">
+                    {getText("forestAgeLessThan5")}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-700">{getText("plantMixOf3To5Species")}</span>
+                  <span className="text-gray-700">
+                    {getText("plantMixOf3To5Species")}
+                  </span>
                 </div>
               </div>
             </div>
@@ -294,8 +339,12 @@ export default function CarbonProjectsPage() {
             <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
               {getText("3dVisualization")}
             </span>
-            <h2 className="text-3xl font-bold mb-4 text-gray-800">{getText("forestGrowthModel")}</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">{getText("exploreForestModel")}</p>
+            <h2 className="text-3xl font-bold mb-4 text-gray-800">
+              {getText("forestGrowthModel")}
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              {getText("exploreForestModel")}
+            </p>
           </div>
 
           <div className="relative w-full h-[600px] rounded-xl shadow-lg overflow-hidden">
@@ -314,12 +363,13 @@ export default function CarbonProjectsPage() {
                 src="https://sketchfab.com/models/ebe393edf83e4ac79005f4e9244e96d6/embed?autostart=1"
                 className="w-full h-full"
               />
-
             </div>
 
             {/* Thông tin ở dưới cùng */}
             <div className="absolute bottom-[50px] left-0 right-0 p-4 bg-black/30 backdrop-blur-sm text-white z-20">
-              <p className="text-sm font-medium">{getText("3dModelDescription")}</p>
+              <p className="text-sm font-medium">
+                {getText("3dModelDescription")}
+              </p>
             </div>
           </div>
         </div>
@@ -332,8 +382,12 @@ export default function CarbonProjectsPage() {
             <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
               {getText("realImpact")}
             </span>
-            <h2 className="text-4xl font-bold mb-4 text-gray-800">{getText("projectImpact")}</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">{getText("seeTheDifference")}</p>
+            <h2 className="text-4xl font-bold mb-4 text-gray-800">
+              {getText("projectImpact")}
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              {getText("seeTheDifference")}
+            </p>
           </div>
 
           <div className="max-w-4xl mx-auto">
@@ -355,8 +409,12 @@ export default function CarbonProjectsPage() {
             <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
               {getText("benefits")}
             </span>
-            <h2 className="text-4xl font-bold mb-4 text-gray-800">{getText("participationBenefits")}</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">{getText("benefitsDescription")}</p>
+            <h2 className="text-4xl font-bold mb-4 text-gray-800">
+              {getText("participationBenefits")}
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              {getText("benefitsDescription")}
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -392,10 +450,17 @@ export default function CarbonProjectsPage() {
                 icon: <CheckCircle className="h-12 w-12 text-green-600" />,
               },
             ].map((benefit, index) => (
-              <Card key={index} className="hover:shadow-xl transition-all duration-300 hover:bg-green-50">
+              <Card
+                key={index}
+                className="hover:shadow-xl transition-all duration-300 hover:bg-green-50"
+              >
                 <CardContent className="p-8">
-                  <div className="bg-green-100 p-4 rounded-full inline-block mb-6">{benefit.icon}</div>
-                  <h3 className="text-2xl font-bold mb-4 text-gray-800">{benefit.title}</h3>
+                  <div className="bg-green-100 p-4 rounded-full inline-block mb-6">
+                    {benefit.icon}
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4 text-gray-800">
+                    {benefit.title}
+                  </h3>
                   <p className="text-gray-600">{benefit.description}</p>
                 </CardContent>
               </Card>
@@ -411,8 +476,12 @@ export default function CarbonProjectsPage() {
             <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
               {getText("process")}
             </span>
-            <h2 className="text-4xl font-bold mb-4 text-gray-800">{getText("projectImplementationProcess")}</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">{getText("processDescription")}</p>
+            <h2 className="text-4xl font-bold mb-4 text-gray-800">
+              {getText("projectImplementationProcess")}
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              {getText("processDescription")}
+            </p>
           </div>
 
           <div className="max-w-4xl mx-auto">
@@ -454,10 +523,16 @@ export default function CarbonProjectsPage() {
                 },
               ].map((step, index) => (
                 <div key={index} className="relative z-10 mb-12">
-                  <div className={`flex items-center ${index % 2 === 0 ? "flex-row" : "flex-row-reverse"}`}>
+                  <div
+                    className={`flex items-center ${index % 2 === 0 ? "flex-row" : "flex-row-reverse"}`}
+                  >
                     {/* Timeline Content */}
-                    <div className={`w-5/12 ${index % 2 === 0 ? "text-right pr-8" : "text-left pl-8"}`}>
-                      <h3 className="text-xl font-bold mb-2 text-gray-800">{step.title}</h3>
+                    <div
+                      className={`w-5/12 ${index % 2 === 0 ? "text-right pr-8" : "text-left pl-8"}`}
+                    >
+                      <h3 className="text-xl font-bold mb-2 text-gray-800">
+                        {step.title}
+                      </h3>
                       <p className="text-gray-600">{step.description}</p>
                     </div>
 
@@ -485,8 +560,12 @@ export default function CarbonProjectsPage() {
             <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
               {getText("registerProjectSection")}
             </span>
-            <h2 className="text-4xl font-bold mb-4 text-gray-800">{getText("registerCarbonProject")}</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">{getText("registerProjectDesc")}</p>
+            <h2 className="text-4xl font-bold mb-4 text-gray-800">
+              {getText("registerCarbonProject")}
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              {getText("registerProjectDesc")}
+            </p>
           </div>
 
           <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
@@ -502,8 +581,12 @@ export default function CarbonProjectsPage() {
             <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
               {getText("faq")}
             </span>
-            <h2 className="text-4xl font-bold mb-4 text-gray-800">{getText("faqTitle")}</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">{getText("commonQuestions")}</p>
+            <h2 className="text-4xl font-bold mb-4 text-gray-800">
+              {getText("faqTitle")}
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              {getText("commonQuestions")}
+            </p>
           </div>
 
           <div className="max-w-3xl mx-auto">
@@ -533,7 +616,9 @@ export default function CarbonProjectsPage() {
                 <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300">
                   <details className="group">
                     <summary className="flex justify-between items-center p-6 cursor-pointer">
-                      <h3 className="text-xl font-bold text-gray-800">{faq.question}</h3>
+                      <h3 className="text-xl font-bold text-gray-800">
+                        {faq.question}
+                      </h3>
                       <div className="w-5 h-5 border-2 border-green-600 rounded-full flex items-center justify-center group-open:bg-green-600 transition-all duration-300">
                         <span className="transform group-open:rotate-180 transition-transform duration-300">
                           <svg
@@ -569,20 +654,22 @@ export default function CarbonProjectsPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="text-white">
-              <h2 className="text-3xl font-bold mb-2">{getText("ctaQuestion")}</h2>
-              <p className="text-white/80 text-lg">{getText("ctaDescription")}</p>
+              <h2 className="text-3xl font-bold mb-2">
+                {getText("ctaQuestion")}
+              </h2>
+              <p className="text-white/80 text-lg">
+                {getText("ctaDescription")}
+              </p>
             </div>
-            <Link href="#register-project">
-              <AnimatedButton
-                className="bg-white text-green-600 hover:bg-green-50 px-8 py-3 text-lg font-medium shadow-lg"
-                hoverText={getText("startNow")}
-              >
-                {getText("registerProject")}
-              </AnimatedButton>
-            </Link>
+            <AnimatedButton
+              className="bg-white text-green-600 hover:bg-green-50 px-8 py-3 text-lg font-medium shadow-lg"
+              hoverText={getText("startNow")}
+            >
+              {getText("registerProject")}
+            </AnimatedButton>
           </div>
         </div>
       </section>
     </div>
-  )
+  );
 }

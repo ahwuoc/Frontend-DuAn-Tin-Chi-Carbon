@@ -72,12 +72,11 @@ export type ResTProduct = {
   project: IProject[];
 };
 export const apiProjects = {
-  getProject: (id: string) => HTTP.GET<IProject>(`/projects/${id}`),
+  getProject: (id: string) => HTTP.GET<any>(`/projects/${id}`),
   update: (id: string, body: any) =>
     HTTP.PUT<IProject>(`/projects/${id}`, { body }),
   getAll: () => HTTP.GET<IProject[]>("/projects"),
   addProject: (data: any) => HTTP.POST<IProject>("/projects", data),
-  getMyProject: (id: string) =>
-    HTTP.GET<ResTProduct>(`/projects/profile/${id}`),
+  getMyProject: (id: string) => HTTP.GET<any>(`/projects/profile/${id}`),
   delete: (id: any) => HTTP.DELETE(`/projects/${id}`),
 };

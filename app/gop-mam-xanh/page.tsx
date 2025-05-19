@@ -8,7 +8,7 @@ import ForestExplorer from "@/components/forest/ForestExplorer";
 import StaticCertificate from "@/components/static-certificate";
 import CertificateGenerator from "@/components/certificate-generator";
 import { apiDonation } from "../fetch/fetch.donation";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 export default function GopMamXanhPage() {
   const [donorName, setDonorName] = useState<string>("");
   const [donorNote, setDonorNote] = useState<string>("");
@@ -174,7 +174,7 @@ export default function GopMamXanhPage() {
             <div className="p-6">
               <div className="mb-4">
                 <h3 className="text-xl font-bold text-center">
-                  Thông tin chi tiết dự án
+                  chi tiết dự án
                 </h3>
               </div>
 
@@ -569,10 +569,11 @@ export default function GopMamXanhPage() {
               <div
                 className="bg-green-600 h-4 rounded-full transition-all duration-500 ease-in-out"
                 style={{
-                  width: `${forestStats.isLoading
-                    ? 0
-                    : (forestStats.treeCount / 10000) * 100
-                    }%`,
+                  width: `${
+                    forestStats.isLoading
+                      ? 0
+                      : (forestStats.treeCount / 10000) * 100
+                  }%`,
                 }}
               ></div>
             </div>
@@ -658,10 +659,11 @@ export default function GopMamXanhPage() {
                           <nav className="flex -mb-px" aria-label="Tabs">
                             <button
                               onClick={() => setActiveTab("video")}
-                              className={`py-2 px-4 text-center border-b-2 font-medium text-sm flex-1 ${activeTab === "video"
-                                ? "border-green-500 text-green-600"
-                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                }`}
+                              className={`py-2 px-4 text-center border-b-2 font-medium text-sm flex-1 ${
+                                activeTab === "video"
+                                  ? "border-green-500 text-green-600"
+                                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                              }`}
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -687,10 +689,11 @@ export default function GopMamXanhPage() {
                             </button>
                             <button
                               onClick={() => setActiveTab("image")}
-                              className={`py-2 px-4 text-center border-b-2 font-medium text-sm flex-1 ${activeTab === "image"
-                                ? "border-green-500 text-green-600"
-                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                }`}
+                              className={`py-2 px-4 text-center border-b-2 font-medium text-sm flex-1 ${
+                                activeTab === "image"
+                                  ? "border-green-500 text-green-600"
+                                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                              }`}
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
