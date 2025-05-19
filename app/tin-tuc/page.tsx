@@ -72,10 +72,10 @@ export default function NewsPage() {
       </div>
     );
   }
-  const hasNews = news.length > 0;
-  const featuredNews = hasNews ? news[0] : null;
-  const gridNews = hasNews ? news.slice(1, 7) : [];
-  const recentPosts = hasNews ? news.slice(0, 4) : [];
+  const safeNews = Array.isArray(news) ? news : [];
+  const featuredNews = safeNews[0] ?? null;
+  const gridNews = safeNews.slice(1, 7);
+  const recentPosts = safeNews.slice(0, 4);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -165,7 +165,7 @@ export default function NewsPage() {
 
               {/* News Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {gridNews.length > 0 && gridNews.map((newsItem: any, index) => (
+                {Array.isArray(gridNews) && gridNews.map((newsItem: any, index) => (
                   <Card
                     key={index}
                     className="hover:shadow-lg transition-shadow duration-300"
@@ -260,7 +260,7 @@ export default function NewsPage() {
                   {t("recent_posts")}
                 </h3>
                 <div className="space-y-4">
-                  {recentPosts.length > 0 && recentPosts.map((post, index) => (
+                  {Array.isArray(recentPosts) && recentPosts.map((post, index) => (
                     <div key={index} className="flex gap-4">
                       <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                         <Image
