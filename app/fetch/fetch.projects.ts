@@ -79,4 +79,16 @@ export const apiProjects = {
   addProject: (data: any) => HTTP.POST<IProject>("/projects", data),
   getMyProject: (id: string) => HTTP.GET<any>(`/projects/profile/${id}`),
   delete: (id: any) => HTTP.DELETE(`/projects/${id}`),
+  updateActivities: (id: string, body: any) =>
+    HTTP.PUT<any>(`/projects/activities/${id}`, { body }),
+  updateDocuments: (id: string, body: any) =>
+    HTTP.PUT(`/projects/documents/${id}`, { body }),
+  updateDocumentStatus: (
+    projectId: string,
+    documentId: string,
+    status: string,
+  ) =>
+    HTTP.PUT(
+      `/projects/documents/${projectId}/${documentId}/status?status=${status}`,
+    ),
 };

@@ -2,10 +2,8 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-// Import các API service của bạn
 import { apiProjects } from "@/app/fetch/fetch.projects";
 
-// Import components từ shadcn/ui
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,24 +15,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-// Import icons từ lucide-react
 import {
-  PencilIcon, // Icon chỉnh sửa
-  SaveIcon, // Icon lưu
-  Trash2Icon, // Icon xóa
-  XCircleIcon, // Icon hủy
-  MapPinIcon, // Icon địa điểm
-  CalendarDaysIcon, // Icon ngày tháng
-  UsersIcon, // Icon người tham gia
-  AreaChartIcon, // Icon diện tích / progress
-  DollarSignIcon, // Icon tín chỉ carbon
-  FileTextIcon, // Icon mô tả / tài liệu
-  BookOpenIcon, // Icon loại / activities
-  InfoIcon, // Icon trạng thái / đăng ký
+  PencilIcon,
+  SaveIcon,
+  Trash2Icon,
+  XCircleIcon,
+  MapPinIcon,
+  CalendarDaysIcon,
+  UsersIcon,
+  AreaChartIcon,
+  DollarSignIcon,
+  FileTextIcon,
+  BookOpenIcon,
+  InfoIcon,
+  Loader2,
+  AlertCircle,
+  ArrowLeft,
+  ActivityIcon, // Thêm ActivityIcon cho phần Hoạt động
 } from "lucide-react";
+import Link from "next/link";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+  CardFooter,
+} from "@/components/ui/card";
 
-// Định nghĩa lại các interface đã cập nhật dựa trên dữ liệu mẫu
 export interface ICoordinates {
   lat: number;
   lng: number;
@@ -96,17 +104,17 @@ export default function EditProjectPage() {
 
   const [project, setProject] = useState<IProject | null>(null);
   const [formData, setFormData] = useState<FormData | null>(null);
-  const [isEditing, setIsEditing] = useState(false); // State để quản lý chế độ chỉnh sửa/chỉ đọc
+  const [isEditing, setIsEditing] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  // Đổi tên state này để tránh nhầm lẫn, vì nó không dùng cho "tasks"
+  // const [isProcessingTasks, setIsProcessingTasks] = useState(false);
 
-  useEffect(() => {
-    if (!projectId) return;
-
-    const fetchProject = async () => {
+  const fetchProject = useMemo(
+    () => async () => {
       setLoading(true);
       setError(null);
       try {
@@ -115,7 +123,6 @@ export default function EditProjectPage() {
         if (response && response.payload) {
           const data: IProject = response.payload;
           setProject(data);
-          // Khởi tạo formData ngay khi fetch thành công
           setFormData({
             name: data.name || "",
             description: data.description || "",
@@ -138,7 +145,7 @@ export default function EditProjectPage() {
             carbonCredits: data.carbonCredits,
             carbonCreditsClaimed: data.carbonCreditsClaimed,
           });
-          setIsEditing(false); // Mặc định là chế độ chỉ đọc sau khi load
+          setIsEditing(false); // Đảm bảo trạng thái ban đầu là không chỉnh sửa
         } else {
           throw new Error(
             response?.message ||
@@ -153,14 +160,19 @@ export default function EditProjectPage() {
       } finally {
         setLoading(false);
       }
-    };
+    },
+    [projectId],
+  );
 
-    fetchProject();
-  }, [projectId]);
+  useEffect(() => {
+    if (projectId) {
+      fetchProject();
+    }
+  }, [projectId, fetchProject]);
 
-  // Reset formData về dữ liệu project gốc khi vào chế độ chỉnh sửa
   const handleEditClick = () => {
     if (project) {
+      // Đảm bảo formData được điền đầy đủ từ project khi chuyển sang chế độ chỉnh sửa
       setFormData({
         name: project.name || "",
         description: project.description || "",
@@ -183,16 +195,15 @@ export default function EditProjectPage() {
         carbonCredits: project.carbonCredits,
         carbonCreditsClaimed: project.carbonCreditsClaimed,
       });
-      setIsEditing(true);
-      setError(null); // Clear error khi vào chế độ chỉnh sửa
     }
+    setIsEditing(true);
+    setError(null);
   };
 
-  // Hủy bỏ chỉnh sửa, quay lại chế độ chỉ đọc và khôi phục dữ liệu gốc
   const handleCancelClick = () => {
+    // Đặt lại formData về dữ liệu gốc của project khi hủy
     if (project) {
       setFormData({
-        // Reset formData về dữ liệu gốc
         name: project.name || "",
         description: project.description || "",
         location: project.location || "",
@@ -216,7 +227,7 @@ export default function EditProjectPage() {
       });
     }
     setIsEditing(false);
-    setError(null); // Clear error khi hủy
+    setError(null);
   };
 
   const handleChange = (
@@ -268,7 +279,7 @@ export default function EditProjectPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData || !projectId || isSubmitting || isDeleting) return; // Không submit nếu đang xóa
+    if (!formData || !projectId || isSubmitting || isDeleting) return;
 
     setIsSubmitting(true);
     setError(null);
@@ -310,10 +321,8 @@ export default function EditProjectPage() {
 
       if (response && response.payload) {
         console.log("Dự án cập nhật thành công!");
-        // Cập nhật state project gốc sau khi lưu thành công để hiển thị đúng ở chế độ chỉ đọc
         setProject(response.payload);
-        setIsEditing(false); // Quay lại chế độ chỉ đọc
-        // router.push(`/projects/${projectId}`); // Có thể không cần chuyển hướng nếu ở lại trang edit
+        setIsEditing(false);
       } else {
         throw new Error(
           response?.message || "Lưu dữ liệu thất bại: Lỗi API không xác định",
@@ -328,14 +337,14 @@ export default function EditProjectPage() {
   };
 
   const handleDelete = async () => {
-    if (!projectId || isDeleting || isSubmitting) return; // Không xóa nếu đang submit
+    if (!projectId || isDeleting || isSubmitting) return;
 
     const confirmDelete = window.confirm(
       `Bạn có chắc chắn muốn xóa dự án "${project?.name || "này"}" không? Hành động này không thể hoàn tác.`,
     );
 
     if (!confirmDelete) {
-      return; // Người dùng hủy xóa
+      return;
     }
 
     setIsDeleting(true);
@@ -343,10 +352,9 @@ export default function EditProjectPage() {
 
     try {
       const response = await apiProjects.delete(projectId);
-
-      if (response && response.success) {
+      if (response && response.payload) {
         console.log("Dự án đã xóa thành công!");
-        router.push("/projects"); // Chuyển hướng về trang danh sách project hoặc dashboard
+        router.push("/quan-ly/du-an");
       } else {
         throw new Error(
           response?.message || "Xóa dự án thất bại: Lỗi API không xác định",
@@ -360,25 +368,33 @@ export default function EditProjectPage() {
     }
   };
 
-  // Helper để render trường form hoặc giá trị chỉ đọc
+  const handleNavigateToActivityPage = () => {
+    router.push(`/quan-ly/admin/projects/edit/${projectId}/activity`);
+  };
+
+  const handleNavigateToDocumentPage = () => {
+    router.push(`/quan-ly/admin/projects/edit/${projectId}/documents`);
+  };
+
+  // Hàm renderField đã được điều chỉnh để hiển thị thông tin khi không chỉnh sửa
   const renderField = (
     label: string,
-    formField: keyof FormData,
-    projectValue: any, // Use 'any' or more specific type if needed
+    formField: keyof FormData | "coordinates_lat" | "coordinates_lng", // Thêm loại cho tọa độ
+    projectValue: any,
     inputType: string = "text",
-    options?: { value: string; label: string }[], // For select
-    step?: string, // For number
-    min?: string, // For number
-    max?: string, // For number
+    options?: { value: string; label: string }[],
+    step?: string,
+    min?: string,
+    max?: string,
   ) => (
     <div>
       <Label htmlFor={formField}>{label}</Label>
       {isEditing ? (
         inputType === "textarea" ? (
           <Textarea
-            id={formField}
-            name={formField}
-            value={formData?.[formField] as string}
+            id={formField.toString()}
+            name={formField.toString()}
+            value={formData?.[formField as keyof FormData] as string}
             onChange={handleChange}
             rows={4}
             required={
@@ -386,15 +402,18 @@ export default function EditProjectPage() {
               formField === "description" ||
               formField === "location" ||
               formField === "status"
-            } // Apply required based on field
+            }
           />
         ) : inputType === "select" && options ? (
           <Select
-            value={formData?.[formField] as string}
-            onValueChange={handleSelectChange(formField)}
-            required={formField === "status"} // Apply required based on field
+            value={formData?.[formField as keyof FormData] as string}
+            onValueChange={handleSelectChange(formField as keyof FormData)}
+            required={formField === "status"}
           >
-            <SelectTrigger id={formField} name={formField}>
+            <SelectTrigger
+              id={formField.toString()}
+              name={formField.toString()}
+            >
               <SelectValue placeholder={`Chọn ${label.toLowerCase()}`} />
             </SelectTrigger>
             <SelectContent>
@@ -405,18 +424,45 @@ export default function EditProjectPage() {
               ))}
             </SelectContent>
           </Select>
+        ) : formField === "participantsCount" ? (
+          <Input
+            type="number"
+            id="participantsCount"
+            name="participantsCount"
+            value={formData?.participantsCount ?? ""}
+            onChange={handleParticipantsChange}
+            step={step}
+            min={min}
+            max={max}
+          />
+        ) : inputType === "number" &&
+          (formField === "coordinates_lat" ||
+            formField === "coordinates_lng") ? (
+          <Input
+            type="number"
+            id={formField.toString()}
+            name={formField === "coordinates_lat" ? "lat" : "lng"}
+            value={
+              formField === "coordinates_lat"
+                ? (formData?.coordinates.lat ?? "")
+                : (formData?.coordinates.lng ?? "")
+            }
+            onChange={handleCoordinateChange}
+            step={step}
+            min={min}
+            max={max}
+          />
         ) : (
-          // text, number, date inputs
           <Input
             type={inputType}
-            id={formField}
-            name={formField}
-            value={formData?.[formField] ?? ""}
+            id={formField.toString()}
+            name={formField.toString()}
+            value={formData?.[formField as keyof FormData] ?? ""}
             onChange={handleChange}
             step={step}
             min={min}
             max={max}
-            required={formField === "name" || formField === "location"} // Apply required based on field
+            required={formField === "name" || formField === "location"}
           />
         )
       ) : (
@@ -425,14 +471,17 @@ export default function EditProjectPage() {
           projectValue !== null &&
           projectValue !== ""
             ? inputType === "date"
-              ? new Date(projectValue).toLocaleDateString() // Format date
+              ? new Date(projectValue).toLocaleDateString("vi-VN")
               : formField === "progress"
-                ? `${projectValue}%` // Add % for progress
-                : formField === "coordinates"
-                  ? `Lat: ${projectValue.lat}, Lng: ${projectValue.lng}` // Format coordinates
+                ? `${projectValue}%`
+                : formField === "area" ||
+                    formField === "carbonCredits" ||
+                    formField === "carbonCreditsTotal" ||
+                    formField === "carbonCreditsClaimed"
+                  ? projectValue.toLocaleString("vi-VN") // Định dạng số
                   : formField === "participantsCount"
-                    ? project?.participants?.[0] || "N/A" // Display original participant string if exists
-                    : String(projectValue) // Default to string
+                    ? project?.participants?.[0] || "N/A"
+                    : String(projectValue)
             : "N/A"}
         </div>
       )}
@@ -441,260 +490,321 @@ export default function EditProjectPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-4 text-center">
-        Đang tải dữ liệu dự án...
+      <div className="container mx-auto py-10 px-4 text-center">
+        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+        <p>Đang tải dữ liệu dự án...</p>
       </div>
     );
   }
 
-  if (error && !formData) {
-    // Chỉ hiện lỗi fetch ban đầu nếu chưa có formData
+  if (error && !project) {
+    // Kiểm tra nếu có lỗi và không có dữ liệu project nào được tải
     return (
-      <div className="container mx-auto p-4 text-red-600">Lỗi: {error}</div>
+      <div className="container mx-auto py-10 px-4 text-center">
+        <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-4" />
+        <h2 className="text-2xl font-bold mb-4">Lỗi tải dự án</h2>
+        <p className="text-gray-500 mb-6">{error}</p>
+        <Link href={`/quan-ly/du-an`}>
+          <Button>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Quay lại danh sách dự án
+          </Button>
+        </Link>
+      </div>
     );
   }
 
-  // Hiện "Chuẩn bị form..." chỉ khi formData chưa được load
-  if (!formData && !error) {
+  if (!project) {
+    // Trường hợp không có project nào được tải (sau khi loading)
     return (
-      <div className="container mx-auto p-4 text-center">
-        Đang chuẩn bị form...
+      <div className="container mx-auto py-10 px-4 text-center">
+        <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-4" />
+        <h2 className="text-2xl font-bold mb-4">Không tìm thấy dự án</h2>
+        <p className="text-gray-500 mb-6">
+          Dự án bạn đang tìm kiếm không tồn tại hoặc có lỗi khi tải dữ liệu.
+        </p>
+        <Link href={`/quan-ly/du-an`}>
+          <Button>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Quay lại danh sách dự án
+          </Button>
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-3xl mx-auto">
-      {/* Header với tên dự án và nút Chỉnh sửa */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">
-          <BookOpenIcon className="inline-block mr-2 h-6 w-6" />
-          Dự án: {project?.name || "Đang tải..."}
-        </h1>
+    <div className="container mx-auto py-10 px-4 max-w-7xl">
+      <div className="mb-6 flex items-center justify-between">
+        <Link
+          href={`/quan-ly/du-an`}
+          className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+        >
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Quay lại danh sách dự án
+        </Link>
         {!isEditing && (
           <Button onClick={handleEditClick} disabled={loading || !project}>
-            <PencilIcon className="mr-2 h-4 w-4" /> Chỉnh sửa
+            <PencilIcon className="mr-2 h-4 w-4" /> Chỉnh sửa dự án
           </Button>
         )}
       </div>
 
-      {/* Hiển thị lỗi khi submit/xóa */}
-      {error && <div className="text-red-600 text-sm mb-4">{error}</div>}
+      <h1 className="text-3xl font-bold mb-8 text-center">
+        <BookOpenIcon className="inline-block mr-3 h-8 w-8 text-primary" />
+        Chi tiết Dự án: {project?.name}
+      </h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Các trường luôn hiển thị 1 cột */}
-        {renderField("Tên Dự án", "name", project?.name, "text")}
-        {renderField("Mô tả", "description", project?.description, "textarea")}
-        {renderField("Địa điểm", "location", project?.location, "text")}
-
-        {/* Các trường nhóm thành 2 cột */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {renderField(
-            "Diện tích (km²)",
-            "area",
-            project?.area,
-            "number",
-            undefined,
-            "0.1",
-          )}
-          {renderField(
-            "Số người tham gia",
-            "participantsCount",
-            project?.participants?.[0],
-            "number",
-            undefined,
-            "1",
-            "0",
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {renderField(
-            "Vĩ độ",
-            "coordinates",
-            project?.coordinates,
-            "number",
-            undefined,
-            "0.000001",
-          )}
-          {renderField(
-            "Kinh độ",
-            "coordinates",
-            project?.coordinates,
-            "number",
-            undefined,
-            "0.000001",
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {renderField("Ngày bắt đầu", "startDate", project?.startDate, "date")}
-          {renderField("Ngày kết thúc", "endDate", project?.endDate, "date")}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {renderField("Loại dự án", "type", project?.type, "select", [
-            { value: "forestry", label: "Lâm nghiệp" },
-            { value: "agriculture", label: "Nông nghiệp" },
-            // Thêm các loại khác
-          ])}
-          {renderField("Trạng thái", "status", project?.status, "select", [
-            { value: "pending", label: "Đang chờ duyệt" },
-            { value: "active", label: "Đang hoạt động" },
-            { value: "completed", label: "Hoàn thành" },
-            { value: "archived", label: "Đã lưu trữ" },
-            // Thêm các trạng thái khác
-          ])}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {renderField(
-            "Tiến độ (%)",
-            "progress",
-            project?.progress,
-            "number",
-            undefined,
-            "1",
-            "0",
-            "100",
-          )}
-          {renderField(
-            "Tổng tín chỉ Carbon",
-            "carbonCreditsTotal",
-            project?.carbonCreditsTotal,
-            "number",
-            undefined,
-            "1",
-            "0",
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {renderField(
-            "Tín chỉ Carbon đã tạo",
-            "carbonCredits",
-            project?.carbonCredits,
-            "number",
-            undefined,
-            "1",
-            "0",
-          )}
-          {renderField(
-            "Tín chỉ Carbon đã yêu cầu",
-            "carbonCreditsClaimed",
-            project?.carbonCreditsClaimed,
-            "number",
-            undefined,
-            "1",
-            "0",
-          )}
-        </div>
-
-        {/* Trường chỉ đọc không có trong formData */}
-        <div>
-          <Label>Ngày đăng ký</Label>
-          <div className="mt-1 text-gray-900 text-sm flex items-center">
-            <CalendarDaysIcon className="mr-2 h-4 w-4 text-gray-500" />
-            {project?.registrationDate
-              ? new Date(project.registrationDate).toLocaleDateString()
-              : "N/A"}
-          </div>
-        </div>
-
-        {/* Activities List (Display only in both modes) */}
-        {project?.activities && project.activities.length > 0 && (
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2 flex items-center">
-              <BookOpenIcon className="mr-2 h-5 w-5 text-gray-700" />
-              Hoạt động gần đây
-            </h3>
-            <ul className="border rounded-md p-3 bg-gray-50 max-h-40 overflow-y-auto text-sm">
-              {project.activities.map((activity) => (
-                <li
-                  key={activity._id || activity.description}
-                  className="leading-tight mb-1"
-                >
-                  <strong>
-                    {new Date(activity.date).toLocaleDateString()}:
-                  </strong>{" "}
-                  {activity.description}{" "}
-                  {activity.title ? `(${activity.title})` : ""}{" "}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Documents List (Display only in both modes) */}
-        {project?.documents && project.documents.length > 0 && (
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2 flex items-center">
-              <FileTextIcon className="mr-2 h-5 w-5 text-gray-700" />
-              Tài liệu
-            </h3>
-            <div className="text-sm text-gray-700">
-              ({project.documents.length} tài liệu đính kèm)
-            </div>
-          </div>
-        )}
-
-        {/* Action Buttons (Visible only in Edit mode) */}
-        {isEditing && (
-          <div className="flex items-center justify-start gap-4 mt-6">
-            <Button
-              type="submit"
-              disabled={isSubmitting || !formData || isDeleting}
-            >
-              {isSubmitting ? (
-                "Đang lưu..."
-              ) : (
-                <>
-                  <SaveIcon className="mr-2 h-4 w-4" /> Lưu thay đổi
-                </>
-              )}
-            </Button>
-
-            {project?._id && (
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={isDeleting || isSubmitting}
-              >
-                {isDeleting ? (
-                  "Đang xóa..."
-                ) : (
-                  <>
-                    <Trash2Icon className="mr-2 h-4 w-4" /> Xóa Dự án
-                  </>
-                )}
-              </Button>
-            )}
-
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancelClick}
-              disabled={isSubmitting || isDeleting}
-            >
-              <XCircleIcon className="mr-2 h-4 w-4" /> Hủy
-            </Button>
-          </div>
-        )}
-      </form>
-      {/* Button Quay lại (Visible only when not in Edit mode) */}
-      {!isEditing && (
-        <div className="flex items-center justify-start gap-4 mt-6">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()} // Quay lại trang trước
-            disabled={loading || isDeleting || isSubmitting}
-          >
-            Quay lại
-          </Button>
+      {error && (
+        <div className="bg-red-100 text-red-800 p-3 rounded-md flex items-center gap-2 mb-6">
+          <AlertCircle className="h-5 w-5" />
+          <p>{error}</p>
         </div>
       )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Cột 1 & 2: Thông tin dự án và Form chỉnh sửa */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <InfoIcon className="mr-2 h-6 w-6 text-blue-600" />
+                Thông tin chung
+              </CardTitle>
+              <CardDescription>
+                Cập nhật các thông tin cơ bản của dự án.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {renderField("Tên Dự án", "name", project.name, "text")}
+                {renderField(
+                  "Mô tả",
+                  "description",
+                  project.description,
+                  "textarea",
+                )}
+                {renderField("Địa điểm", "location", project.location, "text")}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {renderField(
+                    "Diện tích (ha)",
+                    "area",
+                    project.area,
+                    "number",
+                    undefined,
+                    "0.1",
+                    "0",
+                  )}
+                  {renderField(
+                    "Số người tham gia",
+                    "participantsCount",
+                    project.participants?.[0],
+                    "number",
+                    undefined,
+                    "1",
+                    "0",
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {renderField(
+                    "Vĩ độ",
+                    "coordinates_lat", // Sử dụng key mới để phân biệt
+                    project.coordinates?.lat,
+                    "number",
+                    undefined,
+                    "0.000001",
+                  )}
+                  {renderField(
+                    "Kinh độ",
+                    "coordinates_lng", // Sử dụng key mới để phân biệt
+                    project.coordinates?.lng,
+                    "number",
+                    undefined,
+                    "0.000001",
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {renderField(
+                    "Ngày bắt đầu",
+                    "startDate",
+                    project.startDate,
+                    "date",
+                  )}
+                  {renderField(
+                    "Ngày kết thúc",
+                    "endDate",
+                    project.endDate,
+                    "date",
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {renderField("Loại dự án", "type", project.type, "select", [
+                    { value: "forestry", label: "Lâm nghiệp" },
+                    { value: "rice", label: "Lúa" },
+                    { value: "biochar", label: "Biochar" },
+                    { value: "other", label: "Khác" },
+                  ])}
+                  {renderField(
+                    "Trạng thái",
+                    "status",
+                    project.status,
+                    "select",
+                    [
+                      { value: "pending", label: "Đang chờ duyệt" },
+                      { value: "active", label: "Đang hoạt động" },
+                      { value: "completed", label: "Hoàn thành" },
+                      { value: "approved", label: "Đã phê duyệt" },
+                      { value: "in_progress", label: "Đang thực hiện" },
+                      { value: "rejected", label: "Bị từ chối" },
+                      { value: "archived", label: "Đã lưu trữ" },
+                    ],
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {renderField(
+                    "Tiến độ (%)",
+                    "progress",
+                    project.progress,
+                    "number",
+                    undefined,
+                    "1",
+                    "0",
+                    "100",
+                  )}
+                  {renderField(
+                    "Tổng tín chỉ Carbon",
+                    "carbonCreditsTotal",
+                    project.carbonCreditsTotal,
+                    "number",
+                    undefined,
+                    "1",
+                    "0",
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {renderField(
+                    "Tín chỉ Carbon đã tạo",
+                    "carbonCredits",
+                    project.carbonCredits,
+                    "number",
+                    undefined,
+                    "1",
+                    "0",
+                  )}
+                  {renderField(
+                    "Tín chỉ Carbon đã yêu cầu",
+                    "carbonCreditsClaimed",
+                    project.carbonCreditsClaimed,
+                    "number",
+                    undefined,
+                    "1",
+                    "0",
+                  )}
+                </div>
+
+                {/* Trường chỉ đọc: Ngày đăng ký */}
+                <div>
+                  <Label>Ngày đăng ký</Label>
+                  <div className="mt-1 text-gray-900 text-sm flex items-center">
+                    <CalendarDaysIcon className="mr-2 h-4 w-4 text-gray-500" />
+                    {project.registrationDate
+                      ? new Date(project.registrationDate).toLocaleDateString(
+                          "vi-VN",
+                        )
+                      : "N/A"}
+                  </div>
+                </div>
+
+                {/* Action Buttons (Visible only in Edit mode, nằm bên dưới form chính) */}
+                {isEditing && (
+                  <div className="flex flex-wrap items-center justify-start gap-4 mt-6">
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting || !formData || isDeleting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Đang
+                          lưu...
+                        </>
+                      ) : (
+                        <>
+                          <SaveIcon className="mr-2 h-4 w-4" /> Lưu thay đổi
+                        </>
+                      )}
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleCancelClick}
+                      disabled={isSubmitting || isDeleting}
+                    >
+                      <XCircleIcon className="mr-2 h-4 w-4" /> Hủy
+                    </Button>
+                  </div>
+                )}
+              </form>
+            </CardContent>
+            {isEditing && (
+              <CardFooter className="flex justify-end pt-6">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={isDeleting || isSubmitting}
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Đang
+                      xóa...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2Icon className="mr-2 h-4 w-4" /> Xóa Dự án
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
+            )}
+          </Card>
+        </div>
+
+        {/* Cột 3: Các tác vụ và Hoạt động gần đây */}
+        <div className="lg:col-span-1 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Các tác vụ khác</CardTitle>
+              <CardDescription>
+                Quản lý các phần liên quan khác của dự án.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button
+                className="w-full"
+                onClick={handleNavigateToActivityPage}
+                disabled={!projectId}
+              >
+                <ActivityIcon className="mr-2 h-4 w-4" /> Cập nhật hoạt động
+              </Button>
+              <Button
+                className="w-full"
+                onClick={handleNavigateToDocumentPage}
+                disabled={!projectId}
+              >
+                <FileTextIcon className="mr-2 h-4 w-4" /> Quản lý tài liệu
+              </Button>
+              {/* Thêm các nút tác vụ khác ở đây nếu cần */}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

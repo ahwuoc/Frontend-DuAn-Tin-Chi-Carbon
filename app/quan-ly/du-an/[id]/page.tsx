@@ -4,7 +4,11 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLanguage } from "@/context/language-context";
 import { useAuth } from "@/context/auth-context";
-import { uploadToCloudinary, formatDateUtil } from "@/app/utils/common";
+import {
+  uploadToCloudinary,
+  formatDateUtil,
+  getUserFromLocalStorage,
+} from "@/app/utils/common";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -16,8 +20,16 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input"; // Xóa InputProps vì không còn dùng
 import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Leaf,
   MapPin,
@@ -30,24 +42,80 @@ import {
   AlertCircle,
   ArrowLeft,
   Loader2,
+  FileUp, // Thêm icon FileUp cho trạng thái pending của document
 } from "lucide-react";
 import Link from "next/link";
 import { apiProjects, IProject } from "@/app/fetch/fetch.projects";
 import { ProjectIcon } from "./_components";
 
+export interface ICoordinates {
+  lat: number;
+  lng: number;
+}
+
+export interface IActivity {
+  _id?: string;
+  date: string;
+  description: string;
+  title?: string;
+}
+
+export interface IDocument {
+  _id?: string;
+  name: string;
+  url: string;
+  type?: string;
+  uploadedAt?: string;
+  userId?: string;
+  status?: "pending" | "approved" | "rejected"; // Đã thêm status cho tài liệu
+}
+
+export interface IProject {
+  _id?: string;
+  name: string;
+  description?: string;
+  status?: "pending" | "active" | "completed" | "archived";
+  registrationDate?: string;
+  startDate?: string;
+  endDate?: string;
+  carbonCredits?: number;
+  carbonCreditsTotal?: number;
+  carbonCreditsClaimed?: number;
+  type?: string;
+  location?: string;
+  coordinates?: ICoordinates;
+  area?: number;
+  participants?: string[];
+  progress?: number;
+  documents?: IDocument[];
+  activities?: IActivity[];
+  userId: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  __v?: number;
+}
+
+// Component StatusBadge cho trạng thái dự án (không thay đổi)
 const StatusBadge: React.FC<{
   status: string;
-  language: "vi" | "en";
-}> = ({ status, language }) => {
+}> = ({ status }) => {
   const badgeStyles = {
     active: "bg-indigo-100 text-indigo-800 hover:bg-indigo-100",
     pending: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
     completed: "bg-green-100 text-green-800 hover:bg-green-100",
+    approved: "bg-green-100 text-green-800 hover:bg-green-100",
+    in_progress: "bg-blue-100 text-blue-800 hover:bg-blue-100",
+    rejected: "bg-red-100 text-red-800 hover:bg-red-100",
+    archived: "bg-gray-100 text-gray-800 hover:bg-gray-100",
   };
   const badgeLabels = {
-    active: language === "vi" ? "Đang thực hiện" : "Active",
-    pending: language === "vi" ? "Đang xử lý" : "Pending",
-    completed: language === "vi" ? "Hoàn thành" : "Completed",
+    active: "Đang thực hiện",
+    pending: "Đang xử lý",
+    completed: "Hoàn thành",
+    approved: "Đã phê duyệt",
+    in_progress: "Đang tiến hành",
+    rejected: "Đã từ chối",
+    archived: "Đã lưu trữ",
   };
   return (
     <Badge
@@ -62,11 +130,43 @@ const StatusBadge: React.FC<{
   );
 };
 
+// Component mới cho trạng thái tài liệu
+const DocumentStatusBadge: React.FC<{ status?: string }> = ({ status }) => {
+  const badgeStyles: { [key: string]: string } = {
+    approved: "bg-green-100 text-green-800 hover:bg-green-100",
+    rejected: "bg-red-100 text-red-800 hover:bg-red-100",
+    pending: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
+  };
+
+  const badgeLabels: { [key: string]: string } = {
+    approved: "Đã phê duyệt",
+    rejected: "Đã từ chối",
+    pending: "Đang chờ",
+  };
+
+  const IconComponent =
+    status === "approved"
+      ? CheckCircle2
+      : status === "rejected"
+        ? AlertCircle
+        : FileUp; // Mặc định là FileUp cho pending hoặc không xác định
+
+  return (
+    <Badge
+      className={
+        badgeStyles[status || "pending"] ||
+        "bg-gray-100 text-gray-800 hover:bg-gray-100"
+      }
+    >
+      <IconComponent className="w-3 h-3 mr-1" />
+      {badgeLabels[status || "pending"] || "Không xác định"}
+    </Badge>
+  );
+};
+
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { language } = useLanguage();
-  const { user } = useAuth();
   const [project, setProject] = useState<IProject | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
@@ -85,7 +185,7 @@ export default function ProjectDetailPage() {
         setProject(null);
       }
     } catch (error) {
-      console.error("Error fetching project:", error);
+      console.error("Lỗi khi tải dự án:", error);
       setProject(null);
     } finally {
       setLoading(false);
@@ -94,23 +194,19 @@ export default function ProjectDetailPage() {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
-      console.log("File selected:", event.target.files[0]);
+      console.log("Đã chọn tệp:", event.target.files[0]);
       setSelectedFile(event.target.files[0]);
       setUploadError(null);
       setUploadSuccess(false);
     } else {
-      console.log("No file selected or file input cleared.");
+      console.log("Không có tệp nào được chọn hoặc đã xóa tệp.");
       setSelectedFile(null);
     }
   };
 
   const handleUploadDocument = async () => {
-    if (!selectedFile || !project?.id) {
-      setUploadError(
-        language === "vi"
-          ? "Vui lòng chọn một tệp để tải lên."
-          : "Please select a file to upload.",
-      );
+    if (!selectedFile || !project?._id) {
+      setUploadError("Vui lòng chọn một tệp để tải lên.");
       return;
     }
 
@@ -119,53 +215,44 @@ export default function ProjectDetailPage() {
     setUploadSuccess(false);
 
     try {
-      // Gọi trực tiếp hàm uploadToCloudinary và nhận secure_url
       const fileUrl = await uploadToCloudinary(selectedFile);
 
-      const newDocument = {
+      // Thêm status mặc định là 'pending' cho tài liệu mới tải lên
+      const newDocument: IDocument = {
         name: selectedFile.name,
-        url: fileUrl, // Sử dụng trực tiếp fileUrl nhận được
+        url: fileUrl,
         type: selectedFile.type || "unknown",
-        date: new Date().toISOString(),
+        uploadedAt: new Date().toISOString(),
+        userId: getUserFromLocalStorage().userId,
+        status: "pending", // Đặt trạng thái mặc định là pending
       };
-
       const updatedDocuments = project.documents
         ? [...project.documents, newDocument]
         : [newDocument];
+      const response = await apiProjects.updateDocuments(project._id, {
+        documents: updatedDocuments,
+      });
 
-      const response = await apiProjects.updateProject(
-        project.id,
-        {
-          documents: updatedDocuments,
-        },
-        user?.token,
-      );
-
-      if (response.status === 200) {
+      if (response && response.payload) {
         setProject(response.payload as IProject);
         setUploadSuccess(true);
         setSelectedFile(null);
-        alert(
-          language === "vi"
-            ? "Tài liệu đã được tải lên thành công!"
-            : "Document uploaded successfully!",
-        );
+        alert("Tài liệu đã được tải lên thành công!");
       } else {
-        setUploadError(
-          language === "vi"
-            ? "Lỗi khi cập nhật dự án."
-            : "Error updating project.",
-        );
-        console.error("Error updating project with new document:", response);
+        setUploadError("Lỗi khi cập nhật dự án.");
+        console.error("Lỗi khi cập nhật dự án với tài liệu mới:", response);
       }
     } catch (error) {
-      setUploadError(
-        language === "vi" ? "Lỗi khi tải tệp lên." : "Error uploading file.",
-      );
-      console.error("Error uploading document:", error);
+      setUploadError("Lỗi khi tải tệp lên.");
+      console.error("Lỗi tải tài liệu:", error);
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleViewReport = (url: string) => {
+    window.open(url, "_blank");
+    console.log("Xem báo cáo:", url);
   };
 
   useEffect(() => {
@@ -189,21 +276,20 @@ export default function ProjectDetailPage() {
   if (!project) {
     return (
       <div className="container mx-auto py-10 px-4 text-center">
-        <h2 className="text-2xl font-bold mb-4">
-          {language === "vi" ? "Không tìm thấy dự án" : "Project Not Found"}
-        </h2>
+        <h2 className="text-2xl font-bold mb-4">Không tìm thấy dự án</h2>
         <p className="text-gray-500 mb-6">
-          {language === "vi"
-            ? "Dự án bạn đang tìm kiếm không tồn tại hoặc bạn không có quyền truy cập."
-            : "The project you are looking for does not exist or you do not have access."}
+          Dự án bạn đang tìm kiếm không tồn tại hoặc bạn không có quyền truy
+          cập.
         </p>
         <Button onClick={() => router.push("/quan-ly")}>
           <ArrowLeft className="w-4 h-4 mr-2" />
-          {language === "vi" ? "Quay lại trang quản lý" : "Back to Dashboard"}
+          Quay lại trang quản lý
         </Button>
       </div>
     );
   }
+
+  const documents = project.documents || [];
 
   return (
     <div className="container mx-auto py-10 px-4">
@@ -213,7 +299,7 @@ export default function ProjectDetailPage() {
           className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
-          {language === "vi" ? "Quay lại trang quản lý" : "Back to Dashboard"}
+          Quay lại trang quản lý
         </Link>
       </div>
 
@@ -223,13 +309,12 @@ export default function ProjectDetailPage() {
           <div className="ml-3">
             <h1 className="text-3xl font-bold">{project.name}</h1>
             <p className="text-gray-500">
-              {language === "vi" ? "Đăng ký ngày: " : "Registered on: "}
-              {formatDateUtil(project.registrationDate)}
+              Đăng ký ngày: {formatDateUtil(project.registrationDate)}
             </p>
           </div>
         </div>
         <div className="mt-4 md:mt-0">
-          <StatusBadge status={project.status} language={language} />
+          <StatusBadge status={project.status} />
         </div>
       </div>
 
@@ -237,47 +322,39 @@ export default function ProjectDetailPage() {
         <TabsList className="grid grid-cols-3 mb-8">
           <TabsTrigger value="overview">
             <BarChart3 className="w-4 h-4 mr-2" />
-            {language === "vi" ? "Tổng quan" : "Overview"}
+            Tổng quan
           </TabsTrigger>
           <TabsTrigger value="documents">
             <FileText className="w-4 h-4 mr-2" />
-            {language === "vi" ? "Tài liệu" : "Documents"}
+            Tài liệu
           </TabsTrigger>
           <TabsTrigger value="activities">
             <Clock className="w-4 h-4 mr-2" />
-            {language === "vi" ? "Hoạt động" : "Activities"}
+            Hoạt động
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>
-                {language === "vi" ? "Thông tin dự án" : "Project Information"}
-              </CardTitle>
+              <CardTitle>Thông tin dự án</CardTitle>
               <CardDescription>
-                {language === "vi"
-                  ? "Chi tiết về dự án tín chỉ carbon"
-                  : "Details about the carbon credit project"}
+                Chi tiết về dự án tín chỉ carbon
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    {language === "vi" ? "Loại dự án" : "Project Type"}
+                    Loại dự án
                   </h3>
                   <p className="font-medium">
-                    {project.type === "forestry"
-                      ? language === "vi"
-                        ? "Lâm nghiệp"
-                        : "Forestry"
-                      : project.type}
+                    {project.type === "forestry" ? "Lâm nghiệp" : project.type}
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    {language === "vi" ? "Địa điểm" : "Location"}
+                    Địa điểm
                   </h3>
                   <p className="font-medium flex items-center">
                     <MapPin className="w-4 h-4 mr-1 text-gray-400" />
@@ -286,15 +363,13 @@ export default function ProjectDetailPage() {
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    {language === "vi" ? "Diện tích" : "Area"}
+                    Diện tích
                   </h3>
                   <p className="font-medium">{project.area} ha</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    {language === "vi"
-                      ? "Thời gian thực hiện"
-                      : "Implementation Period"}
+                    Thời gian thực hiện
                   </h3>
                   <p className="font-medium flex items-center">
                     <Calendar className="w-4 h-4 mr-1 text-gray-400" />
@@ -304,54 +379,42 @@ export default function ProjectDetailPage() {
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    {language === "vi" ? "Tín chỉ carbon" : "Carbon Credits"}
+                    Tín chỉ carbon
                   </h3>
                   <p className="font-medium">
-                    {project.carbonCreditsTotal.toLocaleString()}
+                    {project.carbonCreditsTotal?.toLocaleString()}
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    {language === "vi" ? "Số người tham gia" : "Participants"}
+                    Số người tham gia
                   </h3>
-                  <p className="font-medium">{project.participants}</p>
+                  <p className="font-medium">{project.participants?.[0]}</p>
                 </div>
               </div>
               <div className="pt-4 border-t">
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
-                  {language === "vi" ? "Mô tả dự án" : "Project Description"}
+                  Mô tả dự án
                 </h3>
                 <p className="text-gray-700">{project.description}</p>
               </div>
             </CardContent>
             <CardFooter className="flex gap-3">
-              <Button>
-                {language === "vi"
-                  ? "Cập nhật thông tin"
-                  : "Update Information"}
-              </Button>
-              <Button variant="outline">
-                {language === "vi" ? "Tải xuống báo cáo" : "Download Report"}
-              </Button>
+              <Button>Cập nhật thông tin</Button>
+              <Button variant="outline">Tải xuống báo cáo</Button>
             </CardFooter>
           </Card>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>
-                  {language === "vi" ? "Tiến độ dự án" : "Project Progress"}
-                </CardTitle>
+                <CardTitle>Tiến độ dự án</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-sm font-medium">
-                        {language === "vi"
-                          ? "Tiến độ tổng"
-                          : "Overall Progress"}
-                      </span>
+                      <span className="text-sm font-medium">Tiến độ tổng</span>
                       <span className="text-sm font-medium">
                         {project.progress}%
                       </span>
@@ -368,70 +431,76 @@ export default function ProjectDetailPage() {
             </Card>
           </div>
         </TabsContent>
+
         <TabsContent value="documents" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>
-                {language === "vi" ? "Tài liệu dự án" : "Project Documents"}
-              </CardTitle>
+              <CardTitle>Tài liệu dự án</CardTitle>
               <CardDescription>
-                {language === "vi"
-                  ? "Các tài liệu đã tải lên liên quan đến dự án"
-                  : "Uploaded documents related to the project"}
+                Các tài liệu đã tải lên liên quan đến dự án.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {project.documents && project.documents.length > 0 ? (
-                  project.documents.map((doc, index) => (
-                    <div
-                      key={index}
-                      className="flex items-start p-3 rounded-lg border border-gray-200"
-                    >
-                      <FileText className="w-5 h-5 text-blue-600 mt-0.5 mr-3" />
-                      <div className="flex-1">
-                        <div className="flex justify-between">
-                          <h4 className="font-medium">{doc.name}</h4>
-                          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
-                            {doc.type}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-gray-500 mt-1">
-                          {language === "vi"
-                            ? "Tải lên ngày: "
-                            : "Uploaded on: "}
-                          {formatDateUtil(doc.date)}
-                        </p>
-                        {doc.url && (
-                          <a
-                            href={doc.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-500 hover:underline text-sm"
-                          >
-                            {language === "vi"
-                              ? "Xem tài liệu"
-                              : "View Document"}
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500 text-center">
-                    {language === "vi"
-                      ? "Chưa có tài liệu nào được tải lên."
-                      : "No documents uploaded yet."}
-                  </p>
-                )}
-              </div>
+              {documents.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Tên tài liệu</TableHead>
+                        <TableHead>Loại</TableHead>
+                        <TableHead>Ngày tải lên</TableHead>
+                        <TableHead>Trạng thái</TableHead>{" "}
+                        {/* Thêm cột trạng thái */}
+                        <TableHead className="text-right">Hành động</TableHead>
+                      </TableRow>
+                    </TableHeader>
+
+                    <TableBody>
+                      {documents.map((doc: IDocument) => (
+                        <TableRow key={doc._id || doc.url}>
+                          <TableCell className="font-medium">
+                            {doc.name ||
+                              decodeURIComponent(
+                                doc.url.split("/").pop() ||
+                                  "Tài liệu không tên",
+                              )}
+                          </TableCell>
+                          <TableCell>{doc.type || "N/A"}</TableCell>
+                          <TableCell>
+                            {doc.uploadedAt
+                              ? formatDateUtil(doc.uploadedAt)
+                              : "N/A"}
+                          </TableCell>
+                          <TableCell>
+                            <DocumentStatusBadge status={doc.status} />{" "}
+                            {/* Sử dụng component mới */}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewReport(doc.url)}
+                              >
+                                Xem báo cáo
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <p className="text-gray-500 text-center">
+                  Chưa có tài liệu nào được đính kèm.
+                </p>
+              )}
             </CardContent>
             <CardFooter className="flex flex-col items-start gap-4">
               <div className="w-full">
                 <Label htmlFor="document" className="mb-2 block">
-                  {language === "vi"
-                    ? "Chọn tệp để tải lên"
-                    : "Choose file to upload"}
+                  Chọn tệp để tải lên
                 </Label>
                 <Input
                   id="document"
@@ -442,7 +511,7 @@ export default function ProjectDetailPage() {
               </div>
               {selectedFile && (
                 <p className="text-sm text-gray-600">
-                  {language === "vi" ? "Đã chọn tệp: " : "Selected file: "}
+                  Đã chọn tệp:{" "}
                   <span className="font-medium">{selectedFile.name}</span>
                 </p>
               )}
@@ -455,9 +524,7 @@ export default function ProjectDetailPage() {
               {uploadSuccess && (
                 <div className="flex items-center text-green-500 text-sm mt-2">
                   <CheckCircle2 className="w-4 h-4 mr-1" />
-                  {language === "vi"
-                    ? "Tải lên thành công!"
-                    : "Upload successful!"}
+                  Tải lên thành công!
                 </div>
               )}
               <Button
@@ -467,14 +534,12 @@ export default function ProjectDetailPage() {
                 {uploading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {language === "vi" ? "Đang tải lên..." : "Uploading..."}
+                    Đang tải lên...
                   </>
                 ) : (
                   <>
                     <Upload className="w-4 h-4 mr-2" />
-                    {language === "vi"
-                      ? "Tải lên tài liệu mới"
-                      : "Upload New Document"}
+                    Tải lên tài liệu mới
                   </>
                 )}
               </Button>
@@ -485,32 +550,34 @@ export default function ProjectDetailPage() {
         <TabsContent value="activities" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>
-                {language === "vi" ? "Lịch sử hoạt động" : "Activity History"}
-              </CardTitle>
+              <CardTitle>Lịch sử hoạt động</CardTitle>
               <CardDescription>
-                {language === "vi"
-                  ? "Các hoạt động gần đây liên quan đến dự án"
-                  : "Recent activities related to the project"}
+                Các hoạt động gần đây liên quan đến dự án
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="relative">
                 <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
                 <div className="space-y-6">
-                  {project.activities.map((activity, index) => (
-                    <div key={index} className="ml-10 relative">
-                      <div className="absolute -left-10 mt-1.5 w-5 h-5 rounded-full bg-green-100 border-2 border-green-600 flex items-center justify-center">
-                        <Clock className="w-3 h-3 text-green-600" />
+                  {project.activities && project.activities.length > 0 ? (
+                    project.activities.map((activity, index) => (
+                      <div key={index} className="ml-10 relative">
+                        <div className="absolute -left-10 mt-1.5 w-5 h-5 rounded-full bg-green-100 border-2 border-green-600 flex items-center justify-center">
+                          <Clock className="w-3 h-3 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{activity.description}</p>
+                          <p className="text-sm text-gray-500">
+                            {formatDateUtil(activity.date)}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium">{activity.description}</p>
-                        <p className="text-sm text-gray-500">
-                          {formatDateUtil(activity.date)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-center">
+                      Chưa có hoạt động nào được ghi nhận.
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>

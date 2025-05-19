@@ -1,5 +1,5 @@
-"use client"
-import { useLanguage } from "@/context/language-context"
+"use client";
+import { useLanguage } from "@/context/language-context";
 import {
   Calendar,
   MapPin,
@@ -11,14 +11,18 @@ import {
   Clock,
   AlertCircle,
   Leaf,
-} from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-
-// Mock data for projects
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 const mockProjects = [
   {
     id: 1,
@@ -44,10 +48,22 @@ const mockProjects = [
       { name: "Kế hoạch thực hiện", date: "2023-10-10", type: "docx" },
     ],
     activities: [
-      { date: "2024-02-15", description: "Hoàn thành trồng 5,000 cây xanh tại khu vực A" },
-      { date: "2024-01-10", description: "Tập huấn kỹ thuật trồng và chăm sóc cây cho 50 hộ dân" },
-      { date: "2023-12-05", description: "Khảo sát và đánh giá khu vực trồng mới" },
-      { date: "2023-11-01", description: "Khởi động dự án với sự tham gia của cộng đồng địa phương" },
+      {
+        date: "2024-02-15",
+        description: "Hoàn thành trồng 5,000 cây xanh tại khu vực A",
+      },
+      {
+        date: "2024-01-10",
+        description: "Tập huấn kỹ thuật trồng và chăm sóc cây cho 50 hộ dân",
+      },
+      {
+        date: "2023-12-05",
+        description: "Khảo sát và đánh giá khu vực trồng mới",
+      },
+      {
+        date: "2023-11-01",
+        description: "Khởi động dự án với sự tham gia của cộng đồng địa phương",
+      },
     ],
   },
   {
@@ -73,8 +89,14 @@ const mockProjects = [
       { name: "Báo cáo khả thi", date: "2023-10-30", type: "pdf" },
     ],
     activities: [
-      { date: "2023-12-20", description: "Hoàn thành khảo sát địa điểm lắp đặt" },
-      { date: "2023-11-30", description: "Ký kết hợp đồng với nhà cung cấp thiết bị" },
+      {
+        date: "2023-12-20",
+        description: "Hoàn thành khảo sát địa điểm lắp đặt",
+      },
+      {
+        date: "2023-11-30",
+        description: "Ký kết hợp đồng với nhà cung cấp thiết bị",
+      },
       { date: "2023-11-20", description: "Đăng ký tham gia dự án" },
     ],
   },
@@ -102,10 +124,22 @@ const mockProjects = [
       { name: "Kế hoạch bảo tồn", date: "2023-08-10", type: "docx" },
     ],
     activities: [
-      { date: "2024-03-01", description: "Hoàn thành dự án và tổ chức lễ bàn giao" },
-      { date: "2024-02-15", description: "Đánh giá cuối cùng về hiệu quả bảo tồn" },
-      { date: "2024-01-10", description: "Tập huấn quản lý đất ngập nước cho cộng đồng" },
-      { date: "2023-11-20", description: "Hoàn thành phục hồi 50 ha đất ngập nước" },
+      {
+        date: "2024-03-01",
+        description: "Hoàn thành dự án và tổ chức lễ bàn giao",
+      },
+      {
+        date: "2024-02-15",
+        description: "Đánh giá cuối cùng về hiệu quả bảo tồn",
+      },
+      {
+        date: "2024-01-10",
+        description: "Tập huấn quản lý đất ngập nước cho cộng đồng",
+      },
+      {
+        date: "2023-11-20",
+        description: "Hoàn thành phục hồi 50 ha đất ngập nước",
+      },
       { date: "2023-09-01", description: "Khởi động dự án bảo tồn" },
     ],
   },
@@ -132,65 +166,86 @@ const mockProjects = [
       { name: "Kế hoạch vận hành", date: "2023-09-25", type: "pdf" },
     ],
     activities: [
-      { date: "2024-02-01", description: "Mở rộng thu gom chất thải từ 5 chợ mới" },
-      { date: "2023-12-15", description: "Hoàn thành lắp đặt thiết bị xử lý chất thải" },
-      { date: "2023-11-01", description: "Tập huấn phân loại rác cho 20 khu dân cư" },
+      {
+        date: "2024-02-01",
+        description: "Mở rộng thu gom chất thải từ 5 chợ mới",
+      },
+      {
+        date: "2023-12-15",
+        description: "Hoàn thành lắp đặt thiết bị xử lý chất thải",
+      },
+      {
+        date: "2023-11-01",
+        description: "Tập huấn phân loại rác cho 20 khu dân cư",
+      },
       { date: "2023-10-01", description: "Khởi động dự án xử lý chất thải" },
     ],
   },
-]
+];
 
 // Status badge component
 const StatusBadge = ({ status }: { status: string }) => {
   switch (status) {
     case "active":
       return (
-        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+        <Badge
+          variant="outline"
+          className="bg-green-50 text-green-700 border-green-200"
+        >
           <CheckCircle2 className="w-3 h-3 mr-1" />
           Đang hoạt động
         </Badge>
-      )
+      );
     case "pending":
       return (
-        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+        <Badge
+          variant="outline"
+          className="bg-yellow-50 text-yellow-700 border-yellow-200"
+        >
           <Clock className="w-3 h-3 mr-1" />
           Chờ xác nhận
         </Badge>
-      )
+      );
     case "completed":
       return (
-        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+        <Badge
+          variant="outline"
+          className="bg-blue-50 text-blue-700 border-blue-200"
+        >
           <CheckCircle2 className="w-3 h-3 mr-1" />
           Hoàn thành
         </Badge>
-      )
+      );
     default:
       return (
-        <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
+        <Badge
+          variant="outline"
+          className="bg-gray-50 text-gray-700 border-gray-200"
+        >
           <AlertCircle className="w-3 h-3 mr-1" />
           Không xác định
         </Badge>
-      )
+      );
   }
-}
+};
 
 export default function ProjectDetail({ id }: { id: number }) {
-  const { language } = useLanguage()
-  const project = mockProjects.find((p) => p.id === id)
+  const { language } = useLanguage();
+  const project = mockProjects.find((p) => p.id === id);
 
   if (!project) {
-    return <div>Không tìm thấy dự án</div>
+    return <div>Không tìm thấy dự án</div>;
   }
 
   // Format date to local format
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
+    const date = new Date(dateString);
     return new Intl.DateTimeFormat(language === "vi" ? "vi-VN" : "en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
-    }).format(date)
-  }
+    }).format(date);
+  };
 
   return (
     <div className="space-y-8">
@@ -200,7 +255,9 @@ export default function ProjectDetail({ id }: { id: number }) {
           <div className="absolute inset-0 bg-black/20"></div>
           <div className="absolute bottom-0 left-0 p-6">
             <StatusBadge status={project.status} />
-            <h1 className="text-2xl font-bold text-white mt-2">{project.name}</h1>
+            <h1 className="text-2xl font-bold text-white mt-2">
+              {project.name}
+            </h1>
           </div>
         </div>
 
@@ -213,7 +270,8 @@ export default function ProjectDetail({ id }: { id: number }) {
               <div>
                 <p className="text-sm text-gray-500">Thời gian</p>
                 <p className="font-medium">
-                  {formatDate(project.startDate)} - {formatDate(project.endDate)}
+                  {formatDate(project.startDate)} -{" "}
+                  {formatDate(project.endDate)}
                 </p>
               </div>
             </div>
@@ -250,28 +308,35 @@ export default function ProjectDetail({ id }: { id: number }) {
       <Card>
         <CardHeader>
           <CardTitle>Tín chỉ Carbon</CardTitle>
-          <CardDescription>Thông tin về tín chỉ carbon của dự án</CardDescription>
+          <CardDescription>
+            Thông tin về tín chỉ carbon của dự án
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-green-50 rounded-lg p-4 border border-green-100">
-              <p className="text-sm text-green-700 mb-1">Tổng tín chỉ dự kiến</p>
+              <p className="text-sm text-green-700 mb-1">
+                Tổng tín chỉ dự kiến
+              </p>
               <p className="text-2xl font-bold text-green-700">
-                {project.carbonCreditsTotal} <span className="text-sm font-normal">tấn CO₂</span>
+                {project.carbonCreditsTotal}{" "}
+                <span className="text-sm font-normal">tấn CO₂</span>
               </p>
             </div>
 
             <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
               <p className="text-sm text-blue-700 mb-1">Đã xác nhận</p>
               <p className="text-2xl font-bold text-blue-700">
-                {project.carbonCreditsClaimed} <span className="text-sm font-normal">tấn CO₂</span>
+                {project.carbonCreditsClaimed}{" "}
+                <span className="text-sm font-normal">tấn CO₂</span>
               </p>
             </div>
 
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <p className="text-sm text-gray-700 mb-1">Của bạn</p>
               <p className="text-2xl font-bold text-gray-700">
-                {project.carbonCredits} <span className="text-sm font-normal">tấn CO₂</span>
+                {project.carbonCredits}{" "}
+                <span className="text-sm font-normal">tấn CO₂</span>
               </p>
             </div>
           </div>
@@ -298,14 +363,18 @@ export default function ProjectDetail({ id }: { id: number }) {
           <Card>
             <CardHeader>
               <CardTitle>Lịch sử hoạt động</CardTitle>
-              <CardDescription>Các hoạt động đã diễn ra trong dự án</CardDescription>
+              <CardDescription>
+                Các hoạt động đã diễn ra trong dự án
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="relative pl-6 border-l border-gray-200">
                 {project.activities.map((activity, index) => (
                   <div key={index} className="mb-6 relative">
                     <div className="absolute -left-[25px] w-4 h-4 rounded-full bg-green-500 border-4 border-white"></div>
-                    <p className="text-sm text-gray-500">{formatDate(activity.date)}</p>
+                    <p className="text-sm text-gray-500">
+                      {formatDate(activity.date)}
+                    </p>
                     <p className="font-medium mt-1">{activity.description}</p>
                   </div>
                 ))}
@@ -318,7 +387,9 @@ export default function ProjectDetail({ id }: { id: number }) {
           <Card>
             <CardHeader>
               <CardTitle>Tài liệu dự án</CardTitle>
-              <CardDescription>Các tài liệu liên quan đến dự án</CardDescription>
+              <CardDescription>
+                Các tài liệu liên quan đến dự án
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -333,7 +404,9 @@ export default function ProjectDetail({ id }: { id: number }) {
                       </div>
                       <div>
                         <p className="font-medium">{doc.name}</p>
-                        <p className="text-sm text-gray-500">{formatDate(doc.date)}</p>
+                        <p className="text-sm text-gray-500">
+                          {formatDate(doc.date)}
+                        </p>
                       </div>
                     </div>
                     <Button variant="ghost" size="sm">
@@ -351,13 +424,17 @@ export default function ProjectDetail({ id }: { id: number }) {
           <Card>
             <CardHeader>
               <CardTitle>Báo cáo phát thải</CardTitle>
-              <CardDescription>Thống kê về lượng phát thải đã giảm</CardDescription>
+              <CardDescription>
+                Thống kê về lượng phát thải đã giảm
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-300">
                 <div className="text-center">
                   <BarChart3 className="h-10 w-10 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500">Báo cáo chi tiết sẽ được cập nhật sau</p>
+                  <p className="text-gray-500">
+                    Báo cáo chi tiết sẽ được cập nhật sau
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -365,5 +442,5 @@ export default function ProjectDetail({ id }: { id: number }) {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
