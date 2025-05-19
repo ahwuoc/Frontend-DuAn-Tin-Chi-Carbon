@@ -8,7 +8,7 @@ import ForestExplorer from "@/components/forest/ForestExplorer";
 import StaticCertificate from "@/components/static-certificate";
 import CertificateGenerator from "@/components/certificate-generator";
 import { apiDonation } from "../fetch/fetch.donation";
-
+import dynamic from 'next/dynamic';
 export default function GopMamXanhPage() {
   const [donorName, setDonorName] = useState<string>("");
   const [donorNote, setDonorNote] = useState<string>("");
@@ -108,7 +108,6 @@ export default function GopMamXanhPage() {
             className="bg-white rounded-xl shadow-xl overflow-hidden border border-emerald-100"
           >
             <div className="h-[800px] relative">
-              {/* Model 3D */}
               <ForestExplorer />
             </div>
 
