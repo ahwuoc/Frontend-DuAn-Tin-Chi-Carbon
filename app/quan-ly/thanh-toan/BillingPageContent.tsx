@@ -19,7 +19,16 @@ import { formatDate, getInvoiceStatusBadge, getSubscriptionStatusBadge, getPayme
 import { apiPayMethod } from "../../fetch/fetch.payment-method";
 import { apiOrders } from "../../fetch/fetch.order";
 import { IOrder } from "../../fetch/fetch.order";
-
+interface IResponseInfor {
+    totalOrders: number,
+    totalAmount: number,
+    totalPendingOrders: number,
+    totalSuccessOrders: number,
+    totalPendingAmount: number,
+    totalSuccessAmount: number,
+    pendingOrders: any[];
+    successOrders: any[];
+}
 const BillingPageContent = () => {
     const router = useRouter();
     const { toast } = useToast();
@@ -32,22 +41,38 @@ const BillingPageContent = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isUpdatingPaymentMethod, setIsUpdatingPaymentMethod] = useState(false);
     const [orders, setOrders] = useState<IOrder[]>([]);
+    const [info, setInfo] = useState({
+        totalOrders: 0,
+        totalAmount: 0,
+        totalPendingOrders: 0,
+        totalSuccessOrders: 0,
+        totalPendingAmount: 0,
+        totalSuccessAmount: 0,
+        pendingOrders: [],
+        successOrders: [],
+    });
     const [totalAmount, setToTotal] = useState<number>(0);
     const { user } = useAuth();
-
-    // --- Các Hooks và State được đặt ở đây ---
-
     useEffect(() => {
         const fetchOrders = async () => {
             if (!user?.userId) return;
-            const response = await apiOrders.getInfoOrderByUserId(user?.userId)
+            const response = await apiOrders.getInforOrderByUserId<IResponseInfor>(user?.userId)
             if (response && response.payload) {
-                setOrders(response.payload.orders)
-                setToTotal(response.payload.totalAmount ?? 0)
+                setInfo(prev => ({
+                    ...prev,
+                    totalOrders: response.payload.totalOrders ?? prev.totalOrders,
+                    totalAmount: response.payload.totalAmount ?? prev.totalAmount,
+                    totalPendingOrders: response.payload.totalPendingOrders ?? prev.totalPendingOrders,
+                    totalSuccessOrders: response.payload.totalSuccessOrders ?? prev.totalSuccessOrders,
+                    totalPendingAmount: response.payload.totalPendingAmount ?? prev.totalPendingAmount,
+                    totalSuccessAmount: response.payload.totalSuccessAmount ?? prev.totalSuccessAmount,
+                    pendingOrders: response.payload.pendingOrders ?? prev.pendingOrders,
+                    successOrders: response.payload.successOrders ?? prev.successOrders,
+                }));
             }
         }
         fetchOrders();
-    }, [user]); // Dependency adjusted
+    }, [user]);
 
     const getBillingData = useCallback(async () => {
         setIsLoading(true);
@@ -93,31 +118,19 @@ const BillingPageContent = () => {
             getBillingData();
         }
     }, [getBillingData, user?.userId]);
-
-    // useEffect này xử lý việc đọc tab từ search params khi component mount hoặc search params thay đổi
     useEffect(() => {
         const tab = searchParams.get("tab");
         if (tab && ["overview", "invoices", "subscriptions", "payment_methods"].includes(tab)) {
             setActiveTab(tab);
         } else if (!tab && activeTab !== "overview") {
-            // Nếu không có tab trên URL nhưng state activeTab khác overview,
-            // có thể bạn muốn đồng bộ lại URL khi mount mà không có param
-            // hoặc chỉ đơn giản là giữ nguyên state activeTab nếu không có param.
-            // Đoạn này có thể cần điều chỉnh tùy theo logic mong muốn khi URL không có param 'tab'.
-            // Hiện tại, nó chỉ set activeTab dựa trên URL.
         }
-    }, [searchParams]); // Chỉ phụ thuộc vào searchParams
-
-    // useEffect này xử lý việc cập nhật URL khi state activeTab thay đổi
+    }, [searchParams]);
     useEffect(() => {
         const currentTabInUrl = searchParams.get("tab");
-        // Chỉ push khi activeTab state khác với tab trên URL để tránh loop vô tận
         if (activeTab !== currentTabInUrl) {
-            // Sử dụng replace thay vì push nếu bạn không muốn tạo entry mới trong lịch sử trình duyệt
             router.replace(`?tab=${activeTab}`, { scroll: false });
         }
-    }, [activeTab, router, searchParams]); // Phụ thuộc vào activeTab, router, searchParams
-
+    }, [activeTab, router, searchParams]);
     const handleSetDefaultPaymentMethod = useCallback(async (methodId: string) => {
         setIsUpdatingPaymentMethod(true);
         try {
@@ -224,8 +237,6 @@ const BillingPageContent = () => {
     if (isLoading) {
         return <div className="container mx-auto py-8 text-center">Đang tải dữ liệu thanh toán...</div>;
     }
-
-    // --- Bắt đầu phần JSX trả về ---
     return (
         <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -255,7 +266,7 @@ const BillingPageContent = () => {
                         <DollarSign className="h-5 w-5 text-green-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{totalAmount} đ</div>
+                        <div className="text-2xl font-bold">{info.totalAmount} đ</div>
                         <p className="text-xs text-gray-500">+2.500.000 đ so với tháng trước</p>
                     </CardContent>
                 </Card>
@@ -266,7 +277,7 @@ const BillingPageContent = () => {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {currentSubscriptions.filter((s) => s.status === "active").length}
+                            {info.totalSuccessOrders ?? 0}
                         </div>
                         <p className="text-xs text-gray-500">Tổng số các gói đang dùng</p>
                     </CardContent>
@@ -278,7 +289,7 @@ const BillingPageContent = () => {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {currentInvoices.filter((i) => i.status === "pending" || i.status === "overdue").length}
+                            {info.totalPendingOrders ?? 0}
                         </div>
                         <p className="text-xs text-gray-500">Tổng số hóa đơn cần xử lý</p>
                     </CardContent>

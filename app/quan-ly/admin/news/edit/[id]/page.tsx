@@ -43,12 +43,8 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import TiptapMenuBar from "../../components/TiptapMenuBar";
-const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUINARY_CLOUD_NAME!;
-const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "my_unsigned_preset";
-
 import statuses from "../../mockup_data/statuses";
 import categories from "../../mockup_data/categories";
-
 export default function NewsFormPage() {
     const router = useRouter();
     const params = useParams();
@@ -165,13 +161,6 @@ export default function NewsFormPage() {
 
         fetchNews();
 
-        // Cleanup function cho useEffect nếu cần (ví dụ: destroy editor)
-        // return () => {
-        //     if (editor) {
-        //         editor.destroy();
-        //     }
-        // };
-
     }, [newsId, toast, router, editor]);
 
     // Xử lý thay đổi ở các input text (trừ content, vì content do Tiptap quản lý)
@@ -213,14 +202,9 @@ export default function NewsFormPage() {
             toast({ title: "Chưa chọn tệp", description: "Vui lòng chọn ảnh.", variant: "default" });
             return;
         }
-        if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
-            toast({ title: "Lỗi cấu hình", description: "Thiếu Cloudinary config.", variant: "destructive" });
-            return;
-        }
-
         setIsUploadingImage(true);
         try {
-            const uploadedUrl = await uploadToCloudinary(imageFile, CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET);
+            const uploadedUrl = await uploadToCloudinary(imageFile);
             setFormData(prev => ({ ...prev, image: uploadedUrl }));
             setImagePreview(uploadedUrl);
             setImageFile(null);

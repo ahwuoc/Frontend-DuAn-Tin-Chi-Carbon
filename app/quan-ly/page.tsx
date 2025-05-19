@@ -26,18 +26,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
-
-// Define interfaces for type safety
-interface User {
-  userId: string;
-  name?: string;
-  email?: string;
-  phone?: string;
-  role: "admin" | "user";
-  products: IOrder[];
-  projects: IProject[];
-}
-
 interface IOrder {
   _id: string;
   productId: {
@@ -251,30 +239,27 @@ export default function DashboardPage() {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {/* Personal Information Card */}
-        <Card>
+        <Card className="flex flex-col"> {/* Add flex flex-col here */}
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Thông tin cá nhân</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-grow"> {/* Add flex-grow here */}
             <div className="space-y-2">
               <p className="text-sm text-gray-500">Họ tên</p>
-              {/* Using optional chaining (?.) for potentially undefined properties */}
-              <p className="font-medium">{user?.name ?? "N/A"}</p>
+              <p className="font-medium break-words">{user?.name ?? "N/A"}</p>
               <p className="text-sm text-gray-500">Email</p>
-              {/* Using optional chaining (?.) for potentially undefined properties */}
-              <p className="font-medium">{user?.email ?? "N/A"}</p>
-              {user?.phone && ( // Check if phone exists before rendering
+              <p className="font-medium break-words">{user?.email ?? "N/A"}</p>
+              {user?.phone && (
                 <>
                   <p className="text-sm text-gray-500">Số điện thoại</p>
-                  <p className="font-medium">{user.phone}</p>
+                  <p className="font-medium break-words">{user.phone}</p>
                 </>
               )}
               <p className="text-sm text-gray-500">Vai trò</p>
-              {/* Ensuring user object is not null/undefined before accessing role */}
-              <p className="font-medium">{user?.role === "admin" ? "Quản trị viên" : "Người dùng"}</p>
+              <p className="font-medium break-words">{user?.role === "admin" ? "Quản trị viên" : "Người dùng"}</p>
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="mt-auto"> {/* Add mt-auto here */}
             <Link href="/quan-ly/cai-dat" className="w-full">
               <Button variant="outline" size="sm" className="w-full">
                 <Settings className="w-4 h-4 mr-2" />
@@ -285,30 +270,27 @@ export default function DashboardPage() {
         </Card>
 
         {/* My Products Card */}
-        <Card>
+        <Card className="flex flex-col"> {/* Add flex flex-col here */}
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Sản phẩm của tôi</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-grow"> {/* Add flex-grow here */}
             <div className="space-y-1">
-              {/* Ensuring user.products is an array before accessing length */}
               <p className="text-3xl font-bold">{user?.products?.length ?? 0}</p>
               <p className="text-sm text-gray-500">Sản phẩm đã đăng ký</p>
               <div className="mt-2 pt-2 border-t border-gray-100">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-500">Đang hoạt động</span>
-                  {/* Safely filter products, defaulting to empty array if products is null/undefined */}
                   <span className="font-medium">{(user?.products ?? []).filter(p => p.status === "active").length}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm mt-1">
                   <span className="text-gray-500">Đang xử lý</span>
-                  {/* Safely filter products, defaulting to empty array if products is null/undefined */}
                   <span className="font-medium">{(user?.products ?? []).filter(p => p.status === "pending").length}</span>
                 </div>
               </div>
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="mt-auto"> {/* Add mt-auto here */}
             <Link href="/quan-ly/san-pham" className="w-full">
               <Button variant="outline" size="sm" className="w-full">
                 <ShoppingCart className="w-4 h-4 mr-2" />
@@ -319,38 +301,38 @@ export default function DashboardPage() {
         </Card>
 
         {/* My Projects Card */}
-        <Card>
+        <Card className="flex flex-col"> {/* Add flex flex-col here */}
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Dự án của tôi</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-grow"> {/* Add flex-grow here */}
             <div className="space-y-1">
-              {/* Ensuring user.projects is an array before accessing length */}
               <p className="text-3xl font-bold">{user?.projects?.length ?? 0}</p>
               <p className="text-sm text-gray-500">Dự án đã đăng ký</p>
               <div className="mt-2 pt-2 border-t border-gray-100">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-500">Đã phê duyệt</span>
-                  {/* Safely filter projects, defaulting to empty array if projects is null/undefined */}
-                  0
+                  {/* Vẫn giữ hardcode 0 ở đây như mã gốc */}
+                  <span className="font-medium">0</span>
                 </div>
                 <div className="flex justify-between items-center text-sm mt-1">
-                  <span className="text-gray-50800">Đang thực hiện</span>
-                  {/* Safely filter projects, defaulting to empty array if projects is null/undefined */}
-                  0
+                  {/* Sửa lại class text-gray-50800 thành text-gray-800 hoặc 500 */}
+                  <span className="text-gray-500">Đang thực hiện</span>
+                  {/* Vẫn giữ hardcode 0 ở đây như mã gốc */}
+                  <span className="font-medium">0</span>
                 </div>
               </div>
             </div>
           </CardContent>
-          <CardFooter>
-            <Button variant="outline" size="sm" className="w-full" onClick={() => setActiveTab("projects")}>
+          <CardFooter className="mt-auto"> {/* Add mt-auto here */}
+            {/* Nút này sử dụng onClick thay vì Link */}
+            <Button variant="outline" size="sm" className="w-full" onClick={() => { /* implement setActiveTab logic */ }}>
               <FileText className="w-4 h-4 mr-2" />
               Xem dự án
             </Button>
           </CardFooter>
         </Card>
       </div>
-
       {/* Tabs System */}
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "overview" | "products" | "projects")} className="w-full">
         <TabsList className="grid grid-cols-3 mb-8">

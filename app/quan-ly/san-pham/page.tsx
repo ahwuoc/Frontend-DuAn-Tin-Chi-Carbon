@@ -402,7 +402,7 @@ export default function ProductsManagementPage() {
                 getProductTypeIcon={getProductTypeIcon}
                 getFeatureIcon={getFeatureIcon}
                 getProductDetailLink={getProductDetailLink}
-                renderAdditionalInfo={renderAdditionalInfo} // Thêm dòng này
+                renderAdditionalInfo={renderAdditionalInfo}
               />
 
             )

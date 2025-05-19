@@ -590,11 +590,9 @@ export default function CheckoutPage() {
                   <div className="space-y-4">
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <h3 className="font-semibold text-lg mb-2">
-                        {product.title}
+                        {product.name}
                       </h3>
-                      <p className="text-gray-600 mb-2">
-                        {product.description}
-                      </p>
+                      <p className="text-gray-600 mb-2">{product.description}</p>
                       <p className="text-xl font-bold text-green-700">
                         {formatCurrency(product.price)}
                       </p>

@@ -35,8 +35,6 @@ import {
 import categories from "../mockup_data/categories";
 import { getUserFromLocalStorage, uploadToCloudinary } from "../../../../utils/common";
 import { Field } from "../components/Field_Component";
-const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "my_unsigned_preset";
 export default function NewsFormPage() {
     const router = useRouter();
     const { toast } = useToast();
@@ -91,13 +89,9 @@ export default function NewsFormPage() {
             toast({ title: "Chưa chọn tệp", description: "Vui lòng chọn ảnh.", variant: "default" });
             return;
         }
-        if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
-            toast({ title: "Lỗi cấu hình", description: "Thiếu Cloudinary config.", variant: "destructive" });
-            return;
-        }
         setIsUploadingImage(true);
         try {
-            const uploadedUrl = await uploadToCloudinary(imageFile, CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET);
+            const uploadedUrl = await uploadToCloudinary(imageFile);
             setFormData(prev => ({ ...prev, image: uploadedUrl }));
             setImagePreview(uploadedUrl);
             setImageFile(null);

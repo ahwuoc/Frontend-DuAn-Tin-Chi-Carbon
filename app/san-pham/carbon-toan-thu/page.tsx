@@ -1758,11 +1758,9 @@ export default function CarbonToanThuPage() {
             </p>
           </div>
 
-          <div className="md:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {/* ditmia */}
+          <div className="gap-6 max-w-6xl mx-auto">
             <CardComponents />
           </div>
-
           <div className="max-w-3xl mx-auto mt-16 text-center">
             <h3 className="text-2xl font-bold mb-4 text-gray-800">
               {getText("groupRegistration")}

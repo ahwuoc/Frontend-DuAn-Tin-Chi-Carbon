@@ -31,7 +31,7 @@ export default function CarbonCreditDetailPage() {
   const [progress, setProgress] = useState(65)
   const [activeTab, setActiveTab] = useState("overview")
 
-  // Dữ liệu chi tiết cho tín chỉ carbon
+
   const carbonCredit = {
     id,
     title: language === "vi" ? "Tín chỉ Carbon - Dự án Rừng Cát Tiên" : "Carbon Credits - Cat Tien Forest Project",

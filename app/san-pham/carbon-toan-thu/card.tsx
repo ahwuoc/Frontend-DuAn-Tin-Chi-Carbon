@@ -1,10 +1,10 @@
-
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CardContent, Card } from "@/components/ui/card";
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
 import { apiProducts } from "../../fetch/fetch.products";
+
 export default function CarbonCard() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,8 +51,10 @@ export default function CarbonCard() {
       </div>
     );
   }
+
   return (
-    <div className="flex gap-5  min-w-screen mx-auto">
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
       {products.map((product) => {
         const isFree = product.subscriptionTier === "free" || product.price === 0;
         const isEnterprise = product.subscriptionTier === "enterprise" || product.price > 50000000;
@@ -62,8 +64,9 @@ export default function CarbonCard() {
         return (
           <Card
             key={product.id}
-            className={`relative w-1/4 bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 border-2 ${isExpert ? "border-green-600" : "border-gray-200"
-              } flex flex-col min-h-[650px] w-full max-w-sm overflow-hidden`}
+            // Đã bỏ lớp w-1/4 để thẻ tự co giãn theo cột grid
+            className={`relative bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 border-2 ${isExpert ? "border-green-600" : "border-gray-200"
+              } flex flex-col min-h-[650px] overflow-hidden`}
           >
             {isExpert && (
               <div className="bg-green-600 text-white text-center py-2 text-sm font-semibold tracking-wide">

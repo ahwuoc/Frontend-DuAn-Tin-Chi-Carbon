@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { apiProducts } from "../../../../../../fetch/fetch.products";
 import {
@@ -36,14 +36,17 @@ import {
     XCircle,
     User,
     Mail,
-    Phone
+    Phone,
+    ChartPie,
+    Clock,
+    Gift,
+    Settings,
+    Star,
+    RefreshCw
 } from "lucide-react";
 
 import { uploadToCloudinary } from "../../../../../../utils/common";
-const cloudName = process.env.NEXT_PUBLIC_CLOUINARY_CLOUD_NAME!;
-const uploadPreset = "my_unsigned_preset";
-
-
+import RelatedActions from "../../ProductActions/page";
 interface EditableCarbonCreditData {
     _id?: string;
     image: string;
@@ -270,7 +273,7 @@ export default function ViewCarbonCreditPage() {
 
         try {
             if (selectedImageFile) {
-                const uploadRes = await uploadToCloudinary(selectedImageFile, cloudName, uploadPreset);
+                const uploadRes = await uploadToCloudinary(selectedImageFile);
                 if (uploadRes) {
                     imageUrl = uploadRes;
                 } else {
@@ -562,7 +565,6 @@ export default function ViewCarbonCreditPage() {
 
                                     <Separator />
 
-                                    {/* Nhóm Thông tin Quản lý tài khoản */}
                                     <div className="space-y-4">
                                         <h3 className="text-lg font-semibold flex items-center">
                                             <User className="mr-2 h-5 w-5" />
@@ -626,73 +628,10 @@ export default function ViewCarbonCreditPage() {
                                     </div>
                                 </div>
                             </CardContent>
-
-                            {/* CardFooter giữ các nút Save/Cancel khi chỉnh sửa */}
-                            {/* isEditing && (
-                                <CardFooter className="flex justify-end gap-2">
-                                     <Button onClick={handleCancel} variant="outline" disabled={isSaving}>
-                                        <XCircle className="mr-2 h-4 w-4" />
-                                        Hủy
-                                    </Button>
-                                    <Button
-                                        onClick={handleSave}
-                                        disabled={!hasChanges || isSaving}
-                                    >
-                                        {isSaving ? (
-                                            <> <Save className="mr-2 h-4 w-4 animate-pulse" /> Đang lưu... </>
-                                        ) : (
-                                            <> <Save className="mr-2 h-4 w-4" /> Lưu thay đổi </>
-                                        )}
-                                    </Button>
-                                </CardFooter>
-                             )*/}
                         </Card>
                     </div>
-
-
-                    {/* Cột 2: Chứa nhóm chức năng liên quan - Chỉ hiển thị khi KHÔNG chỉnh sửa */}
                     {!isEditing && (
-                        <div>
-                            <h3 className="text-lg font-semibold text-center mb-4">Chức năng liên quan</h3>
-                            {/* Sử dụng flexbox với wrap và gap để các nút tự sắp xếp */}
-                            <div className="flex flex-wrap gap-3 justify-center">
-                                <Button asChild variant="secondary" size="sm">
-                                    <Link href={`/quan-ly/admin/products/update/${carbonCredit?.type || 'default'}/${id}/report`} className="flex items-center">
-                                        <FileText className="mr-2 h-4 w-4" />
-                                        Báo cáo dự án
-                                        <ArrowRight className="ml-2 h-4 w-4 text-gray-500" />
-                                    </Link>
-                                </Button>
-                                <Button asChild variant="secondary" size="sm">
-                                    <Link href={`/quan-ly/admin/products/update/${carbonCredit?.type || 'default'}/${id}/timeline`} className="flex items-center">
-                                        <CalendarDays className="mr-2 h-4 w-4" />
-                                        Dòng thời gian
-                                        <ArrowRight className="ml-2 h-4 w-4 text-gray-500" />
-                                    </Link>
-                                </Button>
-                                <Button asChild variant="secondary" size="sm">
-                                    <Link href={`/quan-ly/admin/products/update/${carbonCredit?.type || 'default'}/${id}/benefits`} className="flex items-center">
-                                        <CalendarDays className="mr-2 h-4 w-4" />
-                                        Lợi ích
-                                        <ArrowRight className="ml-2 h-4 w-4 text-gray-500" />
-                                    </Link>
-                                </Button>
-                                <Button asChild variant="secondary" size="sm">
-                                    <Link href={`/quan-ly/admin/products/update/${carbonCredit?.type || 'default'}/${id}/feature`} className="flex items-center">
-                                        <FileEdit className="mr-2 h-4 w-4" />
-                                        Tính năng
-                                        <ArrowRight className="ml-2 h-4 w-4 text-gray-500" />
-                                    </Link>
-                                </Button>
-                                <Button asChild variant="outline" size="sm">
-                                    <Link href={`/quan-ly/admin/products/update/${carbonCredit?.type || 'default'}/${id}/certificate`} className="flex items-center">
-                                        <Award className="mr-2 h-4 w-4" />
-                                        Chứng chỉ
-                                        <ArrowRight className="ml-2 h-4 w-4 text-gray-500" />
-                                    </Link>
-                                </Button>
-                            </div>
-                        </div>
+                        <RelatedActions id={id as string} carbonCredit={{ type: carbonCredit.type }} />
                     )}
                 </div>
             </div >

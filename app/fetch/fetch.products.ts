@@ -48,6 +48,8 @@ export interface IProduct extends Document {
   issuer?: string;
   accountManager: IAccountManager;
   area?: number;
+  totalCredits?: number;
+  usedCredits?: number;
 }
 interface ReportItem {
   date: string;
@@ -63,7 +65,7 @@ export const apiProducts = {
   create: (body: Record<string, any>) => HTTP.POST("/products", { body }),
   getAll: () => HTTP.GET<IProduct[]>("/products"),
   getById: (id: string) => HTTP.GET<any>(`/products/${id}`),
-  updateById: (id: string, body: any) => HTTP.PUT(`/${id}`, { body }),
+  updateById: (id: string, body: any) => HTTP.PUT<any>(`/${id}`, { body }),
   delete: (id: string) => HTTP.DELETE(`/${id}`),
   getFreeTrial: () => HTTP.GET("/free/trial"),
   updatetimeline: (id: string, body: any) =>

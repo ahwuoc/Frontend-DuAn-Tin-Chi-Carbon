@@ -43,24 +43,27 @@ export const formatDateUtil = (dateString?: string | Date) => {
   });
 };
 
-export const uploadToCloudinary = async (
-  file: File,
-  cloudName: string,
-  uploadPreset: string
-): Promise<string> => {
-  const formData = new FormData();
-  formData.append("file", file), formData.append("upload_preset", uploadPreset);
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
+export const uploadToCloudinary = async (file: File): Promise<string> => {
+  const reader = new FileReader();
+  const base64 = await new Promise<string>((resolve, reject) => {
+    reader.onload = () => {
+      if (typeof reader.result === "string") resolve(reader.result);
+      else reject("FileReader error");
+    };
+    reader.onerror = () => reject("FileReader error");
+    reader.readAsDataURL(file);
+  });
+
+  const res = await fetch("/api/upload", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ file: base64 }),
+  });
+
   const data = await res.json();
-  if (!res.ok || !data.secure_url) {
-    throw new Error(data.error?.message || "Upload failed");
+  if (!res.ok || !data.url) {
+    throw new Error(data.message || "Upload failed");
   }
 
-  return data.secure_url;
+  return data.url;
 };

@@ -102,54 +102,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return false;
     }
   };
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (user?.userId) {
-        try {
-          const [projectRes, orderRes] = await Promise.all([
-            apiProjects.getMyProject(user.userId),
-            apiOrders.getInfoOrderByUserId(user.userId),
-          ]);
-          setUser(currentUser => {
-            if (!currentUser) return null;
-            return {
-              ...currentUser,
-              projects: projectRes?.payload?.project || [],
-              products: orderRes?.payload?.orders || [],
-              orders: orderRes.payload.orders || []
-            };
-          });
-        } catch (err) {
-          console.error("Lỗi khi lấy dữ liệu người dùng (sản phẩm/dự án):", err);
-          setUser(currentUser => {
-            if (!currentUser) return null;
-            return {
-              ...currentUser,
-              projects: [], // Clear old data on error
-              products: [], // Clear old data on error
-            };
-          });
-        } finally {
-          // setLoadingData(false); // Optional: unset loading state
-        }
-      } else {
-        // If user logs out or becomes null, clear projects and products from state
-        setUser(currentUser => {
-          if (!currentUser) return null;
-          // Keep essential user info, but clear data specific to a logged-in user
-          return {
-            ...currentUser,
-            projects: [],
-            products: [],
-          };
-        });
-      }
-    };
-
-    fetchUserData();
-
-  }, [user?.userId]);
-
   const registerUser = async (userData: Partial<User>): Promise<boolean> => {
     try {
       if (!userData.email) return false;

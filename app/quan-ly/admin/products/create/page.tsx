@@ -35,8 +35,6 @@ import {
 } from "lucide-react";
 
 import { uploadToCloudinary } from "../../../../utils/common";
-const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
-const uploadPreset = "my_unsigned_preset";
 
 interface NewCarbonCreditData {
     image: string;
@@ -45,7 +43,7 @@ interface NewCarbonCreditData {
     projectLocation?: string;
     price?: number;
     status: "active" | "pending" | "expired";
-    subscriptionTier: "free" | "expert" | "research" | "enterprise"; // Cập nhật kiểu dữ liệu cho subscriptionTier
+    subscriptionTier: "free" | "expert" | "research" | "enterprise";
     verificationStandard?: string;
     billingCycle: string;
     type: string;
@@ -175,13 +173,12 @@ export default function CreateCarbonCreditPage() {
         try {
             if (selectedImageFile) {
                 console.log("Đang tải ảnh lên Cloudinary...");
-                const uploadRes = await uploadToCloudinary(selectedImageFile, cloudName, uploadPreset);
+                const uploadRes = await uploadToCloudinary(selectedImageFile);
                 if (uploadRes) {
                     imageUrl = uploadRes;
                     console.log("Tải ảnh lên thành công:", imageUrl);
                 } else {
                     setError("Không thể tải ảnh lên Cloudinary.");
-                    console.error("Lỗi tải ảnh lên Cloudinary:", uploadRes);
                     setIsSaving(false);
                     return;
                 }
@@ -327,18 +324,13 @@ export default function CreateCarbonCreditPage() {
                                     disabled={isSaving}
                                 />
                             </div>
-                            {/* Trạng thái không còn là Select */}
                             <div className="space-y-2">
                                 <Label>Trạng thái:</Label>
                                 <Input value="Đang chờ xử lý (Mặc định)" disabled />
                             </div>
                         </div>
-                        {/* Tiêu chuẩn xác minh đã bị xóa */}
                     </div>
-
                     <Separator />
-
-                    {/* Nhóm Thông tin Quản lý tài khoản */}
                     <div className="space-y-4">
                         <h3 className="text-lg font-semibold flex items-center">
                             <User className="mr-2 h-5 w-5" />

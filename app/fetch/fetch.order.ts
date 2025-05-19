@@ -47,7 +47,7 @@ interface ResTOrder2 {
 }
 
 export const apiOrders = {
-  getInfoOrderByUserId: (id: any) => HTTP.GET<any>(`/orders/info/${id}`),
+  getInforOrderByUserId: <T>(id: any) => HTTP.GET<T>(`/orders/info/${id}`),
   cancelOrder: (orderCode: string) => HTTP.DELETE(`/orders/${orderCode}`),
   getOrderByUser: (id: string) => HTTP.GET<any>(`/orders/user/${id}`),
   getAll: () => HTTP.GET<any[]>("/orders"),
