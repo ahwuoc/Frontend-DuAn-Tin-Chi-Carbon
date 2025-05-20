@@ -29,7 +29,7 @@ interface DecodedUserPayload extends JWTPayload {
 }
 
 async function checkAuthLogic(
-  request: NextRequest
+  request: NextRequest,
 ): Promise<{ isAuthenticated: boolean; userPayload?: DecodedUserPayload }> {
   const token = request.cookies.get("token")?.value;
   const secretKey = process.env.JWT_SECRET;
@@ -61,7 +61,7 @@ export async function middleware(request: NextRequest) {
   if (GUEST_ONLY_PATHS.includes(pathname)) {
     if (isAuthenticated) {
       return NextResponse.redirect(
-        new URL(PATH_CONFIG.DEFAULT_AUTHENTICATED_REDIRECT, request.url)
+        new URL(PATH_CONFIG.DEFAULT_AUTHENTICATED_REDIRECT, request.url),
       );
     }
     return NextResponse.next();
@@ -69,7 +69,7 @@ export async function middleware(request: NextRequest) {
 
   // 2. Trang cần login mà chưa login -> chuyển về login
   const requireAuth = AUTH_REQUIRED_PATHS.some((path) =>
-    pathname.startsWith(path)
+    pathname.startsWith(path),
   );
   if (requireAuth && !isAuthenticated) {
     const loginUrl = new URL(PATH_CONFIG.LOGIN, request.url);
@@ -79,7 +79,7 @@ export async function middleware(request: NextRequest) {
 
   // 3. Trang chỉ admin mới vào được
   const isAdminRoute = ROLE_BASED_PATHS.ADMIN_ONLY.some((path) =>
-    pathname.startsWith(path)
+    pathname.startsWith(path),
   );
   if (isAdminRoute) {
     if (!isAuthenticated) {
@@ -97,11 +97,9 @@ export async function middleware(request: NextRequest) {
     response.headers.set("x-user-payload", JSON.stringify(userPayload));
     return response;
   }
-
   // ✅ Mọi thứ OK, cho qua
   return NextResponse.next();
 }
-
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

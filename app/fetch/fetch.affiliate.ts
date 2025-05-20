@@ -36,5 +36,5 @@ export const apiAffiliates = {
     HTTP.PATCH<IResponse>(`/affiliates/${id}`, { body }),
   remove: (id: string) => HTTP.DELETE(`/affiliates/${id}`),
   getPaymentMethod: (id: string) => HTTP.GET(""),
-  delete: (id: string) => HTTP.DELETE(`/affo;oates/${id}`),
+  delete: (id: string) => HTTP.DELETE(`/affiliates/${id}`),
 };
