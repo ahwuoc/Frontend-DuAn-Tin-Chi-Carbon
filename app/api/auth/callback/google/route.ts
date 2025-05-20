@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const errorUrl = new URL("/dang-nhap", request.url);
     errorUrl.searchParams.set(
       "error",
-      oauthError ? "google_oauth_failed" : "no_oauth_code"
+      oauthError ? "google_oauth_failed" : "no_oauth_code",
     );
     if (oauthError) errorUrl.searchParams.set("message", oauthError);
     return NextResponse.redirect(errorUrl);
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     if (!access_token) throw new Error("Google không trả access_token.");
 
     const serverRes = await fetch(
-      `${backendApiUrl}/login/email/${access_token}`
+      `${backendApiUrl}/login/email/${access_token}`,
     );
     if (!serverRes.ok) {
       const errorData = await serverRes.json();
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
         sameSite: "lax",
       });
 
-      const redirectUrl = new URL("/quan-ly", request.url);
+      const redirectUrl = new URL("/auth-processing", request.url);
       redirectUrl.searchParams.set("token", token);
 
       const response = NextResponse.redirect(redirectUrl);

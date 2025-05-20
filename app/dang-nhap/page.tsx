@@ -20,12 +20,14 @@ import { useAuth } from "@/context/auth-context";
 import ParticlesBackground from "@/components/particles-background";
 import { Eye, EyeOff } from "lucide-react";
 import { signIn } from "next-auth/react";
+import loginTranslations from "./language";
+import { useLanguage } from "@/context/language-context";
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get("redirect");
   const emailParam = searchParams.get("email") || "";
-
+  const { language } = useLanguage();
   const [email, setEmail] = useState(emailParam);
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -42,18 +44,18 @@ export default function LoginPage() {
       const success = await login(email, password);
       if (success) {
         toast({
-          title: "Login successful",
-          description: "Welcome back",
+          title: loginTranslations.loginSuccessful[language],
+          description: loginTranslations.welcomeBack[language],
           variant: "success",
         });
-        router.push("quan-ly");
+        router.push(redirectPath || "quan-ly"); // Sử dụng redirectPath nếu có, nếu không thì về "quan-ly"
       } else {
         throw new Error("Login failed");
       }
     } catch (error) {
       toast({
-        title: "Login failed",
-        description: "Invalid credentials",
+        title: loginTranslations.loginFailed[language],
+        description: loginTranslations.invalidCredentials[language],
         variant: "destructive",
       });
     } finally {
@@ -64,20 +66,11 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-
-      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-      const redirectUri = process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI;
-
-      if (!redirectUri) throw new Error("redirectUri is required");
-
-      const redirectPath = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(
-        redirectUri
-      )}&response_type=code&scope=openid%20email%20profile&access_type=offline&prompt=consent`;
-      router.push(redirectPath);
+      await signIn("google", { callbackUrl: redirectPath || "/quan-ly" });
     } catch (error) {
       toast({
-        title: "Login failed",
-        description: "Google login failed",
+        title: loginTranslations.loginFailed[language],
+        description: loginTranslations.googleLoginFailed[language],
         variant: "destructive",
       });
     } finally {
@@ -87,7 +80,6 @@ export default function LoginPage() {
 
   return (
     <div className="relative min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-black overflow-hidden font-montserrat">
-
       <ParticlesBackground
         particleColor="rgba(255, 255, 255, 0.5)"
         particleCount={400}
@@ -123,7 +115,7 @@ export default function LoginPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            Login to your account
+            {loginTranslations.loginToAccount[language]}
           </motion.h2>
           <motion.p
             className="mt-2 text-center text-sm text-gray-300"
@@ -131,12 +123,12 @@ export default function LoginPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Or{" "}
+            {language === "vi" ? "Hoặc " : "Or "}
             <Link
               href="/register-consultation"
               className="font-medium text-teal-400 hover:text-teal-300"
             >
-              register for consultation
+              {loginTranslations.registerForConsultation[language]}
             </Link>
           </motion.p>
         </div>
@@ -158,7 +150,7 @@ export default function LoginPage() {
                     htmlFor="email"
                     className="block text-sm font-medium tracking-tight text-gray-200"
                   >
-                    Email address
+                    {loginTranslations.emailAddress[language]}
                   </Label>
                   <div className="mt-1">
                     <Input
@@ -181,14 +173,14 @@ export default function LoginPage() {
                       htmlFor="password"
                       className="block text-sm font-medium tracking-tight text-gray-200"
                     >
-                      Password
+                      {loginTranslations.password[language]}
                     </Label>
                     <div className="text-sm">
                       <Link
                         href="/forget-password"
                         className="font-medium text-teal-400 hover:text-teal-300"
                       >
-                        Forgot password?
+                        {loginTranslations.forgotPassword[language]}
                       </Link>
                     </div>
                   </div>
@@ -227,20 +219,24 @@ export default function LoginPage() {
                       }
                       className="border-gray-600 bg-gray-800 text-teal-500 focus:ring-teal-500"
                     />
-                  </div>
-                  <div className="flex justify-between w-full">
                     <Label
                       htmlFor="remember-me"
                       className="ml-2 block text-sm text-gray-200"
                     >
-                      Remember me
+                      {loginTranslations.rememberMe[language]}
                     </Label>
+                  </div>
+                  <div className="text-sm">
                     <Label
                       htmlFor="register"
-                      className="ml-2 block text-sm text-blue-500"
+                      className="ml-2 block text-sm text-gray-200"
                     >
-                      <Link href="/dang-ky">
-                        Don't have an account?
+                      {loginTranslations.dontHaveAccount[language]}{" "}
+                      <Link
+                        href="/dang-ky"
+                        className="font-medium text-teal-400 hover:text-teal-300"
+                      >
+                        {loginTranslations.register[language]}
                       </Link>
                     </Label>
                   </div>
@@ -252,7 +248,9 @@ export default function LoginPage() {
                     disabled={isLoading}
                     className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium tracking-tight text-white bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 focus:ring-offset-gray-900"
                   >
-                    {isLoading ? "Logging in..." : "Login"}
+                    {isLoading
+                      ? loginTranslations.loggingIn[language]
+                      : loginTranslations.loginButton[language]}
                   </Button>
                 </div>
               </form>
@@ -264,12 +262,12 @@ export default function LoginPage() {
                   </div>
                   <div className="relative flex justify-center text-sm">
                     <span className="px-2 bg-black text-gray-400">
-                      Or continue with
+                      {loginTranslations.orContinueWith[language]}
                     </span>
                   </div>
                 </div>
 
-                <div className="mt-6  grid  gap-3">
+                <div className="mt-6 grid gap-3">
                   <div>
                     <Button
                       onClick={handleGoogleSignIn}
@@ -278,13 +276,14 @@ export default function LoginPage() {
                     >
                       <span className="sr-only">Login with Google</span>
                       <svg
-                        className="w-5 h-5"
+                        className="w-5 h-5 mr-2"
                         aria-hidden="true"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                       >
                         <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
                       </svg>
+                      Google
                     </Button>
                   </div>
                 </div>
@@ -292,7 +291,7 @@ export default function LoginPage() {
             </CardContent>
             <CardFooter className="bg-black/40 border-t border-gray-800 px-6 py-4">
               <p className="text-xs text-center text-gray-400 w-full">
-                By logging in, you agree to our Terms of Service and Privacy Policy
+                {loginTranslations.termsAndPrivacy[language]}
               </p>
             </CardFooter>
           </Card>

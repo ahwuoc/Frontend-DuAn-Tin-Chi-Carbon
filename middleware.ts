@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify, JWTPayload } from "jose";
+import { Buffer } from "buffer"; // cần để encode base64
 
 // =======================
 // ⚙️ Config Paths
@@ -49,7 +50,6 @@ async function checkAuthLogic(
     return { isAuthenticated: false };
   }
 }
-
 // =======================
 // 🛡️ Middleware Logic
 // =======================
@@ -92,14 +92,22 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL(PATH_CONFIG.FORBIDDEN, request.url));
     }
 
-    // Inject payload nếu là admin
+    // ✅ Inject payload (base64) nếu là admin
     const response = NextResponse.next();
-    response.headers.set("x-user-payload", JSON.stringify(userPayload));
+    const encodedPayload = Buffer.from(JSON.stringify(userPayload)).toString(
+      "base64",
+    );
+    response.headers.set("x-user-payload", encodedPayload);
     return response;
   }
+
   // ✅ Mọi thứ OK, cho qua
   return NextResponse.next();
 }
+
+// =======================
+// 🔍 Match Route
+// =======================
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

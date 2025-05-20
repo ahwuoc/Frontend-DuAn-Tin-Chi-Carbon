@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 const StatusBadge = ({ status }: { status: string }) => {
   switch (status) {
     case "active":
@@ -67,43 +68,84 @@ const StatusBadge = ({ status }: { status: string }) => {
   }
 };
 
-import { IProject, apiProjects } from "@/app/fetch/fetch.projects";
+import { apiProjects, IProject, IUser } from "@/app/fetch/fetch.projects";
 import { useAuth } from "../../context/auth-context";
 import { formatDateUtil } from "@/app/utils/common";
+
 export default function ProjectsList() {
   const { language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [projects, setProjects] = useState<IProject[]>([]);
-  const { user } = useAuth();
+  const { user } = useAuth(); // Giả định user có userId để lọc dự án của người dùng hiện tại
+
+  // Hàm chuyển đổi projectType sang tiếng Việt
+  const getProjectTypeName = (type: string) => {
+    switch (type) {
+      case "rice":
+        return "Lúa gạo";
+      case "forest":
+        return "Lâm nghiệp";
+      case "biochar":
+        return "Than sinh học";
+      case "renewable":
+        return "Năng lượng tái tạo";
+      case "conservation":
+        return "Bảo tồn";
+      case "waste":
+        return "Xử lý chất thải";
+      default:
+        return type; // Trả về nguyên bản nếu không khớp
+    }
+  };
+
   useEffect(() => {
-    if (!user?.userId) return; // 👈 chặn khi chưa có user
+    // Đảm bảo có userId trước khi gọi API
+    if (!user?.userId) {
+      // Có thể đặt một state loading thành false ở đây nếu muốn hiển thị thông báo
+      // rằng không có user đăng nhập hoặc chờ đợi user load xong.
+      console.log("Không có userId, không thể fetch dự án.");
+      return;
+    }
 
     const getProjectMyUser = async () => {
       try {
         const response = await apiProjects.getMyProject(user.userId);
         if (response?.payload) {
           setProjects(response.payload);
+        } else {
+          setProjects([]); // Đặt rỗng nếu không có payload
+          console.log("Không có dữ liệu dự án trong phản hồi API.");
         }
       } catch (err) {
         console.error("Lỗi fetch dự án:", err);
+        setProjects([]); // Đặt rỗng nếu có lỗi
       }
     };
-
     getProjectMyUser();
-  }, [user?.userId]);
+  }, [user?.userId]); // Dependency array bao gồm user.userId
 
   const filteredProjects =
     Array.isArray(projects) &&
     projects.filter((project) => {
+      // Tìm kiếm theo tên người đăng ký, tổ chức, thông tin bổ sung và mô tả dự án (nếu có)
       const matchesSearch =
-        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.location.toLowerCase().includes(searchTerm.toLowerCase());
+        project.userId?.name
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        "" || // Truy cập project.userId.name an toàn
+        project.organization.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.additionalInfo
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        project.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        "";
+
       const matchesStatus =
         statusFilter === "all" || project.status === statusFilter;
-      const matchesType = typeFilter === "all" || project.type === typeFilter;
+      const matchesType =
+        typeFilter === "all" || project.projectType === typeFilter;
 
       return matchesSearch && matchesStatus && matchesType;
     });
@@ -115,7 +157,7 @@ export default function ProjectsList() {
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            placeholder="Tìm kiếm dự án..."
+            placeholder="Tìm kiếm dự án (người đăng ký, tổ chức, thông tin bổ sung)..."
             className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -141,7 +183,10 @@ export default function ProjectsList() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả loại</SelectItem>
-              <SelectItem value="forestry">Lâm nghiệp</SelectItem>
+              {/* Cập nhật các loại dự án theo yêu cầu của bạn */}
+              <SelectItem value="rice">Lúa gạo</SelectItem>
+              <SelectItem value="forest">Lâm nghiệp</SelectItem>
+              <SelectItem value="biochar">Than sinh học</SelectItem>
               <SelectItem value="renewable">Năng lượng tái tạo</SelectItem>
               <SelectItem value="conservation">Bảo tồn</SelectItem>
               <SelectItem value="waste">Xử lý chất thải</SelectItem>
@@ -161,40 +206,40 @@ export default function ProjectsList() {
               <div className="p-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {project.name}
+                    Dự án {getProjectTypeName(project.projectType)} của{" "}
+                    <span className="text-green-700">
+                      {project.userId?.name ||
+                        project.name ||
+                        "Người đăng ký không rõ"}
+                    </span>
                   </h3>
-                  <StatusBadge status={project.status} />
+                  {/* Đảm bảo dữ liệu của bạn có trường 'status', nếu không, cung cấp một mặc định */}
+                  <StatusBadge status={project.status || "unknown"} />
                 </div>
 
-                <p className="text-gray-600 mb-4">{project.description}</p>
+                <p className="text-gray-600 mb-4">
+                  **Tổ chức:** {project.organization}
+                  <br />
+                  **Thông tin bổ sung:** {project.additionalInfo}
+                </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div className="flex items-center text-gray-500">
                     <Calendar className="h-4 w-4 mr-2" />
-                    <span>
-                      Đăng ký: {formatDateUtil(project.registrationDate)}
-                    </span>
+                    <span>Đăng ký: {formatDateUtil(project.createdAt)}</span>
                   </div>
                   <div className="flex items-center text-gray-500">
                     <Filter className="h-4 w-4 mr-2" />
-                    <span>
-                      Loại:{" "}
-                      {project.type === "forestry"
-                        ? "Lâm nghiệp"
-                        : project.type === "renewable"
-                          ? "Năng lượng tái tạo"
-                          : project.type === "conservation"
-                            ? "Bảo tồn"
-                            : project.type === "waste"
-                              ? "Xử lý chất thải"
-                              : project.type}
-                    </span>
+                    <span>Loại: {getProjectTypeName(project.projectType)}</span>
                   </div>
-                  <div className="flex items-center text-gray-500">
-                    <span className="font-medium text-green-600">
-                      {project.carbonCredits} tấn CO₂
-                    </span>
-                  </div>
+                  {/* Nếu bạn có trường carbonCredits, hãy hiển thị nó */}
+                  {project.carbonCredits && (
+                    <div className="flex items-center text-gray-500">
+                      <span className="font-medium text-green-600">
+                        {project.carbonCredits.toLocaleString()} tấn CO₂
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
@@ -215,7 +260,7 @@ export default function ProjectsList() {
         ) : (
           <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
             <p className="text-gray-500">
-              Không tìm thấy dự án nào phù hợp với tiêu chí tìm kiếm
+              Không tìm thấy dự án nào phù hợp với tiêu chí tìm kiếm.
             </p>
             <Button
               variant="link"

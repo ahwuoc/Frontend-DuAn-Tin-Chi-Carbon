@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input"; // Xóa InputProps vì không còn dùng
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Table,
@@ -42,58 +42,18 @@ import {
   AlertCircle,
   ArrowLeft,
   Loader2,
-  FileUp, // Thêm icon FileUp cho trạng thái pending của document
+  FileUp,
 } from "lucide-react";
 import Link from "next/link";
-import { apiProjects, IProject } from "@/app/fetch/fetch.projects";
-import { ProjectIcon } from "./_components";
-
-export interface ICoordinates {
-  lat: number;
-  lng: number;
-}
-
-export interface IActivity {
-  _id?: string;
-  date: string;
-  description: string;
-  title?: string;
-}
-
-export interface IDocument {
-  _id?: string;
-  name: string;
-  url: string;
-  type?: string;
-  uploadedAt?: string;
-  userId?: string;
-  status?: "pending" | "approved" | "rejected"; // Đã thêm status cho tài liệu
-}
-
-export interface IProject {
-  _id?: string;
-  name: string;
-  description?: string;
-  status?: "pending" | "active" | "completed" | "archived";
-  registrationDate?: string;
-  startDate?: string;
-  endDate?: string;
-  carbonCredits?: number;
-  carbonCreditsTotal?: number;
-  carbonCreditsClaimed?: number;
-  type?: string;
-  location?: string;
-  coordinates?: ICoordinates;
-  area?: number;
-  participants?: string[];
-  progress?: number;
-  documents?: IDocument[];
-  activities?: IActivity[];
-  userId: string | null;
-  createdAt?: string;
-  updatedAt?: string;
-  __v?: number;
-}
+import {
+  apiProjects,
+  IProject, // Đã cập nhật IProject để khớp với ProjectCarbonData
+  IDocument,
+  IActivity,
+  // ICoordinates, // Có thể không còn cần nếu tọa độ nằm trong details
+  // IUser, // Cần import nếu userId là đối tượng IUser
+} from "@/app/fetch/fetch.projects";
+import { ProjectIcon } from "./_components"; // Đảm bảo ProjectIcon nhận projectType
 
 // Component StatusBadge cho trạng thái dự án (không thay đổi)
 const StatusBadge: React.FC<{
@@ -149,7 +109,7 @@ const DocumentStatusBadge: React.FC<{ status?: string }> = ({ status }) => {
       ? CheckCircle2
       : status === "rejected"
         ? AlertCircle
-        : FileUp; // Mặc định là FileUp cho pending hoặc không xác định
+        : FileUp;
 
   return (
     <Badge
@@ -174,6 +134,20 @@ export default function ProjectDetailPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+
+  // Hàm chuyển đổi projectType sang tiếng Việt
+  const getProjectTypeName = (type: string) => {
+    switch (type) {
+      case "rice":
+        return "Lúa gạo";
+      case "forest":
+        return "Lâm nghiệp";
+      case "biochar":
+        return "Than sinh học";
+      default:
+        return type; // Trả về nguyên bản nếu không khớp
+    }
+  };
 
   const fetchProject = useCallback(async (id: string) => {
     try {
@@ -217,24 +191,25 @@ export default function ProjectDetailPage() {
     try {
       const fileUrl = await uploadToCloudinary(selectedFile);
 
-      // Thêm status mặc định là 'pending' cho tài liệu mới tải lên
       const newDocument: IDocument = {
         name: selectedFile.name,
         url: fileUrl,
         type: selectedFile.type || "unknown",
         uploadedAt: new Date().toISOString(),
-        userId: getUserFromLocalStorage().userId,
-        status: "pending", // Đặt trạng thái mặc định là pending
+        userId: getUserFromLocalStorage()?.userId, // Cần đảm bảo getUserFromLocalStorage trả về user object có userId
+        status: "pending",
       };
       const updatedDocuments = project.documents
         ? [...project.documents, newDocument]
         : [newDocument];
+
+      // Gọi API để cập nhật dự án với tài liệu mới
       const response = await apiProjects.updateDocuments(project._id, {
         documents: updatedDocuments,
       });
 
       if (response && response.payload) {
-        setProject(response.payload as IProject);
+        setProject(response.payload as IProject); // Cập nhật project state với dữ liệu mới từ API
         setUploadSuccess(true);
         setSelectedFile(null);
         alert("Tài liệu đã được tải lên thành công!");
@@ -259,7 +234,7 @@ export default function ProjectDetailPage() {
     if (params.id) {
       fetchProject(params.id as string);
     }
-  }, [params.id, router, fetchProject]);
+  }, [params.id, fetchProject]);
 
   if (loading) {
     return (
@@ -305,16 +280,20 @@ export default function ProjectDetailPage() {
 
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
         <div className="flex items-center">
-          <ProjectIcon type={project.type} />
+          <ProjectIcon type={project.projectType} />
           <div className="ml-3">
-            <h1 className="text-3xl font-bold">{project.name}</h1>
+            <h1 className="text-3xl font-bold">
+              Dự án {getProjectTypeName(project.projectType)} của{" "}
+              {project.name}{" "}
+            </h1>
             <p className="text-gray-500">
-              Đăng ký ngày: {formatDateUtil(project.registrationDate)}
+              Đăng ký ngày:{" "}
+              {formatDateUtil(project.createdAt || new Date().toISOString())}
             </p>
           </div>
         </div>
         <div className="mt-4 md:mt-0">
-          <StatusBadge status={project.status} />
+          <StatusBadge status={project.status || "pending"} />
         </div>
       </div>
 
@@ -349,54 +328,225 @@ export default function ProjectDetailPage() {
                     Loại dự án
                   </h3>
                   <p className="font-medium">
-                    {project.type === "forestry" ? "Lâm nghiệp" : project.type}
+                    {getProjectTypeName(project.projectType)}
                   </p>
                 </div>
+
+                {/* Hiển thị chi tiết theo loại dự án */}
+                {project.projectType === "forest" && (
+                  <>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Địa điểm rừng
+                      </h3>
+                      <p className="font-medium flex items-center">
+                        <MapPin className="w-4 h-4 mr-1 text-gray-400" />
+                        {project.details?.forestLocation || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Diện tích rừng
+                      </h3>
+                      <p className="font-medium">
+                        {project.details?.forestArea || "N/A"} ha
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Loài cây
+                      </h3>
+                      <p className="font-medium">
+                        {project.details?.treeSpecies || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Tuổi cây trồng
+                      </h3>
+                      <p className="font-medium">
+                        {project.details?.plantingAge || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Chiều cao trung bình
+                      </h3>
+                      <p className="font-medium">
+                        {project.details?.averageHeight || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Chu vi trung bình
+                      </h3>
+                      <p className="font-medium">
+                        {project.details?.averageCircumference || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Lịch sử chặt phá
+                      </h3>
+                      <p className="font-medium">
+                        {project.details?.previousDeforestation === "no"
+                          ? "Không"
+                          : project.details?.previousDeforestation === "yes"
+                            ? "Có"
+                            : project.details?.previousDeforestation ===
+                                "unknown"
+                              ? "Không rõ"
+                              : "N/A"}
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {project.projectType === "rice" && (
+                  <>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Địa điểm lúa gạo
+                      </h3>
+                      <p className="font-medium flex items-center">
+                        <MapPin className="w-4 h-4 mr-1 text-gray-400" />
+                        {project.details?.riceLocation || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Diện tích lúa gạo
+                      </h3>
+                      <p className="font-medium">
+                        {project.details?.riceArea || "N/A"} ha
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Địa hình
+                      </h3>
+                      <p className="font-medium">
+                        {project.details?.riceTerrain || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Khí hậu
+                      </h3>
+                      <p className="font-medium">
+                        {project.details?.riceClimate || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Loại đất
+                      </h3>
+                      <p className="font-medium">
+                        {project.details?.riceSoilType || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Ngày bắt đầu (lúa gạo)
+                      </h3>
+                      <p className="font-medium flex items-center">
+                        <Calendar className="w-4 h-4 mr-1 text-gray-400" />
+                        {project.details?.riceStartDate
+                          ? formatDateUtil(project.details.riceStartDate)
+                          : "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Ngày kết thúc (lúa gạo)
+                      </h3>
+                      <p className="font-medium flex items-center">
+                        <Calendar className="w-4 h-4 mr-1 text-gray-400" />
+                        {project.details?.riceEndDate
+                          ? formatDateUtil(project.details.riceEndDate)
+                          : "N/A"}
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {project.projectType === "biochar" && (
+                  <>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Nguyên liệu thô
+                      </h3>
+                      <p className="font-medium">
+                        {project.details?.biocharRawMaterial || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Hàm lượng carbon
+                      </h3>
+                      <p className="font-medium">
+                        {project.details?.biocharCarbonContent || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Diện tích đất ứng dụng
+                      </h3>
+                      <p className="font-medium">
+                        {project.details?.biocharLandArea || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Phương pháp ứng dụng
+                      </h3>
+                      <p className="font-medium">
+                        {project.details?.biocharApplicationMethod || "N/A"}
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {/* Các thông tin chung cho tất cả dự án */}
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    Địa điểm
+                    Người đăng ký
                   </h3>
-                  <p className="font-medium flex items-center">
-                    <MapPin className="w-4 h-4 mr-1 text-gray-400" />
-                    {project.location}
-                  </p>
+                  <p className="font-medium">{project.name || "N/A"}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    Diện tích
+                    Tổ chức
                   </h3>
-                  <p className="font-medium">{project.area} ha</p>
+                  <p className="font-medium">{project.organization || "N/A"}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    Thời gian thực hiện
+                    Email liên hệ
                   </h3>
-                  <p className="font-medium flex items-center">
-                    <Calendar className="w-4 h-4 mr-1 text-gray-400" />
-                    {formatDateUtil(project.startDate)} -{" "}
-                    {formatDateUtil(project.endDate)}
-                  </p>
+                  <p className="font-medium">{project.email || "N/A"}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    Tín chỉ carbon
+                    Số điện thoại
                   </h3>
-                  <p className="font-medium">
-                    {project.carbonCreditsTotal?.toLocaleString()}
-                  </p>
+                  <p className="font-medium">{project.phone || "N/A"}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    Số người tham gia
+                    Địa chỉ
                   </h3>
-                  <p className="font-medium">{project.participants?.[0]}</p>
+                  <p className="font-medium">{project.address || "N/A"}</p>
                 </div>
               </div>
+
               <div className="pt-4 border-t">
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
-                  Mô tả dự án
+                  Thông tin bổ sung
                 </h3>
-                <p className="text-gray-700">{project.description}</p>
+                <p className="text-gray-700">
+                  {project.additionalInfo || "Không có thông tin bổ sung."}
+                </p>
               </div>
             </CardContent>
             <CardFooter className="flex gap-3">
@@ -405,7 +555,53 @@ export default function ProjectDetailPage() {
             </CardFooter>
           </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Phần tín chỉ carbon */}
+          {project.carbonCreditsTotal !== undefined && ( // Kiểm tra cụ thể hơn
+            <Card>
+              <CardHeader>
+                <CardTitle>Thông tin Tín chỉ Carbon</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">
+                      Tổng tín chỉ carbon
+                    </h3>
+                    <p className="font-medium">
+                      {project.carbonCreditsTotal?.toLocaleString() || "N/A"}{" "}
+                      tấn CO₂
+                    </p>
+                  </div>
+                  {project.carbonCredits !== undefined && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Tín chỉ hiện có
+                      </h3>
+                      <p className="font-medium">
+                        {project.carbonCredits?.toLocaleString() || "N/A"} tấn
+                        CO₂
+                      </p>
+                    </div>
+                  )}
+                  {project.carbonCreditsClaimed !== undefined && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">
+                        Tín chỉ đã yêu cầu
+                      </h3>
+                      <p className="font-medium">
+                        {project.carbonCreditsClaimed?.toLocaleString() ||
+                          "N/A"}{" "}
+                        tấn CO₂
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Phần tiến độ dự án */}
+          {typeof project.progress === "number" && (
             <Card>
               <CardHeader>
                 <CardTitle>Tiến độ dự án</CardTitle>
@@ -429,7 +625,7 @@ export default function ProjectDetailPage() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          )}
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-6">
@@ -449,8 +645,7 @@ export default function ProjectDetailPage() {
                         <TableHead>Tên tài liệu</TableHead>
                         <TableHead>Loại</TableHead>
                         <TableHead>Ngày tải lên</TableHead>
-                        <TableHead>Trạng thái</TableHead>{" "}
-                        {/* Thêm cột trạng thái */}
+                        <TableHead>Trạng thái</TableHead>
                         <TableHead className="text-right">Hành động</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -472,8 +667,7 @@ export default function ProjectDetailPage() {
                               : "N/A"}
                           </TableCell>
                           <TableCell>
-                            <DocumentStatusBadge status={doc.status} />{" "}
-                            {/* Sử dụng component mới */}
+                            <DocumentStatusBadge status={doc.status} />
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end space-x-2">

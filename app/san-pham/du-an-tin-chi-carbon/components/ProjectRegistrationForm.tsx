@@ -17,8 +17,9 @@ import {
 
 import dynamic from "next/dynamic";
 import ProjectFormContent from "./ProjectFormContent";
-import { apiProjects } from "@/app/fetch/fetch.projects";
+import { apiProjects } from "@/app/fetch/fetch.projects"; // Đây có thể là `apiProjectCarbon` nếu bạn dùng chung cho cả fetch và add
 
+// Định nghĩa lại FormData để phản ánh cấu trúc chi tiết hơn
 interface FormData {
   name: string;
   organization: string;
@@ -26,6 +27,7 @@ interface FormData {
   email: string;
   address: string;
 
+  // Fields for all project types, but populated conditionally
   forestLocation: string;
   forestArea: string;
   treeSpecies: string;
@@ -39,8 +41,9 @@ interface FormData {
   riceTerrain: string;
   riceClimate: string;
   riceSoilType: string;
-  riceStartDate: string;
-  riceEndDate: string;
+  riceStartDate: string; // Giữ là string vì form input là string
+  riceEndDate: string; // Giữ là string vì form input là string
+
   biocharRawMaterial: string;
   biocharCarbonContent: string;
   biocharLandArea: string;
@@ -51,10 +54,13 @@ interface FormData {
 interface FormErrors {
   [key: string]: string;
 }
+
+// Cập nhật interface Project để khớp với loại bạn đang fetch từ apiProjects.getAll()
 interface Project {
   _id: string;
-  name: string;
-  type: string;
+  name: string; // Giả định đây là tên loại dự án (ví dụ: "Lâm nghiệp", "Lúa")
+  // Bạn có thể thêm các trường khác nếu apiProjects.getAll() trả về
+  // Ví dụ: type: "forest" | "rice" | "biochar";
 }
 
 export default function ProjectRegistrationForm() {
@@ -64,7 +70,9 @@ export default function ProjectRegistrationForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const kmlFileInputRef = useRef<HTMLInputElement>(null);
 
-  const [activeTab, setActiveTab] = useState("forest");
+  const [activeTab, setActiveTab] = useState<"forest" | "rice" | "biochar">(
+    "forest",
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -74,8 +82,8 @@ export default function ProjectRegistrationForm() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [kmlFile, setKmlFile] = useState<File | null>(null);
 
-  // Cập nhật kiểu dữ liệu cho Projects
-  const [Projects, setProjects] = useState<Project[]>([]);
+  const [Projects, setProjects] = useState<Project[]>([]); // Danh sách các loại dự án từ API
+
   const [formData, setFormData] = useState<FormData>({
     name: user?.name || "",
     organization: "",
@@ -120,14 +128,15 @@ export default function ProjectRegistrationForm() {
   }, [user]);
 
   React.useEffect(() => {
-    const getProject = async () => {
+    const getProjectList = async () => {
+      // Giả định apiProjects.getAll() trả về danh sách các Project có _id và name
       const response = await apiProjects.getAll();
       if (response?.payload) {
         setProjects(response.payload);
       }
     };
 
-    getProject();
+    getProjectList();
   }, []);
 
   const handleChange = (
@@ -151,7 +160,7 @@ export default function ProjectRegistrationForm() {
   };
 
   const handleTabChange = (value: string) => {
-    setActiveTab(value);
+    setActiveTab(value as "forest" | "rice" | "biochar");
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -207,6 +216,7 @@ export default function ProjectRegistrationForm() {
     }
 
     requiredFields.forEach((field) => {
+      // Sử dụng optional chaining và fallback rỗng cho an toàn
       if (!formData[field as keyof FormData]?.trim()) {
         errors[field] = `${getFieldLabel(field)} là bắt buộc`;
       }
@@ -286,7 +296,9 @@ export default function ProjectRegistrationForm() {
 
   const handleGoToLogin = () => {
     router.push(
-      `/dang-nhap?redirect=${encodeURIComponent("/quan-ly")}&email=${encodeURIComponent(formData.email)}`,
+      `/dang-nhap?redirect=${encodeURIComponent(
+        "/quan-ly",
+      )}&email=${encodeURIComponent(formData.email)}`,
     );
   };
 
@@ -300,101 +312,91 @@ export default function ProjectRegistrationForm() {
     setIsSubmitting(true);
 
     try {
+      // 1. Upload land documents
       const landDocumentUrls = await Promise.all(
-        uploadedFiles.map((file) => uploadToCloudinary(file)),
+        uploadedFiles.map(async (file) => {
+          const url = await uploadToCloudinary(file);
+          return {
+            name: file.name,
+            url: url,
+            type: file.type, // Hoặc xác định type dựa trên extension
+            status: "pending", // Trạng thái mặc định khi tải lên
+          };
+        }),
       );
 
-      let kmlFileUrl: string | null = null;
+      // 2. Upload KML file
+      let kmlFileData: { name: string; url: string } | null = null;
       if (kmlFile) {
-        kmlFileUrl = await uploadToCloudinary(kmlFile);
+        const kmlUrl = await uploadToCloudinary(kmlFile);
+        kmlFileData = { name: kmlFile.name, url: kmlUrl };
       }
 
-      // Xác định projectId dựa trên activeTab
-      let projectId: string | null = null;
-      const projectMapping: Record<string, string> = {
-        forest: "Lâm nghiệp",
-        rice: "Lúa",
-        biochar: "Biochar",
-      };
-      const projectName = projectMapping[activeTab];
-
-      if (projectName) {
-        const foundProject = Projects.find(
-          (project) => project.name === projectName,
-        );
-        if (foundProject) {
-          projectId = foundProject._id;
-        } else {
-          console.warn(`Không tìm thấy Project với tên: ${projectName}`);
-        }
-      }
-
-      const dataToSendToBackend: any = {
-        name: formData.name,
-        organization: formData.organization,
-        phone: formData.phone,
-        email: formData.email,
-        address: formData.address,
-        projectType: activeTab,
-        additionalInfo: formData.additionalInfo,
-        landDocuments: landDocumentUrls,
-        kmlFile: kmlFileUrl,
-        // Thêm projectId vào dữ liệu gửi đi
-        projectId: projectId,
-      };
-
-      if (activeTab === "forest") {
-        dataToSendToBackend.forestLocation = formData.forestLocation;
-        dataToSendToBackend.forestArea = formData.forestArea;
-        dataToSendToBackend.treeSpecies = formData.treeSpecies;
-        dataToSendToBackend.plantingAge = formData.plantingAge;
-        dataToSendToBackend.averageHeight = formData.averageHeight;
-        dataToSendToBackend.averageCircumference =
-          formData.averageCircumference;
-        dataToSendToBackend.previousDeforestation =
-          formData.previousDeforestation;
-      } else if (activeTab === "rice") {
-        dataToSendToBackend.riceLocation = formData.riceLocation;
-        dataToSendToBackend.riceArea = formData.riceArea;
-        dataToSendToBackend.riceTerrain = formData.riceTerrain;
-        dataToSendToBackend.riceClimate = formData.riceClimate;
-        dataToSendToBackend.riceSoilType = formData.riceSoilType;
-        dataToSendToBackend.riceStartDate = formData.riceStartDate;
-        dataToSendToBackend.riceEndDate = formData.riceEndDate;
-      } else if (activeTab === "biochar") {
-        dataToSendToBackend.biocharRawMaterial = formData.biocharRawMaterial;
-        dataToSendToBackend.biocharCarbonContent =
-          formData.biocharCarbonContent;
-        dataToSendToBackend.biocharLandArea = formData.biocharLandArea;
-        dataToSendToBackend.biocharApplicationMethod =
-          formData.biocharApplicationMethod;
-      }
-
-      let userid = null;
+      // 3. Lấy userId từ localStorage
+      let userIdFromLocalStorage: string | null = null;
       try {
-        const user = getUserFromLocalStorage();
-        if (user && user.userId) {
-          userid = user.userId;
+        const userData = getUserFromLocalStorage();
+        if (userData?.userId) {
+          userIdFromLocalStorage = userData.userId;
         }
       } catch (parseError) {
-        console.error("Failed to get user_id from localStorage", parseError);
+        console.error("Failed to get userId from localStorage", parseError);
       }
 
-      if (userid) {
-        dataToSendToBackend.userId = userid;
-      } else if (isAuthenticated) {
-        console.warn(
-          "User is authenticated but user_id not found/valid in localStorage.",
-        );
+      // 4. Tạo đối tượng details dựa trên activeTab
+      const details: any = {};
+      if (activeTab === "forest") {
+        details.forestLocation = formData.forestLocation;
+        details.forestArea = formData.forestArea;
+        details.treeSpecies = formData.treeSpecies;
+        details.plantingAge = formData.plantingAge;
+        details.averageHeight = formData.averageHeight;
+        details.averageCircumference = formData.averageCircumference;
+        details.previousDeforestation = formData.previousDeforestation;
+      } else if (activeTab === "rice") {
+        details.riceLocation = formData.riceLocation;
+        details.riceArea = formData.riceArea;
+        details.riceTerrain = formData.riceTerrain;
+        details.riceClimate = formData.riceClimate;
+        details.riceSoilType = formData.riceSoilType;
+        details.riceStartDate = formData.riceStartDate; // Có thể cần chuyển đổi sang Date object nếu backend yêu cầu
+        details.riceEndDate = formData.riceEndDate; // Có thể cần chuyển đổi sang Date object nếu backend yêu cầu
+      } else if (activeTab === "biochar") {
+        details.biocharRawMaterial = formData.biocharRawMaterial;
+        details.biocharCarbonContent = formData.biocharCarbonContent;
+        details.biocharLandArea = formData.biocharLandArea;
+        details.biocharApplicationMethod = formData.biocharApplicationMethod;
       }
 
+      // 5. Chuẩn bị dữ liệu để gửi đến backend
+      const dataToSendToBackend: any = {
+        name: formData.name, // Tên người đăng ký
+        organization: formData.organization || undefined, // Gửi undefined nếu trống
+        phone: formData.phone,
+        email: formData.email,
+        address: formData.address || undefined, // Gửi undefined nếu trống
+        projectType: activeTab, // "forest", "rice", "biochar"
+        details: details, // Đối tượng details đã được điền
+        status: "pending", // Trạng thái mặc định cho dự án mới đăng ký
+        additionalInfo: formData.additionalInfo || undefined, // Gửi undefined nếu trống
+        landDocuments: landDocumentUrls, // Mảng các đối tượng LandDocument
+        kmlFile: kmlFileData, // Đối tượng KmlFile hoặc null
+        userId: userIdFromLocalStorage, // Đảm bảo userId có giá trị
+      };
+
+      // Logging dữ liệu trước khi gửi để kiểm tra
+      console.log("Data to send to backend:", dataToSendToBackend);
+
+      // 6. Gọi API để gửi dữ liệu
       const result = await apiProjectCarbon.add(dataToSendToBackend);
       console.log("API submission result:", result);
 
+      // 7. Xử lý kết quả thành công
       setIsSuccess(true);
       setShowConfetti(true);
       setShowLoginPrompt(!isAuthenticated);
 
+      // Reset form data sau khi submit thành công
       if (!isAuthenticated) {
         setFormData({
           name: "",
@@ -423,8 +425,11 @@ export default function ProjectRegistrationForm() {
           additionalInfo: "",
         });
       } else {
+        // Nếu người dùng đã đăng nhập, chỉ reset các trường liên quan đến dự án
         setFormData((prev) => ({
           ...prev,
+          organization: "", // reset organization, address nếu người dùng đã đăng nhập
+          address: "",
           forestLocation: "",
           forestArea: "",
           treeSpecies: "",

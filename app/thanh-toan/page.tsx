@@ -128,16 +128,20 @@ export default function CheckoutPage() {
 
   const validateForm = (): boolean => {
     const newErrors: Partial<FormData> = {};
-    if (!formData.fullName.trim()) newErrors.fullName = "Vui lòng nhập họ và tên";
+    if (!formData.fullName.trim())
+      newErrors.fullName = "Vui lòng nhập họ và tên";
     if (!formData.email.trim()) newErrors.email = "Vui lòng nhập email";
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email không hợp lệ";
+    else if (!/\S+@\S+\.\S+/.test(formData.email))
+      newErrors.email = "Email không hợp lệ";
     if (!formData.phone.trim()) newErrors.phone = "Vui lòng nhập số điện thoại";
     if (!formData.address.trim()) newErrors.address = "Vui lòng nhập địa chỉ";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => {
       const updated = { ...prev, [name]: value };
@@ -183,7 +187,8 @@ export default function CheckoutPage() {
         } else {
           toast({
             title: "Cảnh báo",
-            description: "Không tìm thấy link thanh toán. Vui lòng liên hệ hỗ trợ.",
+            description:
+              "Không tìm thấy link thanh toán. Vui lòng liên hệ hỗ trợ.",
             variant: "destructive",
           });
         }
@@ -592,73 +597,15 @@ export default function CheckoutPage() {
                       <h3 className="font-semibold text-lg mb-2">
                         {product.name}
                       </h3>
-                      <p className="text-gray-600 mb-2">{product.description}</p>
+                      <p className="text-gray-600 mb-2">
+                        {product.description}
+                      </p>
                       <p className="text-xl font-bold text-green-700">
                         {formatCurrency(product.price)}
                       </p>
                     </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-lg mb-3">
-                      Thông tin thanh toán
-                    </h3>
-                    <div className="bg-gray-50 p-4 rounded-lg space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span>Số tài khoản:</span>
-                        <div className="flex items-center">
-                          <span className="font-medium">686820248888</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="ml-2 h-6 w-6 p-0"
-                            onClick={() => handleCopy("686820248888")}
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span>Ngân hàng:</span>
-                        <span className="font-medium">MB Bank</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span>Tên tài khoản:</span>
-                        <div className="flex items-center">
-                          <span className="font-medium text-right">
-                            CTY CP TM & ĐT TÍN CHỈ CARBON VN
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="ml-2 h-6 w-6 p-0"
-                            onClick={() =>
-                              handleCopy("CTY CP TM & ĐT TÍN CHỈ CARBON VN")
-                            }
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg mb-3">
-                      Mã QR thanh toán
-                    </h3>
-                    <div className="bg-white border border-gray-200 rounded-lg p-4 flex justify-center">
-                      <div className="relative h-64 w-64">
-                        <Image
-                          src="https://hrn4pkuebnmvy1ev.public.blob.vercel-storage.com/M%C3%A3%20QR%20chuy%E1%BB%83n%20kho%E1%BA%A3n-S2p7m4uIA5xpn7Kywu1pCYtHz7giui.jpg"
-                          alt="Mã QR chuyển khoản"
-                          fill
-                          className="object-contain"
-                        />
-                      </div>
-                    </div>
-                    <p className="text-sm text-center mt-2 text-gray-500">
-                      Quét mã QR để thanh toán nhanh chóng
-                    </p>
-                  </div>
+
                   <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
                     <ul className="text-sm text-yellow-700 space-y-1 list-disc pl-5">
                       <li>
@@ -679,17 +626,6 @@ export default function CheckoutPage() {
                     </ul>
                   </div>
                 </CardContent>
-                <CardFooter>
-                  <Link href="/" className="w-full">
-                    <Button
-                      variant="outline"
-                      className="w-full transition-all duration-300 transform hover:scale-[1.02] hover:bg-gray-100"
-                    >
-                      <ArrowLeft className="mr-2 h-4 w-4" />
-                      Quay lại
-                    </Button>
-                  </Link>
-                </CardFooter>
               </Card>
             </div>
           </div>

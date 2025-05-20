@@ -10,7 +10,7 @@ export default function AffiliateManager() {
   const { toast } = useToast();
   const [affiliateData, setAffiliateData] = useState<IAffiliate | null>(null);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth()
+  const { user } = useAuth();
   useEffect(() => {
     const fetchAffiliateData = async () => {
       try {
