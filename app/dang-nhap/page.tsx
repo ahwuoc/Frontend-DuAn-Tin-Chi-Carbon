@@ -63,19 +63,18 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = () => {
     setIsLoading(true);
-    try {
-      await signIn("google", { callbackUrl: redirectPath || "/quan-ly" });
-    } catch (error) {
-      toast({
-        title: loginTranslations.loginFailed[language],
-        description: loginTranslations.googleLoginFailed[language],
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+
+    const params = new URLSearchParams({
+      client_id: NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      redirect_uri: NEXT_PUBLIC_GOOGLE_REDIRECT_URI,
+      response_type: "code",
+      scope: "openid email profile",
+      access_type: "offline",
+      prompt: "consent",
+    });
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
   };
 
   return (
