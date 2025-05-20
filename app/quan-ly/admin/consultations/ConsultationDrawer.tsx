@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Drawer,
   DrawerContent,
@@ -16,8 +17,16 @@ import {
   apiConsultations,
   IConsultation,
 } from "@/app/fetch/fetch.consultations";
-import { Trash2 } from "lucide-react";
-type ConsultationType = "forest" | "carbon" | "other" | "biochar" | "agriculture" | "csu" | "carbonbook";
+import { useState, useEffect } from "react";
+
+type ConsultationType =
+  | "forest"
+  | "carbon"
+  | "other"
+  | "biochar"
+  | "agriculture"
+  | "csu"
+  | "carbonbook";
 
 interface ConsultationDrawerProps {
   isOpen: boolean;
@@ -27,7 +36,10 @@ interface ConsultationDrawerProps {
   setSelectedConsultation: React.Dispatch<
     React.SetStateAction<IConsultation | null>
   >;
+  // **Lưu ý: formData không còn cần thiết cho việc hiển thị tất cả các trường**
+  // Thay vào đó, chúng ta sẽ đọc trực tiếp từ selectedConsultation để đảm bảo dữ liệu luôn đồng bộ và đầy đủ
   formData: {
+    // Vẫn giữ để tránh lỗi compile nếu bạn đang dùng ở nơi khác, nhưng chúng ta sẽ không dùng nó để hiển thị dữ liệu chi tiết
     name: string;
     email: string;
     phone: string;
@@ -39,6 +51,7 @@ interface ConsultationDrawerProps {
     status: "pending" | "in_progress" | "completed" | "cancelled";
   };
   setFormData: React.Dispatch<
+    // Vẫn giữ để tránh lỗi compile nếu bạn đang dùng ở nơi khác
     React.SetStateAction<{
       name: string;
       email: string;
@@ -52,17 +65,6 @@ interface ConsultationDrawerProps {
     }>
   >;
 }
-interface FormDataType {
-  name: string;
-  email: string;
-  phone: string;
-  organization: string;
-  consultationType: ConsultationType; // dùng type rộng luôn
-  projectType: string;
-  projectSize: string;
-  budget: string;
-  status: "pending" | "in_progress" | "completed" | "cancelled";
-}
 
 export default function ConsultationDrawer({
   isOpen,
@@ -70,267 +72,305 @@ export default function ConsultationDrawer({
   setConsultations,
   selectedConsultation,
   setSelectedConsultation,
-  formData,
-  setFormData,
+  formData, // Giữ lại formData props nhưng không dùng để hiển thị chi tiết nữa
+  setFormData, // Giữ lại setFormData props nhưng không dùng để set chi tiết nữa
 }: ConsultationDrawerProps) {
   const { toast } = useToast();
-
-  const handleSubmit = async () => {
-    try {
-      if (selectedConsultation?._id) {
-        const res = await apiConsultations.updateConsultation(
-          selectedConsultation._id,
-          formData,
-        );
-        if (res.status === 200) {
-          setConsultations((prev) =>
-            prev.map((c) =>
-              c._id === selectedConsultation._id ? res.payload.consultation : c,
-            ),
-          );
-          toast({
-            title: "Thành công",
-            description: "Sửa yêu cầu tư vấn thành công!",
-          });
-        } else {
-          throw new Error("Sửa yêu cầu tư vấn thất bại");
-        }
-      } else {
-        const res = await apiConsultations.createConsultation(formData);
-        if (res && res.payload) {
-          setConsultations((prev) => [...prev, res.payload.consultation]);
-          toast({
-            title: "Thành công",
-            description: "Thêm yêu cầu tư vấn mới thành công!",
-          });
-        } else {
-          throw new Error("Thêm yêu cầu tư vấn thất bại");
-        }
-      }
-      setIsOpen(false);
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        organization: "",
-        consultationType: "forest",
-        projectType: "",
-        projectSize: "",
-        budget: "",
-        status: "pending",
-      });
-      setSelectedConsultation(null);
-    } catch (err: any) {
-      toast({
-        title: "Lỗi",
-        description:
-          err.response?.data?.error || "Không thể xử lý yêu cầu tư vấn!",
-        variant: "destructive",
-      });
+  const [feedbackContent, setFeedbackContent] = useState("");
+  useEffect(() => {
+    if (isOpen && selectedConsultation) {
+      setFeedbackContent(selectedConsultation.feedback || "");
+    } else if (!isOpen) {
+      setFeedbackContent(""); // Reset khi đóng drawer
     }
+  }, [isOpen, selectedConsultation]);
+
+  const consultationTypeMap: Record<ConsultationType, string> = {
+    forest: "Trồng rừng",
+    carbon: "Carbon Offset",
+    biochar: "Biochar",
+    agriculture: "Nông nghiệp",
+    csu: "CSU",
+    carbonbook: "Carbonbook",
+    other: "Khác",
   };
 
-  const handleDelete = async () => {
-    if (!selectedConsultation?._id) return;
+  const statusMap: Record<
+    "pending" | "in_progress" | "completed" | "cancelled",
+    string
+  > = {
+    pending: "Đang chờ",
+    in_progress: "Đang xử lý",
+    completed: "Hoàn thành",
+    cancelled: "Đã hủy",
+  };
+
+  const handleSendFeedback = async () => {
+    if (!selectedConsultation?._id) {
+      toast({
+        title: "Lỗi",
+        description: "Không tìm thấy yêu cầu tư vấn để gửi phản hồi.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      const res = await apiConsultations.deleteConsultation(
+      const updatedData = {
+        ...selectedConsultation,
+        status: "completed" as "completed", // Cập nhật trạng thái
+        feedback: feedbackContent, // Thêm/cập nhật nội dung phản hồi
+      };
+
+      const res = await apiConsultations.updateConsultation(
         selectedConsultation._id,
+        updatedData,
       );
-      if (res.status === 200) {
+
+      if (res.payload) {
         setConsultations((prev) =>
-          prev.filter((c) => c._id !== selectedConsultation._id),
+          prev.map((c) =>
+            c._id === selectedConsultation._id ? res.payload.consultation : c,
+          ),
         );
-        setIsOpen(false);
-        setSelectedConsultation(null);
         toast({
           title: "Thành công",
-          description: "Xóa yêu cầu tư vấn thành công!",
+          description: "Phản hồi đã được gửi thành công!",
         });
+        setIsOpen(false);
+        setSelectedConsultation(null);
+        setFeedbackContent("");
       } else {
-        throw new Error("Xóa yêu cầu tư vấn thất bại");
+        throw new Error("Gửi phản hồi thất bại");
       }
     } catch (err: any) {
+      console.error("Lỗi khi gửi phản hồi:", err);
       toast({
         title: "Lỗi",
         description:
-          err.response?.data?.error || "Không thể xóa yêu cầu tư vấn!",
+          err.response?.data?.error || "Không thể gửi phản hồi yêu cầu tư vấn!",
         variant: "destructive",
       });
     }
   };
+
+  // Tránh lỗi khi selectedConsultation là null
+  if (!selectedConsultation) {
+    return null;
+  }
 
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
-      <DrawerContent className="w-full sm:w-96">
-        <DrawerHeader>
-          <DrawerTitle>
-            {selectedConsultation?._id
-              ? "Sửa yêu cầu tư vấn"
-              : "Thêm yêu cầu tư vấn mới"}
+      <DrawerContent className="w-full sm:max-w-xl mx-auto rounded-t-[10px] p-4">
+        <DrawerHeader className="text-center pb-4">
+          <DrawerTitle className="text-2xl font-bold text-gray-900">
+            Chi tiết và phản hồi yêu cầu tư vấn
           </DrawerTitle>
-          <DrawerDescription>
-            {selectedConsultation?._id
-              ? "Cập nhật thông tin yêu cầu tư vấn."
-              : "Nhập thông tin để tạo yêu cầu tư vấn mới."}
+          <DrawerDescription className="text-sm text-gray-600 mt-1">
+            Xem thông tin yêu cầu và gửi phản hồi cho khách hàng.
           </DrawerDescription>
         </DrawerHeader>
-        <div className="grid gap-4 p-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Tên khách hàng
-            </Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="col-span-3"
-            />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 px-4 py-6 overflow-y-auto max-h-[60vh] custom-scrollbar">
+          {/* Custom Scrollbar */}
+          <style jsx>{`
+            .custom-scrollbar::-webkit-scrollbar {
+              width: 8px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-track {
+              background: #f1f1f1;
+              border-radius: 10px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+              background: #888;
+              border-radius: 10px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+              background: #555;
+            }
+          `}</style>
+          <div className="col-span-1 md:col-span-2 grid grid-cols-2 gap-4 border-b pb-4 mb-4">
+            <h3 className="col-span-2 text-lg font-semibold text-gray-800 mb-2">
+              Thông tin khách hàng
+            </h3>
+            <div className="flex flex-col space-y-1">
+              <Label className="text-sm font-medium text-gray-700">
+                Tên khách hàng:
+              </Label>
+              <span className="text-base text-gray-900 font-semibold">
+                {selectedConsultation?.name || "N/A"}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1">
+              <Label className="text-sm font-medium text-gray-700">
+                Email:
+              </Label>
+              <span className="text-base text-gray-900">
+                {selectedConsultation?.email || "N/A"}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1">
+              <Label className="text-sm font-medium text-gray-700">
+                Số điện thoại:
+              </Label>
+              <span className="text-base text-gray-900">
+                {selectedConsultation?.phone || "N/A"}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1">
+              <Label className="text-sm font-medium text-gray-700">
+                Tổ chức:
+              </Label>
+              <span className="text-base text-gray-900">
+                {selectedConsultation?.organization || "N/A"}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1">
+              <Label className="text-sm font-medium text-gray-700">Tuổi:</Label>
+              <span className="text-base text-gray-900">
+                {selectedConsultation?.age || "N/A"}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1">
+              <Label className="text-sm font-medium text-gray-700">
+                Vị trí:
+              </Label>
+              <span className="text-base text-gray-900">
+                {selectedConsultation?.position || "N/A"}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1 col-span-2">
+              <Label className="text-sm font-medium text-gray-700">
+                Kinh nghiệm:
+              </Label>
+              <span className="text-base text-gray-900">
+                {selectedConsultation?.experience || "N/A"}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1 col-span-2">
+              <Label className="text-sm font-medium text-gray-700">
+                Học vấn:
+              </Label>
+              <span className="text-base text-gray-900">
+                {selectedConsultation?.education || "N/A"}
+              </span>
+            </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="email" className="text-right">
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              className="col-span-3"
-            />
+
+          {/* Các trường thông tin yêu cầu tư vấn */}
+          <div className="col-span-1 md:col-span-2 grid grid-cols-2 gap-4 mb-4">
+            <h3 className="col-span-2 text-lg font-semibold text-gray-800 mb-2">
+              Thông tin yêu cầu tư vấn
+            </h3>
+            <div className="flex flex-col space-y-1">
+              <Label className="text-sm font-medium text-gray-700">
+                Loại tư vấn:
+              </Label>
+              <span className="text-base text-gray-900">
+                {consultationTypeMap[selectedConsultation?.consultationType] ||
+                  "Khác"}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1">
+              <Label className="text-sm font-medium text-gray-700">
+                Loại dự án:
+              </Label>
+              <span className="text-base text-gray-900">
+                {selectedConsultation?.projectType || "N/A"}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1">
+              <Label className="text-sm font-medium text-gray-700">
+                Quy mô dự án:
+              </Label>
+              <span className="text-base text-gray-900">
+                {selectedConsultation?.projectSize || "N/A"}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1">
+              <Label className="text-sm font-medium text-gray-700">
+                Ngân sách:
+              </Label>
+              <span className="text-base text-gray-900">
+                {selectedConsultation?.budget || "N/A"}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1">
+              <Label className="text-sm font-medium text-gray-700">
+                Khu vực (Area):
+              </Label>
+              <span className="text-base text-gray-900">
+                {selectedConsultation?.area || "N/A"}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1">
+              <Label className="text-sm font-medium text-gray-700">
+                Địa điểm dự án:
+              </Label>
+              <span className="text-base text-gray-900">
+                {selectedConsultation?.projectLocation || "N/A"}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1 col-span-2">
+              <Label className="text-sm font-medium text-gray-700">
+                Mục tiêu Carbon:
+              </Label>
+              <span className="text-base text-gray-900">
+                {selectedConsultation?.carbonGoals || "N/A"}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1 col-span-2">
+              <Label className="text-sm font-medium text-gray-700">
+                Lộ trình thực hiện:
+              </Label>
+              <span className="text-base text-gray-900">
+                {selectedConsultation?.implementationTimeline || "N/A"}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1 col-span-2">
+              <Label className="text-sm font-medium text-gray-700">
+                Lời nhắn của khách hàng:
+              </Label>
+              <span className="text-base text-gray-900 leading-relaxed">
+                {selectedConsultation?.message || "Không có lời nhắn."}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1 col-span-2">
+              <Label className="text-sm font-medium text-gray-700">
+                Trạng thái:
+              </Label>
+              <span className="text-base text-gray-900 font-semibold">
+                {statusMap[selectedConsultation?.status] || "Không rõ"}
+              </span>
+            </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="phone" className="text-right">
-              Số điện thoại
-            </Label>
-            <Input
-              id="phone"
-              value={formData.phone}
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="organization" className="text-right">
-              Tổ chức
-            </Label>
-            <Input
-              id="organization"
-              value={formData.organization}
-              onChange={(e) =>
-                setFormData({ ...formData, organization: e.target.value })
-              }
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="consultationType" className="text-right">
-              Loại tư vấn
-            </Label>
-            <select
-              id="consultationType"
-              value={formData.consultationType}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  consultationType: e.target.value as
-                    | "forest"
-                    | "carbon"
-                    | "other",
-                })
-              }
-              className="col-span-3 border rounded-md p-2"
+
+          {/* Trường nhập liệu cho phản hồi */}
+          <div className="col-span-1 md:col-span-2 flex flex-col space-y-2 pt-4 border-t">
+            <Label
+              htmlFor="feedbackContent"
+              className="text-lg font-semibold text-gray-800"
             >
-              <option value="forest">Trồng rừng</option>
-              <option value="carbon">Carbon Offset</option>
-              <option value="other">Khác</option>
-            </select>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="projectType" className="text-right">
-              Loại dự án
+              Nội dung phản hồi:
             </Label>
-            <Input
-              id="projectType"
-              value={formData.projectType}
-              onChange={(e) =>
-                setFormData({ ...formData, projectType: e.target.value })
-              }
-              className="col-span-3"
+            <Textarea
+              id="feedbackContent"
+              value={feedbackContent}
+              onChange={(e) => setFeedbackContent(e.target.value)}
+              placeholder="Nhập nội dung phản hồi tại đây..."
+              className="min-h-[120px] resize-y border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm"
             />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="projectSize" className="text-right">
-              Quy mô dự án
-            </Label>
-            <Input
-              id="projectSize"
-              value={formData.projectSize}
-              onChange={(e) =>
-                setFormData({ ...formData, projectSize: e.target.value })
-              }
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="budget" className="text-right">
-              Ngân sách
-            </Label>
-            <Input
-              id="budget"
-              value={formData.budget}
-              onChange={(e) =>
-                setFormData({ ...formData, budget: e.target.value })
-              }
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="status" className="text-right">
-              Trạng thái
-            </Label>
-            <select
-              id="status"
-              value={formData.status}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  status: e.target.value as
-                    | "pending"
-                    | "in_progress"
-                    | "completed"
-                    | "cancelled",
-                })
-              }
-              className="col-span-3 border rounded-md p-2"
-            >
-              <option value="pending">Đang chờ</option>
-              <option value="in_progress">Đang xử lý</option>
-              <option value="completed">Hoàn thành</option>
-              <option value="cancelled">Đã hủy</option>
-            </select>
           </div>
         </div>
-        <DrawerFooter className="flex justify-between">
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
-              Hủy
-            </Button>
-            <Button onClick={handleSubmit}>
-              {selectedConsultation?._id ? "Lưu" : "Thêm"}
-            </Button>
-          </div>
-          {selectedConsultation?._id && (
-            <Button variant="destructive" onClick={handleDelete}>
-              <Trash2 className="w-4 h-4 mr-1" />
-              Xóa
-            </Button>
-          )}
+        <DrawerFooter className="flex flex-row justify-end gap-3 p-4 border-t pt-4 bg-white sticky bottom-0">
+          <Button variant="outline" onClick={() => setIsOpen(false)}>
+            Đóng
+          </Button>
+          <Button
+            onClick={handleSendFeedback}
+            disabled={!feedbackContent.trim()}
+          >
+            Gửi phản hồi
+          </Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

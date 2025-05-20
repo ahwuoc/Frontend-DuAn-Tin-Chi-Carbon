@@ -18,28 +18,41 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, MessageSquareText } from "lucide-react";
 
 import ConsultationDrawer from "./ConsultationDrawer";
-type ConsultationType = "forest" | "carbon" | "other" | "biochar" | "agriculture" | "csu" | "carbonbook";
+
+type ConsultationType =
+  | "forest"
+  | "carbon"
+  | "other"
+  | "biochar"
+  | "agriculture"
+  | "csu"
+  | "carbonbook";
+
 interface FormDataType {
   name: string;
   email: string;
   phone: string;
   organization: string;
-  consultationType: ConsultationType; // dùng type rộng luôn
+  consultationType: ConsultationType;
   projectType: string;
   projectSize: string;
   budget: string;
   status: "pending" | "in_progress" | "completed" | "cancelled";
 }
 
+// Interface ConsultationDrawerProps không cần thay đổi trong file này,
+// nhưng tôi sẽ giữ nó ở đây để bạn tiện tham khảo.
 interface ConsultationDrawerProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   setConsultations: React.Dispatch<React.SetStateAction<IConsultation[]>>;
   selectedConsultation: IConsultation | null;
-  setSelectedConsultation: React.Dispatch<React.SetStateAction<IConsultation | null>>;
+  setSelectedConsultation: React.Dispatch<
+    React.SetStateAction<IConsultation | null>
+  >;
   formData: FormDataType;
   setFormData: React.Dispatch<React.SetStateAction<FormDataType>>;
 }
@@ -69,6 +82,7 @@ export default function AdminConsultationsPage() {
     completed: "Hoàn thành",
     cancelled: "Đã hủy",
   };
+
   const router = useRouter();
   const [consultations, setConsultations] = useState<IConsultation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,16 +91,17 @@ export default function AdminConsultationsPage() {
     useState(false);
   const [selectedConsultation, setSelectedConsultation] =
     useState<IConsultation | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormDataType>({
+    // Sử dụng FormDataType
     name: "",
     email: "",
     phone: "",
     organization: "",
-    consultationType: "forest" as ConsultationType,
+    consultationType: "forest",
     projectType: "",
     projectSize: "",
     budget: "",
-    status: "pending" as "pending" | "in_progress" | "completed" | "cancelled",
+    status: "pending",
   });
 
   useEffect(() => {
@@ -111,8 +126,9 @@ export default function AdminConsultationsPage() {
   }, [router]);
 
   const openConsultationDrawer = (consultation?: IConsultation) => {
+    setSelectedConsultation(consultation || null);
+
     if (consultation) {
-      setSelectedConsultation(consultation);
       setFormData({
         name: consultation.name || "",
         email: consultation.email || "",
@@ -125,7 +141,6 @@ export default function AdminConsultationsPage() {
         status: consultation.status || "pending",
       });
     } else {
-      setSelectedConsultation(null);
       setFormData({
         name: "",
         email: "",
@@ -141,7 +156,9 @@ export default function AdminConsultationsPage() {
     setIsConsultationDrawerOpen(true);
   };
 
-  const formatDate = (dateString: Date) => {
+  const formatDate = (dateString: string) => {
+    // Thay đổi kiểu về string vì createdAt thường là string từ API
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
     return date.toLocaleDateString("vi-VN", {
       day: "2-digit",
@@ -182,25 +199,12 @@ export default function AdminConsultationsPage() {
                   Quản lý thông tin yêu cầu tư vấn môi trường trên hệ thống
                 </CardDescription>
               </div>
-              <Button onClick={() => openConsultationDrawer()}>
-                <Plus className="w-4 h-4 mr-2" />
-                Thêm yêu cầu
-              </Button>
             </div>
           </CardHeader>
           <CardContent>
             {consultations.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-gray-500">
-                  Chưa có yêu cầu tư vấn nào. Thêm ngay!
-                </p>
-                <Button
-                  className="mt-4"
-                  onClick={() => openConsultationDrawer()}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Thêm yêu cầu
-                </Button>
+                <p className="text-gray-500">Chưa có yêu cầu tư vấn nào.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -218,24 +222,29 @@ export default function AdminConsultationsPage() {
                   </TableHeader>
                   <TableBody>
                     {consultations.length > 0 &&
-                      consultations.map((consultation) => (
-                        <TableRow key={consultation._id}>
+                      consultations.map((consultation, index) => (
+                        <TableRow key={index}>
                           <TableCell className="font-medium">
-                            {consultation.name || "N/A"}
+                            {consultation?.name || "N/A"}
                           </TableCell>
-                          <TableCell>{consultation.email || "N/A"}</TableCell>
+                          <TableCell>{consultation?.email || "N/A"}</TableCell>
                           <TableCell>
-                            {consultation.organization || "N/A"}
-                          </TableCell>
-                          <TableCell>
-                            {consultationTypeMap[consultation.consultationType] || "Khác"}
-                          </TableCell>
-
-                          <TableCell>
-                            {statusMap[consultation.status] || "Không rõ"}
+                            {consultation?.organization || "N/A"}
                           </TableCell>
                           <TableCell>
-                            {formatDate(consultation.createdAt)}
+                            {consultation?.consultationType
+                              ? consultationTypeMap[
+                                  consultation.consultationType
+                                ]
+                              : "Khác"}
+                          </TableCell>
+                          <TableCell>
+                            {consultation?.status
+                              ? statusMap[consultation.status]
+                              : "Không rõ"}
+                          </TableCell>
+                          <TableCell>
+                            {formatDate(consultation?.createdAt || "")}
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-2">
@@ -246,18 +255,8 @@ export default function AdminConsultationsPage() {
                                   openConsultationDrawer(consultation)
                                 }
                               >
-                                <Pencil className="w-4 h-4 mr-1" />
-                                Sửa
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  openConsultationDrawer(consultation)
-                                }
-                              >
-                                <Trash2 className="w-4 h-4 mr-1" />
-                                Xóa
+                                <MessageSquareText className="w-4 h-4 mr-1" />
+                                Gửi lời phản hồi
                               </Button>
                             </div>
                           </TableCell>
@@ -270,7 +269,6 @@ export default function AdminConsultationsPage() {
           </CardContent>
         </Card>
       </div>
-      {/* Drawer xử lý yêu cầu tư vấn (create/update/delete) */}
       <ConsultationDrawer
         isOpen={isConsultationDrawerOpen}
         setIsOpen={setIsConsultationDrawerOpen}

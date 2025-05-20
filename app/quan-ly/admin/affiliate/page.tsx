@@ -29,7 +29,7 @@ export default function AdminAffiliatesPage() {
   const [error, setError] = useState<string | null>(null);
   const [isAffiliateDrawerOpen, setIsAffiliateDrawerOpen] = useState(false);
   const [selectedAffiliate, setSelectedAffiliate] = useState<IAffiliate | null>(
-    null
+    null,
   );
   const [formData, setFormData] = useState({
     fullName: "",
@@ -120,16 +120,14 @@ export default function AdminAffiliatesPage() {
                   Quản lý thông tin affiliates trên hệ thống
                 </CardDescription>
               </div>
-              <Button onClick={() => openAffiliateDrawer()}>
-                <Plus className="w-4 h-4 mr-2" />
-                Thêm Affiliate
-              </Button>
             </div>
           </CardHeader>
           <CardContent>
             {affiliates.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-gray-500">Chưa có affiliate nào. Thêm ngay!</p>
+                <p className="text-gray-500">
+                  Chưa có affiliate nào. Thêm ngay!
+                </p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -146,44 +144,51 @@ export default function AdminAffiliatesPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {affiliates && affiliates.map((affiliate) => (
-                      <TableRow key={affiliate._id}>
-                        <TableCell className="font-medium">
-                          {affiliate.fullName || "N/A"}
-                        </TableCell>
-                        <TableCell>{affiliate.email || "N/A"}</TableCell>
-                        <TableCell>{affiliate.company || "N/A"}</TableCell>
-                        <TableCell>{formatCommission(affiliate.totalCommission)}</TableCell>
-                        <TableCell>
-                          {affiliate.status === "pending"
-                            ? "Đang chờ"
-                            : affiliate.status === "approved"
-                              ? "Đã duyệt"
-                              : "Bị từ chối"}
-                        </TableCell>
-                        <TableCell>{formatDate(affiliate.createdAt)}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => openAffiliateDrawer(affiliate)}
-                            >
-                              <Pencil className="w-4 h-4 mr-1" />
-                              Sửa
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeleteAffiliate(affiliate._id!)}
-                            >
-                              <Trash2 className="w-4 h-4 mr-1" />
-                              Xóa
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {affiliates &&
+                      affiliates.map((affiliate) => (
+                        <TableRow key={affiliate._id}>
+                          <TableCell className="font-medium">
+                            {affiliate.fullName || "N/A"}
+                          </TableCell>
+                          <TableCell>{affiliate.email || "N/A"}</TableCell>
+                          <TableCell>{affiliate.company || "N/A"}</TableCell>
+                          <TableCell>
+                            {formatCommission(affiliate.totalCommission)}
+                          </TableCell>
+                          <TableCell>
+                            {affiliate.status === "pending"
+                              ? "Đang chờ"
+                              : affiliate.status === "approved"
+                                ? "Đã duyệt"
+                                : "Bị từ chối"}
+                          </TableCell>
+                          <TableCell>
+                            {formatDate(affiliate.createdAt)}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openAffiliateDrawer(affiliate)}
+                              >
+                                <Pencil className="w-4 h-4 mr-1" />
+                                Sửa
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  handleDeleteAffiliate(affiliate._id!)
+                                }
+                              >
+                                <Trash2 className="w-4 h-4 mr-1" />
+                                Xóa
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </div>
