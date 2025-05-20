@@ -37,7 +37,7 @@ export default function CertificateGenerator({
   const [useImageFallback, setUseImageFallback] = useState(false);
   const [activeTab, setActiveTab] = useState("video");
 
-  const certificateVideoPath = "/videos/certification-of-forest-planting.mp4";
+  const certificateVideoPath = "/videos/Certification of forest planting.mp4";
   const certificateImagePath = "/images/certificate-sample.png";
 
   const formattedDate = new Intl.DateTimeFormat("vi-VN", {
@@ -146,7 +146,7 @@ export default function CertificateGenerator({
       console.error("Lỗi tạo chứng nhận hình ảnh:", err);
       setError(
         "Lỗi khi tạo chứng nhận hình ảnh: " +
-        (err instanceof Error ? err.message : String(err)),
+          (err instanceof Error ? err.message : String(err)),
       );
     }
   };
@@ -225,7 +225,7 @@ export default function CertificateGenerator({
             mimeType: "video/webm; codecs=vp8",
             videoBitsPerSecond: 5000000,
           };
-        } catch (e2) { }
+        } catch (e2) {}
       }
 
       let mediaRecorder;
@@ -341,7 +341,7 @@ export default function CertificateGenerator({
       console.error("Lỗi tạo chứng nhận video:", err);
       setError(
         "Lỗi khi tạo chứng nhận video: " +
-        (err instanceof Error ? err.message : String(err)),
+          (err instanceof Error ? err.message : String(err)),
       );
       setIsGeneratingVideo(false);
 
