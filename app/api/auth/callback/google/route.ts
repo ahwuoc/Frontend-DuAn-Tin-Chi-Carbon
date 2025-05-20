@@ -1,4 +1,3 @@
-// app/api/auth/google/callback/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { serialize } from "cookie";
 
@@ -6,7 +5,6 @@ const googleClientId = process.env.GOOGLE_CLIENT_ID!;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET!;
 const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI!;
 const backendApiUrl = process.env.NEXT_PUBLIC_API_URL!;
-const jwtExpiresIn = process.env.JWT_CUSTOM_EXPIRES_IN || "1d";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -40,17 +38,18 @@ export async function GET(request: NextRequest) {
 
     if (!tokenRes.ok) {
       const errorData = await tokenRes.json();
+      console.error("Google Token API Error:", errorData);
       throw new Error(errorData.error_description || "Google token failed");
     }
 
     const { access_token } = await tokenRes.json();
     if (!access_token) throw new Error("Google không trả access_token.");
-
     const serverRes = await fetch(
       `${backendApiUrl}/login/email/${access_token}`,
     );
     if (!serverRes.ok) {
       const errorData = await serverRes.json();
+      console.error("Backend Auth Error:", errorData);
       throw new Error(errorData.message || "Backend xử lý thất bại");
     }
 
@@ -67,6 +66,7 @@ export async function GET(request: NextRequest) {
 
       const redirectUrl = new URL("/auth-processing", request.url);
       redirectUrl.searchParams.set("token", token);
+      redirectUrl.searchParams.set("redirectPath", "/quan-ly");
 
       const response = NextResponse.redirect(redirectUrl);
       response.headers.append("Set-Cookie", cookie);
@@ -79,6 +79,7 @@ export async function GET(request: NextRequest) {
     errorUrl.searchParams.set("message", "No token returned");
     return NextResponse.redirect(errorUrl);
   } catch (err: any) {
+    console.error("Callback Exception:", err);
     const errorUrl = new URL("/dang-nhap", request.url);
     errorUrl.searchParams.set("error", "callback_exception");
     errorUrl.searchParams.set("message", err.message || "Internal error");
