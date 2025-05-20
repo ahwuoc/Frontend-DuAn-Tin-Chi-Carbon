@@ -21,6 +21,10 @@ import translations from "@/app/mockup/translate.mockup";
 export default function CertificateCoursesClient() {
   const { language } = useLanguage();
   const [products, setProducts] = useState<any[]>([]);
+  const targetRef = useRef<HTMLDivElement>(null);
+  const handleScroll = () => {
+    targetRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -37,8 +41,8 @@ export default function CertificateCoursesClient() {
     fetchProducts();
   }, []);
 
-  const getText = (key: keyof typeof translations["vi"]) => {
-    const langDict = translations[language] as typeof translations["vi"];
+  const getText = (key: keyof (typeof translations)["vi"]) => {
+    const langDict = translations[language] as (typeof translations)["vi"];
     return langDict[key] || translations["vi"][key];
   };
 
@@ -84,17 +88,12 @@ export default function CertificateCoursesClient() {
             {getText("courseSubtitle")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link
-              href="/thanh-toan?product=khoa-hoc-chung-chi-chuyen-gia"
-              aria-label={getText("registerCourse")}
+            <Button
+              size="lg"
+              className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg"
             >
-              <Button
-                size="lg"
-                className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg"
-              >
-                {getText("registerCourse")}
-              </Button>
-            </Link>
+              {getText("registerCourse")}
+            </Button>
             <Button
               variant="outline"
               size="lg"
@@ -1714,14 +1713,9 @@ export default function CertificateCoursesClient() {
                 </p>
               </div>
             </div>
-            <Link
-              href="/thanh-toan?product=khoa-hoc-chung-chi-chuyen-gia"
-              aria-label={getText("registerNow")}
-            >
-              <Button className="bg-white text-green-600 hover:bg-green-50 px-8 py-3 text-lg font-medium">
-                {getText("registerNow")}
-              </Button>
-            </Link>
+            <Button className="bg-white text-green-600 hover:bg-green-50 px-8 py-3 text-lg font-medium">
+              {getText("registerNow")}
+            </Button>
           </div>
         </div>
       </section>

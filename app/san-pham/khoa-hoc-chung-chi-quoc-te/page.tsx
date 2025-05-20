@@ -19,11 +19,15 @@ import Head from "next/head";
 import { generateProductSchema, generateFAQSchema } from "@/lib/schema";
 import { PricingSection } from "./card.components";
 import translations from "@/app/mockup/translate.mockup";
+import { useRef } from "react";
 export default function InternationalCertificateCoursesPage() {
   const { language } = useLanguage();
-
-  const getText = (key: keyof typeof translations["vi"]) => {
-    const langData = translations[language] as typeof translations["vi"];
+  const handleScroll = () => {
+    targetRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  const targetRef = useRef<HTMLDivElement>(null);
+  const getText = (key: keyof (typeof translations)["vi"]) => {
+    const langData = translations[language] as (typeof translations)["vi"];
     return langData[key] || translations["vi"][key];
   };
 
@@ -176,15 +180,15 @@ export default function InternationalCertificateCoursesPage() {
               {getText("courseSubtitle")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/thanh-toan?product=khoa-hoc-chung-chi-chuyen-gia">
-                <Button
-                  size="lg"
-                  className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg"
-                >
-                  {getText("registerCourse")}
-                </Button>
-              </Link>
               <Button
+                size="lg"
+                onClick={handleScroll}
+                className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg"
+              >
+                {getText("registerCourse")}
+              </Button>
+              <Button
+                onClick={handleScroll}
                 variant="outline"
                 size="lg"
                 className="border-white text-white bg-green-600/20 hover:bg-white hover:text-green-600 px-8 py-6 text-lg"
@@ -1017,23 +1021,35 @@ export default function InternationalCertificateCoursesPage() {
                       Tiến sĩ Giáo dục học, Đại học Sư phạm TP. Hồ Chí Minh
                     </p>
                     <div className="mt-2 text-gray-600">
-                      <p className="font-medium">Trưởng bộ môn Phương pháp giảng dạy tiếng Việt</p>
-                      <p className="font-medium">Chuyên môn: Ngôn ngữ học, Giáo dục học</p>
-                      <p className="font-medium">Vai trò: Giảng viên, Nghiên cứu viên</p>
+                      <p className="font-medium">
+                        Trưởng bộ môn Phương pháp giảng dạy tiếng Việt
+                      </p>
+                      <p className="font-medium">
+                        Chuyên môn: Ngôn ngữ học, Giáo dục học
+                      </p>
+                      <p className="font-medium">
+                        Vai trò: Giảng viên, Nghiên cứu viên
+                      </p>
                     </div>
                     <div className="mt-4 text-gray-600">
                       <p className="mb-2">
-                        Giảng viên có hơn 20 năm kinh nghiệm trong đào tạo giáo viên tiểu học và nghiên cứu về phương pháp giảng dạy tiếng Việt.
+                        Giảng viên có hơn 20 năm kinh nghiệm trong đào tạo giáo
+                        viên tiểu học và nghiên cứu về phương pháp giảng dạy
+                        tiếng Việt.
                       </p>
                       <ul className="list-disc pl-5 space-y-1">
-                        <li>Tham gia biên soạn chương trình giáo dục phổ thông mới</li>
-                        <li>Tác giả nhiều công trình nghiên cứu khoa học cấp quốc gia</li>
+                        <li>
+                          Tham gia biên soạn chương trình giáo dục phổ thông mới
+                        </li>
+                        <li>
+                          Tác giả nhiều công trình nghiên cứu khoa học cấp quốc
+                          gia
+                        </li>
                         <li>Giải thưởng giảng viên xuất sắc năm 2020</li>
                         <li>Thành viên hội đồng chuyên môn Bộ Giáo dục</li>
                       </ul>
                     </div>
                   </div>
-
                 </div>
               </div>
             </div>
@@ -1142,7 +1158,11 @@ export default function InternationalCertificateCoursesPage() {
               </p>
             </div>
 
-            <div className="flex  w-full  md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div
+              // sao ko scoll tới đây
+              ref={targetRef}
+              className="flex  w-full  md:grid-cols-3 gap-8 max-w-5xl mx-auto"
+            >
               {/* Show product */}
               <PricingSection />
             </div>
