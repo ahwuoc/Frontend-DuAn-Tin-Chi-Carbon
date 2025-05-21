@@ -83,11 +83,11 @@ export default function DashboardSidebar() {
       icon: <Share2 className="w-5 h-5" />,
       href: "/quan-ly/tiep-thi-lien-ket",
     },
-    {
-      title: language === "vi" ? "Thanh toán" : "Billing",
-      icon: <CreditCard className="w-5 h-5" />,
-      href: "/quan-ly/thanh-toan",
-    },
+    // {
+    //   title: language === "vi" ? "Thanh toán" : "Billing",
+    //   icon: <CreditCard className="w-5 h-5" />,
+    //   href: "/quan-ly/thanh-toan",
+    // },
     {
       title: language === "vi" ? "Cài đặt" : "Settings",
       icon: <Settings className="w-5 h-5" />,
@@ -146,7 +146,6 @@ export default function DashboardSidebar() {
     //   icon: <MessageSquareText className="w-5 h-5" />,
     //   href: "/quan-ly/admin/carboncredits",
     // },
-
   ];
   const isActive = (href: string) => pathname === href;
 
@@ -204,10 +203,11 @@ export default function DashboardSidebar() {
               <div key={index}>
                 <Link
                   href={item.href}
-                  className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${isActive(item.href)
-                    ? "bg-green-50 text-green-600"
-                    : "text-gray-700 hover:bg-gray-50"
-                    }`}
+                  className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    isActive(item.href)
+                      ? "bg-green-50 text-green-600"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
                 >
                   {item.icon}
                   <span className="ml-3">{item.title}</span>
@@ -233,10 +233,11 @@ export default function DashboardSidebar() {
                       <Link
                         key={index}
                         href={item.href}
-                        className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${isActive(item.href)
-                          ? "bg-green-50 text-green-600"
-                          : "text-gray-700 hover:bg-gray-50"
-                          }`}
+                        className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                          isActive(item.href)
+                            ? "bg-green-50 text-green-600"
+                            : "text-gray-700 hover:bg-gray-50"
+                        }`}
                       >
                         {item.icon}
                         <span className="ml-3">{item.title}</span>
