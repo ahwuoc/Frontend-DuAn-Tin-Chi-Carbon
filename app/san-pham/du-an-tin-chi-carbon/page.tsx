@@ -15,10 +15,21 @@ import ImageComparison from "@/components/image-comparison";
 import ProjectRegistrationForm from "./components/ProjectRegistrationForm";
 import AnimatedButton from "@/components/animated-button";
 import { useLanguage } from "@/context/language-context";
+import { useEffect } from "react";
 
 export default function CarbonProjectsPage() {
   const { language } = useLanguage();
-
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash === "#dang-ky-du-an") {
+      const el = document.getElementById("dang-ky-du-an");
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+    }
+  }, []);
   const translations = {
     en: {
       featuredProduct: "Featured Product",
@@ -566,7 +577,10 @@ export default function CarbonProjectsPage() {
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
+          <div
+            id="dang-ky-du-an"
+            className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8"
+          >
             <ProjectRegistrationForm />
           </div>
         </div>

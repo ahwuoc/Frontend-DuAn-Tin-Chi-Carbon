@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { CheckCircle, Loader2 } from "lucide-react";
+import { ArrowRightCircle, CheckCircle, Loader2 } from "lucide-react";
 import ConfettiEffect from "@/components/confetti-effect";
 import apiConsultation, { TFormData } from "@/app/fetch/fetch.register-form";
 import { useToast } from "@/hooks/use-toast";
@@ -19,7 +19,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
-
+import Link from "next/link";
 export default function RegistrationForm() {
   const [formData, setFormData] = useState<TFormData>({
     userId: "",
@@ -42,6 +42,7 @@ export default function RegistrationForm() {
     budget: "",
     carbonGoals: "",
   });
+
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -102,7 +103,7 @@ export default function RegistrationForm() {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -122,9 +123,9 @@ export default function RegistrationForm() {
     const errors: Record<string, string> = {};
     requiredFields.forEach((field) => {
       const fieldValue = formData[field as keyof TFormData];
-      if (typeof fieldValue === 'string' && !fieldValue.trim()) {
+      if (typeof fieldValue === "string" && !fieldValue.trim()) {
         errors[field] = `${getFieldLabel(field)} là bắt buộc`;
-      } else if (typeof fieldValue !== 'string' && !fieldValue) {
+      } else if (typeof fieldValue !== "string" && !fieldValue) {
         errors[field] = `${getFieldLabel(field)} là bắt buộc`;
       }
     });
@@ -143,7 +144,10 @@ export default function RegistrationForm() {
       name: "Họ và tên",
       age: "Tuổi",
       location: "Địa điểm",
-      area: formData.consultationType === "forest" ? "Diện tích rừng" : "Diện tích (ha)",
+      area:
+        formData.consultationType === "forest"
+          ? "Diện tích rừng"
+          : "Diện tích (ha)",
       phone: "Số điện thoại",
       email: "Email",
       message: "Câu hỏi khác",
@@ -219,7 +223,8 @@ export default function RegistrationForm() {
       } else {
         toast({
           title: "Gửi thất bại",
-          description: response.payload?.error || "Gửi thất bại, vui lòng thử lại sau!",
+          description:
+            response.payload?.error || "Gửi thất bại, vui lòng thử lại sau!",
           variant: "destructive",
         });
       }
@@ -331,7 +336,10 @@ export default function RegistrationForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="projectType" className="text-gray-700 font-medium">
+              <Label
+                htmlFor="projectType"
+                className="text-gray-700 font-medium"
+              >
                 Loại cây trồng/vật nuôi <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -352,7 +360,10 @@ export default function RegistrationForm() {
         return (
           <>
             <div className="space-y-2">
-              <Label htmlFor="organization" className="text-gray-700 font-medium">
+              <Label
+                htmlFor="organization"
+                className="text-gray-700 font-medium"
+              >
                 Tổ chức/Doanh nghiệp <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -364,12 +375,17 @@ export default function RegistrationForm() {
                 className={`border-2 py-6 ${formErrors.organization ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
               />
               {formErrors.organization && (
-                <p className="text-red-500 text-sm">{formErrors.organization}</p>
+                <p className="text-red-500 text-sm">
+                  {formErrors.organization}
+                </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="projectSize" className="text-gray-700 font-medium">
+              <Label
+                htmlFor="projectSize"
+                className="text-gray-700 font-medium"
+              >
                 Quy mô dự án <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -386,7 +402,10 @@ export default function RegistrationForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="projectLocation" className="text-gray-700 font-medium">
+              <Label
+                htmlFor="projectLocation"
+                className="text-gray-700 font-medium"
+              >
                 Địa điểm dự kiến
               </Label>
               <Input
@@ -429,7 +448,8 @@ export default function RegistrationForm() {
 
             <div className="space-y-2">
               <Label htmlFor="experience" className="text-gray-700 font-medium">
-                Kinh nghiệm trong lĩnh vực môi trường <span className="text-red-500">*</span>
+                Kinh nghiệm trong lĩnh vực môi trường{" "}
+                <span className="text-red-500">*</span>
               </Label>
               <select
                 id="experience"
@@ -451,7 +471,10 @@ export default function RegistrationForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="organization" className="text-gray-700 font-medium">
+              <Label
+                htmlFor="organization"
+                className="text-gray-700 font-medium"
+              >
                 Tổ chức/Doanh nghiệp
               </Label>
               <Input
@@ -470,7 +493,10 @@ export default function RegistrationForm() {
         return (
           <>
             <div className="space-y-2">
-              <Label htmlFor="organization" className="text-gray-700 font-medium">
+              <Label
+                htmlFor="organization"
+                className="text-gray-700 font-medium"
+              >
                 Tổ chức/Doanh nghiệp <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -482,7 +508,9 @@ export default function RegistrationForm() {
                 className={`border-2 py-6 ${formErrors.organization ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
               />
               {formErrors.organization && (
-                <p className="text-red-500 text-sm">{formErrors.organization}</p>
+                <p className="text-red-500 text-sm">
+                  {formErrors.organization}
+                </p>
               )}
             </div>
 
@@ -504,7 +532,10 @@ export default function RegistrationForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="carbonGoals" className="text-gray-700 font-medium">
+              <Label
+                htmlFor="carbonGoals"
+                className="text-gray-700 font-medium"
+              >
                 Mục tiêu sử dụng Carbon Toàn Thư 4.0
               </Label>
               <Textarea
@@ -553,7 +584,10 @@ export default function RegistrationForm() {
         </h3>
 
         <div className="space-y-2">
-          <Label htmlFor="consultationType" className="text-gray-700 font-medium">
+          <Label
+            htmlFor="consultationType"
+            className="text-gray-700 font-medium"
+          >
             Loại tư vấn <span className="text-red-500">*</span>
           </Label>
           <select
@@ -571,7 +605,9 @@ export default function RegistrationForm() {
             <option value="other">Khác</option>
           </select>
           {formErrors.consultationType && (
-            <p className="text-red-500 text-sm">{formErrors.consultationType}</p>
+            <p className="text-red-500 text-sm">
+              {formErrors.consultationType}
+            </p>
           )}
         </div>
 
@@ -647,11 +683,26 @@ export default function RegistrationForm() {
           </div>
         )}
 
-        <div className="flex items-start space-x-2 py-2">
-          <div className="bg-green-100 p-1 rounded-full mt-0.5">
-            <CheckCircle className="h-4 w-4 text-green-600" />
+        <div className="flex justify-between items-start space-x-2 py-2">
+          <div className="flex">
+            <div className="bg-green-100 p-1 rounded-full mt-0.5">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+            </div>
+            <p className="text-sm text-gray-600">
+              Cam kết bảo mật thông tin cá nhân
+            </p>
           </div>
-          <p className="text-sm text-gray-600">Cam kết bảo mật thông tin cá nhân</p>
+          <div className="flex">
+            <Link
+              href="/san-pham/du-an-tin-chi-carbon#dang-ky-du-an"
+              className="flex items-start space-x-1"
+            >
+              <div className="bg-blue-100 p-1 rounded-full mt-0.5">
+                <ArrowRightCircle className="h-4 w-4 text-blue-600" />
+              </div>
+              <p className="text-sm text-gray-600">Đăng ký dự án ngay</p>
+            </Link>
+          </div>
         </div>
 
         <Button

@@ -216,20 +216,33 @@ export const PricingSection: FC = () => {
                   {targetAudienceDescription}
                 </p>
               </div>
-              <Link
-                href={`/thanh-toan?product=${plan._id}`}
-                className="mt-auto w-full"
-                passHref
-                legacyBehavior
-              >
-                <a className="w-full">
-                  <Button className="w-full bg-green-600 hover:bg-green-700 h-12 text-base font-medium">
-                    {plan.subscriptionTier === "enterprise"
-                      ? "Liên hệ tư vấn"
-                      : "Đăng ký ngay"}
-                  </Button>
-                </a>
-              </Link>
+              {plan.subscriptionTier === "enterprise" ? (
+                <Link
+                  href="/san-pham/du-an-tin-chi-carbon#dang-ky-du-an"
+                  className="mt-auto w-full"
+                  passHref
+                  legacyBehavior
+                >
+                  <a className="w-full">
+                    <Button className="w-full bg-green-600 hover:bg-green-700 h-12 text-base font-medium">
+                      Liên hệ tư vấn
+                    </Button>
+                  </a>
+                </Link>
+              ) : (
+                <Link
+                  href={`/thanh-toan?product=${plan._id}`}
+                  className="mt-auto w-full"
+                  passHref
+                  legacyBehavior
+                >
+                  <a className="w-full">
+                    <Button className="w-full bg-green-600 hover:bg-green-700 h-12 text-base font-medium">
+                      Đăng ký ngay
+                    </Button>
+                  </a>
+                </Link>
+              )}
             </CardContent>
           </Card>
         );
