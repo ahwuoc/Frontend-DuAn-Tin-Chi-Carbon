@@ -111,11 +111,11 @@ export default function DashboardSidebar() {
       icon: <Package className="w-5 h-5" />,
       href: "/quan-ly/admin/products",
     },
-    {
-      title: language === "vi" ? "Affiliate" : "Affiliate",
-      icon: <Handshake className="w-5 h-5" />,
-      href: "/quan-ly/admin/affiliate",
-    },
+    // {
+    //   title: language === "vi" ? "Affiliate" : "Affiliate",
+    //   icon: <Handshake className="w-5 h-5" />,
+    //   href: "/quan-ly/admin/affiliate",
+    // },
     {
       title: language === "vi" ? "Tin tức" : "News",
       icon: <Newspaper className="w-5 h-5" />,
