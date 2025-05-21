@@ -73,7 +73,7 @@ export default function CarbonCard() {
           _id,
           subscriptionTier,
           price,
-          description, // description đã được đưa về đúng chỗ
+          description,
           billingCycle,
           features,
           benefits,
@@ -88,17 +88,17 @@ export default function CarbonCard() {
         const localizedSubscriptionTier =
           subscriptionTierMap[subscriptionTier] || subscriptionTier;
 
-        // Logic để xác định giá hiển thị và giá gạch ngang
+        // --- Logic để xác định giá hiển thị và giá gạch ngang ---
         let strikethroughPrice = "";
         let currentPriceDisplay = "";
 
         if (isExpert) {
-          strikethroughPrice = ""; // Expert không có giá gạch ngang theo yêu cầu mới nhất
+          strikethroughPrice = ""; // Expert không có giá gạch ngang
           currentPriceDisplay = price
             ? `${price.toLocaleString("vi-VN")} VNĐ`
             : "Liên hệ báo giá";
         } else if (isResearch) {
-          strikethroughPrice = "10.000.000 VNĐ";
+          strikethroughPrice = ""; // Research cũng không có giá gạch ngang (cập nhật theo yêu cầu mới)
           currentPriceDisplay = price
             ? `${price.toLocaleString("vi-VN")} VNĐ`
             : "Liên hệ báo giá";
@@ -113,7 +113,17 @@ export default function CarbonCard() {
             : "N/A";
         }
 
-        // Logic để xác định mô tả đối tượng phù hợp (companyDescription)
+        // --- Logic để xác định mô tả chu kỳ thanh toán ---
+        let billingCycleDescription = "";
+        if (isFree) {
+          billingCycleDescription = "Dùng thử 14 ngày";
+        } else if (isEnterprise) {
+          billingCycleDescription = "Tùy chỉnh theo yêu cầu";
+        } else {
+          billingCycleDescription = "Giá khuyến mãi đến 04/03"; // Mặc định cho các gói có giá
+        }
+
+        // --- Logic để xác định mô tả đối tượng phù hợp (companyDescription) ---
         let companyDescription = "";
         if (isResearch) {
           companyDescription =
@@ -131,17 +141,16 @@ export default function CarbonCard() {
           companyDescription = company || "Doanh nghiệp và cá nhân"; // Fallback nếu không có tier nào khớp
         }
 
-        const planDescription =
-          description ||
-          (isFree
-            ? "Dành cho sinh viên và người mới bắt đầu"
-            : isExpert
-              ? "Dành cho chuyên gia và người đi làm"
-              : isResearch
-                ? "Dành cho chuyên gia và người đi làm"
-                : isEnterprise
-                  ? "Giải pháp toàn diện cho doanh nghiệp"
-                  : ""); // Mặc định là chuỗi rỗng
+        let planDescription = "";
+        if (isFree) {
+          planDescription = "Dành cho sinh viên và người mới bắt đầu";
+        } else if (isExpert) {
+          planDescription = "Dành cho chuyên gia và người đi làm";
+        } else if (isResearch) {
+          planDescription = "Dành riêng cho sinh viên với giá ưu đãi"; // Mô tả chi tiết cho research
+        } else if (isEnterprise) {
+          planDescription = "Giải pháp toàn diện cho doanh nghiệp";
+        }
 
         return (
           <Card
@@ -170,19 +179,13 @@ export default function CarbonCard() {
                     </span>
                   )}
                   <p className="text-sm text-gray-500 mt-1">
-                    {isFree
-                      ? "Dùng thử 14 ngày"
-                      : isEnterprise
-                        ? "Tùy chỉnh theo yêu cầu"
-                        : billingCycle || "Không xác định"}
+                    {billingCycleDescription}{" "}
                   </p>
                 </div>
-                {/* Sử dụng biến planDescription đã được xử lý */}
                 <p className="text-sm text-gray-600 italic mb-4 line-clamp-2">
                   {planDescription}
                 </p>
 
-                {/* Đã xóa max-h-48 và overflow-y-auto */}
                 <div className="space-y-3 mb-6 pr-2">
                   {features?.length ? (
                     features.map((feature) => (
@@ -220,7 +223,9 @@ export default function CarbonCard() {
                   </ul>
                 </div>
 
-                <p className="text-sm text-gray-500">{companyDescription}</p>
+                <p className="text-sm text-gray-500">
+                  Phù hợp với: {companyDescription}
+                </p>
               </div>
 
               <div className="mt-auto pt-6">

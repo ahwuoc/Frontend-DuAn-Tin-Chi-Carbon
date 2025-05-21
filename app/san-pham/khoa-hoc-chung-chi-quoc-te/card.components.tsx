@@ -64,35 +64,61 @@ export const PricingSection: FC = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {products.map((plan, index) => {
+        // --- Logic để xác định giá hiển thị và giá gạch ngang ---
         let strikethroughPrice = "";
-        let currentPriceDisplay = ""; // Biến mới để kiểm soát giá hiển thị
-        let targetAudienceDescription = ""; // Biến mới cho mô tả đối tượng
+        let currentPriceDisplay = "";
 
         if (plan.subscriptionTier === "expert") {
           strikethroughPrice = "12.000.000 VNĐ";
           currentPriceDisplay = plan.price
             ? `${plan.price.toLocaleString("vi-VN")} VNĐ`
             : "Liên hệ báo giá";
-          targetAudienceDescription =
-            "Dành cho những cá nhân muốn chuyên sâu và làm việc trực tiếp với chuyên gia, sẵn sàng tự tin đảm nhiệm vai trò chuyên viên/consultant về kiểm kê khí nhà kính, ESG, hoặc phát triển dự án carbon tại doanh nghiệp.";
         } else if (plan.subscriptionTier === "research") {
           strikethroughPrice = "10.000.000 VNĐ";
           currentPriceDisplay = plan.price
             ? `${plan.price.toLocaleString("vi-VN")} VNĐ`
             : "Liên hệ báo giá";
-          targetAudienceDescription =
-            "Phù hợp cho nhà nghiên cứu và người mới bước vào lĩnh vực kiểm kê khí nhà kính, môi trường, ESG, hoặc sinh viên mong muốn lấy chứng chỉ quốc tế để mở rộng cơ hội tương lai.";
         } else if (plan.subscriptionTier === "enterprise") {
           currentPriceDisplay = "Liên hệ báo giá";
           strikethroughPrice = "";
-          targetAudienceDescription =
-            "Phù hợp cho các doanh nghiệp vừa và lớn muốn nâng cao năng lực đội ngũ, đáp ứng yêu cầu pháp lý quốc tế, đồng thời triển khai các dự án kiểm kê carbon, ESG một cách toàn diện.";
         } else {
           // Các gói khác (ví dụ: free)
           currentPriceDisplay = plan.price
             ? `${plan.price.toLocaleString("vi-VN")} VNĐ`
             : "Liên hệ báo giá";
-          targetAudienceDescription = "Phù hợp cho người tự học";
+        }
+
+        // --- Logic cho mô tả giá (dưới giá hiển thị) ---
+        let priceDescription = "";
+        if (plan.subscriptionTier === "enterprise") {
+          priceDescription = "Giải pháp tùy chỉnh cho doanh nghiệp";
+        } else if (plan.price) {
+          priceDescription = "Ưu đãi có thời hạn";
+        } else {
+          priceDescription = "Tùy chỉnh theo yêu cầu";
+        }
+
+        // --- Logic cho mô tả tính năng bao gồm ---
+        let includedFeaturesDescription = "";
+        if (plan.subscriptionTier === "enterprise") {
+          includedFeaturesDescription =
+            "Bao gồm tất cả tính năng của gói Chuyên Gia";
+        } else if (plan.subscriptionTier === "expert") {
+          includedFeaturesDescription =
+            "Bao gồm tất cả tính năng của gói Cơ Bản";
+        }
+
+        // --- Logic cho mô tả đối tượng phù hợp ---
+        let targetAudienceDescription = "";
+        if (plan.subscriptionTier === "enterprise") {
+          targetAudienceDescription =
+            "Phù hợp cho các doanh nghiệp vừa và lớn muốn nâng cao năng lực đội ngũ, đáp ứng yêu cầu pháp lý quốc tế, đồng thời triển khai các dự án kiểm kê carbon, ESG một cách toàn diện.";
+        } else if (plan.subscriptionTier === "expert") {
+          targetAudienceDescription =
+            "Dành cho những cá nhân muốn chuyên sâu và làm việc trực tiếp với chuyên gia, sẵn sàng tự tin đảm nhiệm vai trò chuyên viên/consultant về kiểm kê khí nhà kính, ESG, hoặc phát triển dự án carbon tại doanh nghiệp.";
+        } else {
+          targetAudienceDescription =
+            "Phù hợp cho nhà nghiên cứu và người mới bước vào lĩnh vực kiểm kê khí nhà kính, môi trường, ESG, hoặc sinh viên mong muốn lấy chứng chỉ quốc tế để mở rộng cơ hội tương lai."; // Mặc định cho free, research
         }
 
         return (
@@ -125,24 +151,14 @@ export const PricingSection: FC = () => {
                     </span>
                   )}
                   <p className="text-sm text-gray-600 mt-1">
-                    {/* Dịch mô tả giá */}
-                    {plan.subscriptionTier === "enterprise"
-                      ? "Giải pháp tùy chỉnh cho doanh nghiệp"
-                      : plan.price
-                        ? "Giá khuyến mãi có hạn"
-                        : "Tùy chỉnh theo yêu cầu"}
+                    {priceDescription} {/* Sử dụng biến priceDescription */}
                   </p>
                 </div>
-                {plan.subscriptionTier && (
+                {includedFeaturesDescription && ( // Chỉ hiển thị nếu có mô tả
                   <p className="text-sm text-gray-600 italic mb-3">
-                    {plan.subscriptionTier === "enterprise"
-                      ? "Bao gồm tất cả tính năng của gói Chuyên Gia"
-                      : plan.subscriptionTier === "expert"
-                        ? "Bao gồm tất cả tính năng của gói Cơ Bản"
-                        : ""}
+                    {includedFeaturesDescription} {/* Sử dụng biến mới */}
                   </p>
                 )}
-                {/* Đã bỏ max-h-[260px] và overflow-y-auto */}
                 <div className="space-y-3 mb-8 pr-2">
                   {plan.features?.length > 0 ? (
                     plan.features.map((feature: any, idx: number) => (
@@ -189,7 +205,7 @@ export const PricingSection: FC = () => {
                   </div>
                 )}
                 <p className="text-sm text-gray-500 mb-4">
-                  {targetAudienceDescription} {/* Sử dụng biến mới */}
+                  {targetAudienceDescription}
                 </p>
               </div>
               <Link
