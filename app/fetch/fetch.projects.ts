@@ -2,8 +2,14 @@ import HTTP from "../common/http";
 
 export interface IProjectDocument {
   name: string;
-  date: Date;
-  type: string;
+  url: string;
+  type?: string;
+  createdAt: any;
+}
+export interface IKmlFile {
+  name: string;
+  url: string;
+  createdAt: any;
 }
 // Định nghĩa interface cho hoạt động (Activity)
 export interface IActivity {
@@ -22,24 +28,25 @@ export interface ICoordinates {
 
 // Định nghĩa kiểu dữ liệu cho form
 export type FormData = {
+  userId?: any;
   name: string;
   description?: string;
   coordinates?: string; // Luôn là string trong form
   registrationDate?: string;
   startDate?: string;
   endDate?: string;
+  landDocuments: any;
   carbonCredits?: number;
   carbonCreditsTotal?: number;
   carbonCreditsClaimed?: number;
   area?: number;
-  // userId: string; // Đã xóa khỏi FormData
   location?: string;
   type?: string;
   status?: "pending" | "active" | "completed" | "archived";
-  participants?: string; // Chuỗi phân tách bằng dấu phẩy
+  participants?: string;
   progress?: number;
-  documents: string[]; // Quản lý dạng mảng string
-  activities: IActivity[]; // Quản lý dạng mảng IActivity
+  documents: string[];
+  activities: IActivity[];
 };
 
 export interface IProjectActivity {
@@ -49,7 +56,9 @@ export interface IProjectActivity {
 export interface IProject {
   _id: string;
   name: string;
+  landDocuments: any;
   description: string;
+  details?: any;
   status: "active" | "pending" | "completed";
   registrationDate: Date;
   startDate: Date;
@@ -59,14 +68,17 @@ export interface IProject {
   carbonCreditsClaimed: number;
   type: "forestry" | "renewable" | "conservation" | "waste";
   location: string;
+  address?: any;
+  organization?: any;
   coordinates: string;
   area: number;
+  kmlFile: any;
   createdAt: Date;
   participants: number;
   progress: number;
   documents: IProjectDocument[];
   activities: IProjectActivity[];
-  userId: string;
+  userId: any;
 }
 export type ResTProduct = {
   project: IProject[];
@@ -74,6 +86,8 @@ export type ResTProduct = {
 export const apiProjects = {
   getProject: (id: string) => HTTP.GET<any>(`/projects/${id}`),
   update: (id: string, body: any) =>
+    HTTP.PUT<IProject>(`/projects/${id}`, { body }),
+  updateProject: (id: string, body: any) =>
     HTTP.PUT<IProject>(`/projects/${id}`, { body }),
   getAll: () => HTTP.GET<IProject[]>("/projects"),
   addProject: (data: any) => HTTP.POST<IProject>("/projects", data),

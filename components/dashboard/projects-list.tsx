@@ -129,18 +129,13 @@ export default function ProjectsList() {
   const filteredProjects =
     Array.isArray(projects) &&
     projects.filter((project) => {
-      // Tìm kiếm theo tên người đăng ký, tổ chức, thông tin bổ sung và mô tả dự án (nếu có)
+      const search = searchTerm.toLowerCase();
+
       const matchesSearch =
-        project.userId?.name
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        "" || // Truy cập project.userId.name an toàn
-        project.organization.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.additionalInfo
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        project.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        "";
+        (project.userId?.name?.toLowerCase()?.includes(search) ?? false) ||
+        (project.organization?.toLowerCase()?.includes(search) ?? false) ||
+        (project.additionalInfo?.toLowerCase()?.includes(search) ?? false) ||
+        (project.description?.toLowerCase()?.includes(search) ?? false);
 
       const matchesStatus =
         statusFilter === "all" || project.status === statusFilter;

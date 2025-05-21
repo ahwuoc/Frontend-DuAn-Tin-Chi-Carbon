@@ -1,13 +1,13 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Textarea } from "@/components/ui/textarea"; // Giữ lại Textarea
 import { Label } from "@/components/ui/label";
 import {
   Card,
@@ -52,6 +52,7 @@ interface Product {
   title: string;
   description: string;
   price: number;
+  // type?: string; // Đã bỏ trường type
 }
 
 interface User {
@@ -77,7 +78,7 @@ export default function CheckoutPage() {
     email: "",
     phone: "",
     address: "",
-    note: "",
+    note: "", // Khởi tạo note rỗng
   });
 
   const [product, setProduct] = useState<Product | null>(null);
@@ -86,16 +87,55 @@ export default function CheckoutPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
+  // Hàm rút gọn chuỗi, loại bỏ dấu và ký tự không cần thiết, chuyển thành chữ hoa
+  const cleanAndShortenString = useCallback(
+    (str: string, maxLength: number) => {
+      if (!str) return "";
+      return str
+        .normalize("NFD") // Chuyển đổi Unicode sang dạng không dấu
+        .replace(/[\u0300-\u036f]/g, "") // Loại bỏ dấu
+        .replace(/[^a-zA-Z0-9\s]/g, "") // Chỉ giữ lại chữ cái, số, khoảng trắng
+        .trim()
+        .toUpperCase() // Chuyển thành chữ hoa
+        .replace(/\s+/g, "") // Loại bỏ tất cả khoảng trắng
+        .substring(0, maxLength); // Cắt theo độ dài tối đa
+    },
+    [],
+  );
+
+  // Hàm tạo nội dung ghi chú tối ưu (tên + sdt + tên sản phẩm)
+  const generateOptimizedNote = useCallback(() => {
+    if (!product) return "";
+
+    // Giả định tổng độ dài tối đa là 25 ký tự
+    const MAX_NOTE_LENGTH = 25;
+
+    // Rút gọn họ tên (VD: "NguyenVanA" -> 7 ký tự)
+    const shortenedFullName = cleanAndShortenString(formData.fullName, 7);
+    // Rút gọn số điện thoại (VD: "0912345678" -> 7 ký tự cuối)
+    const shortenedPhone = formData.phone ? formData.phone.slice(-7) : "";
+    // Rút gọn tên sản phẩm (VD: "KhoaHoc" -> 7 ký tự)
+    const shortenedProductName = cleanAndShortenString(product.name, 7);
+
+    // Xây dựng nội dung ghi chú, đảm bảo có dấu gạch nối giữa các phần nếu chúng tồn tại
+    let noteParts: string[] = [];
+    if (shortenedFullName) noteParts.push(shortenedFullName);
+    if (shortenedPhone) noteParts.push(shortenedPhone);
+    if (shortenedProductName) noteParts.push(shortenedProductName);
+
+    const fullNote = noteParts.join("-"); // Nối các phần bằng dấu gạch ngang
+
+    // Đảm bảo tổng độ dài không vượt quá MAX_NOTE_LENGTH
+    return fullNote.substring(0, MAX_NOTE_LENGTH);
+  }, [formData.fullName, formData.phone, product, cleanAndShortenString]);
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const response = await apiProducts.getById(productId);
         if (response && response.payload) {
           setProduct(response.payload);
-          setFormData((prev) => ({
-            ...prev,
-            note: `${prev.fullName} - ${prev.phone} - ${response.payload.name}`,
-          }));
+          // Gán note sau khi có product, generateOptimizedNote sẽ được gọi ở useEffect riêng
         } else {
           throw new Error("Không tìm thấy sản phẩm");
         }
@@ -112,19 +152,26 @@ export default function CheckoutPage() {
   }, [productId, toast]);
 
   useEffect(() => {
-    if (isAuthenticated && user && product) {
-      const fullName = user.name || formData.fullName;
-      const phone = user.phone || formData.phone;
+    if (isAuthenticated && user) {
       setFormData((prev) => ({
         ...prev,
-        fullName,
+        fullName: user.name || prev.fullName,
         email: user.email || prev.email,
-        phone,
+        phone: user.phone || prev.phone,
         address: user.address || prev.address,
-        note: `${fullName} - ${phone} - ${product.name}`,
       }));
     }
-  }, [isAuthenticated, user, product]);
+  }, [isAuthenticated, user]);
+
+  // Cập nhật note mỗi khi formData.fullName, formData.phone hoặc product thay đổi
+  // Điều này đảm bảo note luôn phản ánh thông tin mới nhất
+  useEffect(() => {
+    if (product) {
+      // Chỉ generate note khi product đã được tải
+      const optimizedNote = generateOptimizedNote();
+      setFormData((prev) => ({ ...prev, note: optimizedNote }));
+    }
+  }, [formData.fullName, formData.phone, product, generateOptimizedNote]);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<FormData> = {};
@@ -143,13 +190,7 @@ export default function CheckoutPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => {
-      const updated = { ...prev, [name]: value };
-      if (name === "fullName" || name === "phone") {
-        updated.note = `${updated.fullName} - ${updated.phone} - ${product?.name || ""}`;
-      }
-      return updated;
-    });
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (errors[name as keyof FormData]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
@@ -172,6 +213,7 @@ export default function CheckoutPage() {
         amount: product.price,
         status: "pending",
         nameItem: product.name,
+        note: formData.note,
       });
 
       if (orderResponse.status === 201) {
@@ -227,7 +269,7 @@ export default function CheckoutPage() {
     navigator.clipboard.writeText(text);
     toast({
       title: "Đã sao chép",
-      description: `${text} đã được sao chép vào clipboard.`,
+      description: `"${text}" đã được sao chép vào clipboard.`,
     });
   };
 
@@ -300,11 +342,23 @@ export default function CheckoutPage() {
                           <span className="font-medium">Tên tài khoản:</span>{" "}
                           CTY CP TM & ĐT TÍN CHỈ CARBON VN
                         </p>
-                        <p>
+                        <p className="flex items-center">
                           <span className="font-medium">
                             Nội dung chuyển khoản:
                           </span>{" "}
-                          {formData.note}
+                          <span className="font-semibold text-green-700 break-all ml-1">
+                            {formData.note}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2 text-xs ml-2"
+                            onClick={() => handleCopy(formData.note)}
+                          >
+                            <Copy className="h-3.5 w-3.5 mr-1" />
+                            Sao chép
+                          </Button>
                         </p>
                       </div>
                       <div className="flex flex-col items-center justify-center">
@@ -339,8 +393,8 @@ export default function CheckoutPage() {
                       Theo dõi đơn hàng của bạn
                     </h3>
                     <p className="text-sm text-blue-700 mb-3">
-                      Chúng tôi đã tạo tài khoản cho bạn với email{" "}
-                      {formData.email}. Đăng nhập để theo dõi đơn hàng và sử
+                      Chúng tôi đã tạo tài khoản cho bạn với email **
+                      {formData.email}**. Đăng nhập để theo dõi đơn hàng và sử
                       dụng sản phẩm của bạn.
                     </p>
                     <Button
@@ -505,7 +559,9 @@ export default function CheckoutPage() {
                     </div>
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <Label htmlFor="note">Ghi chú</Label>
+                        <Label htmlFor="note">
+                          Nội dung chuyển khoản gợi ý
+                        </Label>
                         <Button
                           type="button"
                           variant="ghost"
@@ -517,16 +573,15 @@ export default function CheckoutPage() {
                           Sao chép
                         </Button>
                       </div>
-                      <Textarea
+                      <Input
                         id="note"
                         name="note"
                         value={formData.note}
-                        onChange={handleChange}
-                        rows={2}
-                        className="font-medium"
+                        readOnly
+                        className="font-medium bg-gray-100 text-gray-700"
                       />
                       <p className="text-xs text-gray-500">
-                        Nội dung này sẽ được sử dụng làm nội dung chuyển khoản
+                        Nội dung này được tạo tự động để giúp bạn thanh toán.
                       </p>
                     </div>
                     <Button
@@ -612,8 +667,8 @@ export default function CheckoutPage() {
                         Vui lòng điền đầy đủ thông tin trước khi thanh toán
                       </li>
                       <li>
-                        Nội dung chuyển khoản: [Họ tên] - [Số điện thoại] - [Tên
-                        sản phẩm]
+                        Nội dung chuyển khoản: Sử dụng nội dung gợi ý được điền
+                        tự động.
                       </li>
                       <li>
                         Sau khi thanh toán, chúng tôi sẽ liên hệ với bạn trong

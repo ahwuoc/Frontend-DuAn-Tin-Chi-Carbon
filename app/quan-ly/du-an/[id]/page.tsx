@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useLanguage } from "@/context/language-context";
-import { useAuth } from "@/context/auth-context";
 import {
   uploadToCloudinary,
   formatDateUtil,
@@ -31,6 +29,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import {
   Leaf,
   MapPin,
   Calendar,
@@ -43,19 +49,19 @@ import {
   ArrowLeft,
   Loader2,
   FileUp,
+  FileBadge,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import {
   apiProjects,
-  IProject, // Đã cập nhật IProject để khớp với ProjectCarbonData
-  IDocument,
+  IProject,
+  IProjectDocument,
+  IKmlFile,
   IActivity,
-  // ICoordinates, // Có thể không còn cần nếu tọa độ nằm trong details
-  // IUser, // Cần import nếu userId là đối tượng IUser
 } from "@/app/fetch/fetch.projects";
-import { ProjectIcon } from "./_components"; // Đảm bảo ProjectIcon nhận projectType
+import { ProjectIcon } from "./_components";
 
-// Component StatusBadge cho trạng thái dự án (không thay đổi)
 const StatusBadge: React.FC<{
   status: string;
 }> = ({ status }) => {
@@ -65,7 +71,7 @@ const StatusBadge: React.FC<{
     completed: "bg-green-100 text-green-800 hover:bg-green-100",
     approved: "bg-green-100 text-green-800 hover:bg-green-100",
     in_progress: "bg-blue-100 text-blue-800 hover:bg-blue-100",
-    rejected: "bg-red-100 text-red-800 hover:bg-red-100",
+    rejected: "bg-red-100 text-red-800 hover:bg-red-800",
     archived: "bg-gray-100 text-gray-800 hover:bg-gray-100",
   };
   const badgeLabels = {
@@ -90,40 +96,6 @@ const StatusBadge: React.FC<{
   );
 };
 
-// Component mới cho trạng thái tài liệu
-const DocumentStatusBadge: React.FC<{ status?: string }> = ({ status }) => {
-  const badgeStyles: { [key: string]: string } = {
-    approved: "bg-green-100 text-green-800 hover:bg-green-100",
-    rejected: "bg-red-100 text-red-800 hover:bg-red-100",
-    pending: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
-  };
-
-  const badgeLabels: { [key: string]: string } = {
-    approved: "Đã phê duyệt",
-    rejected: "Đã từ chối",
-    pending: "Đang chờ",
-  };
-
-  const IconComponent =
-    status === "approved"
-      ? CheckCircle2
-      : status === "rejected"
-        ? AlertCircle
-        : FileUp;
-
-  return (
-    <Badge
-      className={
-        badgeStyles[status || "pending"] ||
-        "bg-gray-100 text-gray-800 hover:bg-gray-100"
-      }
-    >
-      <IconComponent className="w-3 h-3 mr-1" />
-      {badgeLabels[status || "pending"] || "Không xác định"}
-    </Badge>
-  );
-};
-
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -134,8 +106,10 @@ export default function ProjectDetailPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [fileTypeToUpload, setFileTypeToUpload] = useState<
+    "landDocument" | "kmlFile"
+  >("landDocument");
 
-  // Hàm chuyển đổi projectType sang tiếng Việt
   const getProjectTypeName = (type: string) => {
     switch (type) {
       case "rice":
@@ -145,7 +119,7 @@ export default function ProjectDetailPage() {
       case "biochar":
         return "Than sinh học";
       default:
-        return type; // Trả về nguyên bản nếu không khớp
+        return type;
     }
   };
 
@@ -178,7 +152,7 @@ export default function ProjectDetailPage() {
     }
   };
 
-  const handleUploadDocument = async () => {
+  const handleUploadFile = async () => {
     if (!selectedFile || !project?._id) {
       setUploadError("Vui lòng chọn một tệp để tải lên.");
       return;
@@ -190,32 +164,64 @@ export default function ProjectDetailPage() {
 
     try {
       const fileUrl = await uploadToCloudinary(selectedFile);
+      const userId = getUserFromLocalStorage()?.userId;
 
-      const newDocument: IDocument = {
-        name: selectedFile.name,
-        url: fileUrl,
-        type: selectedFile.type || "unknown",
-        uploadedAt: new Date().toISOString(),
-        userId: getUserFromLocalStorage()?.userId, // Cần đảm bảo getUserFromLocalStorage trả về user object có userId
-        status: "pending",
-      };
-      const updatedDocuments = project.documents
-        ? [...project.documents, newDocument]
-        : [newDocument];
+      if (fileTypeToUpload === "landDocument") {
+        const newDocument: IProjectDocument = {
+          name: selectedFile.name,
+          url: fileUrl,
+          type: selectedFile.type || "unknown",
+          createdAt: new Date().toISOString(),
+          userId: userId,
+        };
+        const updatedLandDocuments = project.landDocuments
+          ? [...project.landDocuments, newDocument]
+          : [newDocument];
 
-      // Gọi API để cập nhật dự án với tài liệu mới
-      const response = await apiProjects.updateDocuments(project._id, {
-        documents: updatedDocuments,
-      });
+        const response = await apiProjects.updateProject(project._id, {
+          landDocuments: updatedLandDocuments,
+        });
 
-      if (response && response.payload) {
-        setProject(response.payload as IProject); // Cập nhật project state với dữ liệu mới từ API
-        setUploadSuccess(true);
-        setSelectedFile(null);
-        alert("Tài liệu đã được tải lên thành công!");
-      } else {
-        setUploadError("Lỗi khi cập nhật dự án.");
-        console.error("Lỗi khi cập nhật dự án với tài liệu mới:", response);
+        if (response && response.payload) {
+          setProject((prevProject) => ({
+            ...(prevProject as IProject),
+            landDocuments:
+              response.payload.landDocuments || updatedLandDocuments,
+          }));
+          setUploadSuccess(true);
+          setSelectedFile(null);
+          alert("Tài liệu đất đai đã được tải lên thành công!");
+        } else {
+          setUploadError("Lỗi khi cập nhật dự án với tài liệu đất đai.");
+        }
+      } else if (fileTypeToUpload === "kmlFile") {
+        if (!selectedFile.name.toLowerCase().endsWith(".kml")) {
+          setUploadError("Vui lòng chọn tệp KML hợp lệ (.kml).");
+          setUploading(false);
+          return;
+        }
+
+        const newKmlFile: IKmlFile = {
+          name: selectedFile.name,
+          url: fileUrl,
+          createdAt: new Date().toISOString(),
+        };
+
+        const response = await apiProjects.updateProject(project._id, {
+          kmlFile: newKmlFile,
+        });
+
+        if (response && response.payload) {
+          setProject((prevProject) => ({
+            ...(prevProject as IProject),
+            kmlFile: response.payload.kmlFile || newKmlFile,
+          }));
+          setUploadSuccess(true);
+          setSelectedFile(null);
+          alert("Tệp KML đã được tải lên thành công!");
+        } else {
+          setUploadError("Lỗi khi cập nhật dự án với tệp KML.");
+        }
       }
     } catch (error) {
       setUploadError("Lỗi khi tải tệp lên.");
@@ -225,9 +231,74 @@ export default function ProjectDetailPage() {
     }
   };
 
-  const handleViewReport = (url: string) => {
+  const handleDeleteLandDocument = async (docUrl: string) => {
+    if (!project?._id) return;
+
+    if (
+      !confirm(
+        "Bạn có chắc chắn muốn xóa tài liệu này không? Hành động này không thể hoàn tác.",
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const updatedLandDocuments =
+        project.landDocuments?.filter((doc) => doc.url !== docUrl) || [];
+      const response = await apiProjects.updateProject(project._id, {
+        landDocuments: updatedLandDocuments,
+      });
+
+      if (response && response.payload) {
+        setProject((prevProject) => ({
+          ...(prevProject as IProject),
+          landDocuments: response.payload.landDocuments || updatedLandDocuments,
+        }));
+        alert("Tài liệu đã được xóa thành công!");
+      } else {
+        alert("Lỗi khi xóa tài liệu.");
+        console.error("Lỗi khi xóa tài liệu:", response);
+      }
+    } catch (error) {
+      alert("Đã xảy ra lỗi khi xóa tài liệu.");
+      console.error("Lỗi xóa tài liệu:", error);
+    }
+  };
+
+  const handleDeleteKmlFile = async () => {
+    if (!project?._id) return;
+
+    if (
+      !confirm(
+        "Bạn có chắc chắn muốn xóa tệp KML này không? Hành động này không thể hoàn tác.",
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const response = await apiProjects.updateProject(project._id, {
+        kmlFile: null,
+      });
+
+      if (response && response.payload) {
+        setProject((prevProject) => ({
+          ...(prevProject as IProject),
+          kmlFile: response.payload.kmlFile || null,
+        }));
+        alert("Tệp KML đã được xóa thành công!");
+      } else {
+        alert("Lỗi khi xóa tệp KML.");
+        console.error("Lỗi khi xóa tệp KML:", response);
+      }
+    } catch (error) {
+      alert("Đã xảy ra lỗi khi xóa tệp KML.");
+      console.error("Lỗi xóa tệp KML:", error);
+    }
+  };
+
+  const handleViewFile = (url: string) => {
     window.open(url, "_blank");
-    console.log("Xem báo cáo:", url);
   };
 
   useEffect(() => {
@@ -264,7 +335,7 @@ export default function ProjectDetailPage() {
     );
   }
 
-  const documents = project.documents || [];
+  const landDocuments = project.landDocuments || [];
 
   return (
     <div className="container mx-auto py-10 px-4">
@@ -332,7 +403,6 @@ export default function ProjectDetailPage() {
                   </p>
                 </div>
 
-                {/* Hiển thị chi tiết theo loại dự án */}
                 {project.projectType === "forest" && (
                   <>
                     <div>
@@ -507,7 +577,6 @@ export default function ProjectDetailPage() {
                   </>
                 )}
 
-                {/* Các thông tin chung cho tất cả dự án */}
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
                     Người đăng ký
@@ -555,8 +624,7 @@ export default function ProjectDetailPage() {
             </CardFooter>
           </Card>
 
-          {/* Phần tín chỉ carbon */}
-          {project.carbonCreditsTotal !== undefined && ( // Kiểm tra cụ thể hơn
+          {project.carbonCreditsTotal !== undefined && (
             <Card>
               <CardHeader>
                 <CardTitle>Thông tin Tín chỉ Carbon</CardTitle>
@@ -600,7 +668,6 @@ export default function ProjectDetailPage() {
             </Card>
           )}
 
-          {/* Phần tiến độ dự án */}
           {typeof project.progress === "number" && (
             <Card>
               <CardHeader>
@@ -631,13 +698,13 @@ export default function ProjectDetailPage() {
         <TabsContent value="documents" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Tài liệu dự án</CardTitle>
+              <CardTitle>Tài liệu đất đai</CardTitle>
               <CardDescription>
-                Các tài liệu đã tải lên liên quan đến dự án.
+                Các tài liệu liên quan đến quyền sở hữu/sử dụng đất của dự án.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {documents.length > 0 ? (
+              {landDocuments.length > 0 ? (
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
@@ -645,13 +712,12 @@ export default function ProjectDetailPage() {
                         <TableHead>Tên tài liệu</TableHead>
                         <TableHead>Loại</TableHead>
                         <TableHead>Ngày tải lên</TableHead>
-                        <TableHead>Trạng thái</TableHead>
                         <TableHead className="text-right">Hành động</TableHead>
                       </TableRow>
                     </TableHeader>
 
                     <TableBody>
-                      {documents.map((doc: IDocument) => (
+                      {landDocuments.map((doc: IProjectDocument) => (
                         <TableRow key={doc._id || doc.url}>
                           <TableCell className="font-medium">
                             {doc.name ||
@@ -662,21 +728,27 @@ export default function ProjectDetailPage() {
                           </TableCell>
                           <TableCell>{doc.type || "N/A"}</TableCell>
                           <TableCell>
-                            {doc.uploadedAt
-                              ? formatDateUtil(doc.uploadedAt)
+                            {doc.createdAt
+                              ? formatDateUtil(doc.createdAt)
                               : "N/A"}
-                          </TableCell>
-                          <TableCell>
-                            <DocumentStatusBadge status={doc.status} />
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end space-x-2">
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleViewReport(doc.url)}
+                                onClick={() => handleViewFile(doc.url)}
                               >
-                                Xem báo cáo
+                                Xem
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() =>
+                                  handleDeleteLandDocument(doc.url)
+                                }
+                              >
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
                           </TableCell>
@@ -687,22 +759,93 @@ export default function ProjectDetailPage() {
                 </div>
               ) : (
                 <p className="text-gray-500 text-center">
-                  Chưa có tài liệu nào được đính kèm.
+                  Chưa có tài liệu đất đai nào được đính kèm.
                 </p>
               )}
             </CardContent>
-            <CardFooter className="flex flex-col items-start gap-4">
-              <div className="w-full">
-                <Label htmlFor="document" className="mb-2 block">
-                  Chọn tệp để tải lên
-                </Label>
-                <Input
-                  id="document"
-                  type="file"
-                  onChange={handleFileChange}
-                  className="mb-2"
-                />
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Tệp KML</CardTitle>
+              <CardDescription>
+                Tệp KML định vị khu vực địa lý của dự án trên bản đồ.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {project.kmlFile ? (
+                <div className="flex items-center justify-between p-4 border rounded-md">
+                  <div className="flex items-center">
+                    <FileBadge className="h-6 w-6 text-blue-500 mr-2" />
+                    <span className="font-medium">{project.kmlFile.name}</span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleViewFile(project.kmlFile!.url)}
+                    >
+                      Xem
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleDeleteKmlFile}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-500 text-center">
+                  Chưa có tệp KML nào được đính kèm.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Tải lên tệp mới</CardTitle>
+              <CardDescription>
+                Tải lên tài liệu đất đai hoặc tệp KML mới cho dự án.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="fileType">Loại tệp tải lên</Label>
+                  <Select
+                    value={fileTypeToUpload}
+                    onValueChange={(value: "landDocument" | "kmlFile") =>
+                      setFileTypeToUpload(value)
+                    }
+                  >
+                    <SelectTrigger id="fileType">
+                      <SelectValue placeholder="Chọn loại tệp" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="landDocument">
+                        Tài liệu đất đai
+                      </SelectItem>
+                      <SelectItem value="kmlFile">Tệp KML</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="document" className="mb-2 block">
+                    Chọn tệp
+                  </Label>
+                  <Input
+                    id="document"
+                    type="file"
+                    onChange={handleFileChange}
+                    className="mb-2"
+                    accept={fileTypeToUpload === "kmlFile" ? ".kml" : undefined}
+                  />
+                </div>
               </div>
+
               {selectedFile && (
                 <p className="text-sm text-gray-600">
                   Đã chọn tệp:{" "}
@@ -722,7 +865,7 @@ export default function ProjectDetailPage() {
                 </div>
               )}
               <Button
-                onClick={handleUploadDocument}
+                onClick={handleUploadFile}
                 disabled={uploading || !selectedFile}
               >
                 {uploading ? (
@@ -733,11 +876,11 @@ export default function ProjectDetailPage() {
                 ) : (
                   <>
                     <Upload className="w-4 h-4 mr-2" />
-                    Tải lên tài liệu mới
+                    Tải lên
                   </>
                 )}
               </Button>
-            </CardFooter>
+            </CardContent>
           </Card>
         </TabsContent>
 
