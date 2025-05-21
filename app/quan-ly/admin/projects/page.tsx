@@ -31,18 +31,11 @@ import { useToast } from "@/hooks/use-toast";
 import { apiProjects } from "../../../fetch/fetch.projects";
 import { formatDateUtil } from "@/app/utils/common";
 import {
+  ProjectStatus,
   getProjectTypeText,
   getStatusBadge,
   getStatusText,
 } from "@/app/components/projects/project";
-
-export type ProjectStatus =
-  | "surveying"
-  | "designing"
-  | "verifying"
-  | "implementing"
-  | "credit_issuing"
-  | "trading";
 
 export interface IProject {
   _id: string;

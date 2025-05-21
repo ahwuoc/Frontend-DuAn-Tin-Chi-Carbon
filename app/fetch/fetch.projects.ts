@@ -89,7 +89,7 @@ export const apiProjects = {
     HTTP.PUT<IProject>(`/projects/${id}`, { body }),
   updateProject: (id: string, body: any) =>
     HTTP.PUT<IProject>(`/projects/${id}`, { body }),
-  getAll: () => HTTP.GET<IProject[]>("/projects"),
+  getAll: () => HTTP.GET<any[]>("/projects"),
   addProject: (data: any) => HTTP.POST<IProject>("/projects", data),
   getMyProject: (id: string) => HTTP.GET<any>(`/projects/profile/${id}`),
   delete: (id: any) => HTTP.DELETE(`/projects/${id}`),

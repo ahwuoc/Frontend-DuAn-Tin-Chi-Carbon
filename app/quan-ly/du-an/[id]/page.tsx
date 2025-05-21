@@ -1,3 +1,4 @@
+// src/app/admin/projects-carbon/[id]/page.tsx
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -17,7 +18,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge"; // Cần Badge cho getStatusBadge
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -40,7 +41,7 @@ import {
   Leaf,
   MapPin,
   Calendar,
-  Clock,
+  Clock, // Cần Clock cho getStatusBadge
   FileText,
   BarChart3,
   Upload,
@@ -53,6 +54,8 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
+
+// NHẬP CÁC KIỂU DỮ LIỆU CƠ BẢN
 import {
   apiProjects,
   IProject,
@@ -61,41 +64,12 @@ import {
   IActivity,
 } from "@/app/fetch/fetch.projects";
 import { ProjectIcon } from "./_components";
-
-const StatusBadge: React.FC<{
-  status: string;
-}> = ({ status }) => {
-  const badgeStyles = {
-    active: "bg-indigo-100 text-indigo-800 hover:bg-indigo-100",
-    pending: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
-    completed: "bg-green-100 text-green-800 hover:bg-green-100",
-    approved: "bg-green-100 text-green-800 hover:bg-green-100",
-    in_progress: "bg-blue-100 text-blue-800 hover:bg-blue-100",
-    rejected: "bg-red-100 text-red-800 hover:bg-red-800",
-    archived: "bg-gray-100 text-gray-800 hover:bg-gray-100",
-  };
-  const badgeLabels = {
-    active: "Đang thực hiện",
-    pending: "Đang xử lý",
-    completed: "Hoàn thành",
-    approved: "Đã phê duyệt",
-    in_progress: "Đang tiến hành",
-    rejected: "Đã từ chối",
-    archived: "Đã lưu trữ",
-  };
-  return (
-    <Badge
-      className={
-        badgeStyles[status as keyof typeof badgeStyles] ||
-        "bg-gray-100 text-gray-800 hover:bg-gray-100"
-      }
-    >
-      <Clock className="w-3 h-3 mr-1" />
-      {badgeLabels[status as keyof typeof badgeLabels] || status}
-    </Badge>
-  );
-};
-
+import {
+  ProjectStatus,
+  getStatusText,
+  getStatusBadge,
+  getProjectTypeText,
+} from "@/app/components/projects/project";
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -110,24 +84,20 @@ export default function ProjectDetailPage() {
     "landDocument" | "kmlFile"
   >("landDocument");
 
-  const getProjectTypeName = (type: string) => {
-    switch (type) {
-      case "rice":
-        return "Lúa gạo";
-      case "forest":
-        return "Lâm nghiệp";
-      case "biochar":
-        return "Than sinh học";
-      default:
-        return type;
-    }
-  };
+  const projectStatusOrder: ProjectStatus[] = [
+    "surveying",
+    "designing",
+    "verifying",
+    "implementing",
+    "credit_issuing",
+    "trading",
+  ];
 
   const fetchProject = useCallback(async (id: string) => {
     try {
       setLoading(true);
       const response = await apiProjects.getProject(id);
-      if (response.status === 200) {
+      if (response.status === 200 && response.payload) {
         setProject(response.payload as IProject);
       } else {
         setProject(null);
@@ -164,7 +134,8 @@ export default function ProjectDetailPage() {
 
     try {
       const fileUrl = await uploadToCloudinary(selectedFile);
-      const userId = getUserFromLocalStorage()?.userId;
+      const user = getUserFromLocalStorage();
+      const userId = user?.userId;
 
       if (fileTypeToUpload === "landDocument") {
         const newDocument: IProjectDocument = {
@@ -186,7 +157,8 @@ export default function ProjectDetailPage() {
           setProject((prevProject) => ({
             ...(prevProject as IProject),
             landDocuments:
-              response.payload.landDocuments || updatedLandDocuments,
+              (response.payload as IProject).landDocuments ||
+              updatedLandDocuments,
           }));
           setUploadSuccess(true);
           setSelectedFile(null);
@@ -214,7 +186,7 @@ export default function ProjectDetailPage() {
         if (response && response.payload) {
           setProject((prevProject) => ({
             ...(prevProject as IProject),
-            kmlFile: response.payload.kmlFile || newKmlFile,
+            kmlFile: (response.payload as IProject).kmlFile || newKmlFile,
           }));
           setUploadSuccess(true);
           setSelectedFile(null);
@@ -252,7 +224,9 @@ export default function ProjectDetailPage() {
       if (response && response.payload) {
         setProject((prevProject) => ({
           ...(prevProject as IProject),
-          landDocuments: response.payload.landDocuments || updatedLandDocuments,
+          landDocuments:
+            (response.payload as IProject).landDocuments ||
+            updatedLandDocuments,
         }));
         alert("Tài liệu đã được xóa thành công!");
       } else {
@@ -284,7 +258,7 @@ export default function ProjectDetailPage() {
       if (response && response.payload) {
         setProject((prevProject) => ({
           ...(prevProject as IProject),
-          kmlFile: response.payload.kmlFile || null,
+          kmlFile: (response.payload as IProject).kmlFile || null,
         }));
         alert("Tệp KML đã được xóa thành công!");
       } else {
@@ -354,7 +328,7 @@ export default function ProjectDetailPage() {
           <ProjectIcon type={project.projectType} />
           <div className="ml-3">
             <h1 className="text-3xl font-bold">
-              Dự án {getProjectTypeName(project.projectType)} của{" "}
+              Dự án {getProjectTypeText(project.projectType)} của{" "}
               {project.name}{" "}
             </h1>
             <p className="text-gray-500">
@@ -364,7 +338,7 @@ export default function ProjectDetailPage() {
           </div>
         </div>
         <div className="mt-4 md:mt-0">
-          <StatusBadge status={project.status || "pending"} />
+          {getStatusBadge(project.status || "surveying")}
         </div>
       </div>
 
@@ -399,7 +373,7 @@ export default function ProjectDetailPage() {
                     Loại dự án
                   </h3>
                   <p className="font-medium">
-                    {getProjectTypeName(project.projectType)}
+                    {getProjectTypeText(project.projectType)}
                   </p>
                 </div>
 

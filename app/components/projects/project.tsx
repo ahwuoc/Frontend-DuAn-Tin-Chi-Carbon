@@ -1,7 +1,14 @@
 // src/app/components/projects/project.ts (hoặc .tsx)
 
 import { Badge } from "@/components/ui/badge"; // Đảm bảo import Badge
-import { ProjectStatus } from "@/app/quan-ly/admin/projects/page";
+
+export type ProjectStatus =
+  | "surveying"
+  | "designing"
+  | "verifying"
+  | "implementing"
+  | "credit_issuing"
+  | "trading";
 
 export const getStatusText = (status: ProjectStatus): string => {
   switch (status) {

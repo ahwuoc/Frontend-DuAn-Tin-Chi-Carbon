@@ -22,53 +22,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  getProjectTypeText,
+  getStatusText,
+} from "@/app/components/projects/project";
 
-const StatusBadge = ({ status }: { status: string }) => {
-  switch (status) {
-    case "active":
-      return (
-        <Badge
-          variant="outline"
-          className="bg-green-50 text-green-700 border-green-200"
-        >
-          <CheckCircle2 className="w-3 h-3 mr-1" />
-          Đang hoạt động
-        </Badge>
-      );
-    case "pending":
-      return (
-        <Badge
-          variant="outline"
-          className="bg-yellow-50 text-yellow-700 border-yellow-200"
-        >
-          <Clock className="w-3 h-3 mr-1" />
-          Chờ xác nhận
-        </Badge>
-      );
-    case "completed":
-      return (
-        <Badge
-          variant="outline"
-          className="bg-blue-50 text-blue-700 border-blue-200"
-        >
-          <CheckCircle2 className="w-3 h-3 mr-1" />
-          Hoàn thành
-        </Badge>
-      );
-    default:
-      return (
-        <Badge
-          variant="outline"
-          className="bg-gray-50 text-gray-700 border-gray-200"
-        >
-          <AlertCircle className="w-3 h-3 mr-1" />
-          Không xác định
-        </Badge>
-      );
-  }
-};
-
-import { apiProjects, IProject, IUser } from "@/app/fetch/fetch.projects";
+import { apiProjects, IProject } from "@/app/fetch/fetch.projects";
 import { useAuth } from "../../context/auth-context";
 import { formatDateUtil } from "@/app/utils/common";
 
@@ -80,31 +39,8 @@ export default function ProjectsList() {
   const [projects, setProjects] = useState<IProject[]>([]);
   const { user } = useAuth(); // Giả định user có userId để lọc dự án của người dùng hiện tại
 
-  // Hàm chuyển đổi projectType sang tiếng Việt
-  const getProjectTypeName = (type: string) => {
-    switch (type) {
-      case "rice":
-        return "Lúa gạo";
-      case "forest":
-        return "Lâm nghiệp";
-      case "biochar":
-        return "Than sinh học";
-      case "renewable":
-        return "Năng lượng tái tạo";
-      case "conservation":
-        return "Bảo tồn";
-      case "waste":
-        return "Xử lý chất thải";
-      default:
-        return type; // Trả về nguyên bản nếu không khớp
-    }
-  };
-
   useEffect(() => {
-    // Đảm bảo có userId trước khi gọi API
     if (!user?.userId) {
-      // Có thể đặt một state loading thành false ở đây nếu muốn hiển thị thông báo
-      // rằng không có user đăng nhập hoặc chờ đợi user load xong.
       console.log("Không có userId, không thể fetch dự án.");
       return;
     }
@@ -192,7 +128,7 @@ export default function ProjectsList() {
 
       {/* Projects list */}
       <div className="grid grid-cols-1 gap-6">
-        {filteredProjects.length > 0 ? (
+        {Array.isArray(filteredProjects) ? (
           filteredProjects.map((project) => (
             <div
               key={project._id}
@@ -201,7 +137,7 @@ export default function ProjectsList() {
               <div className="p-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    Dự án {getProjectTypeName(project.projectType)} của{" "}
+                    Dự án {getProjectTypeText(project.projectType)} của{" "}
                     <span className="text-green-700">
                       {project.userId?.name ||
                         project.name ||
@@ -209,7 +145,7 @@ export default function ProjectsList() {
                     </span>
                   </h3>
                   {/* Đảm bảo dữ liệu của bạn có trường 'status', nếu không, cung cấp một mặc định */}
-                  <StatusBadge status={project.status || "unknown"} />
+                  {getStatusText(project.status)}
                 </div>
 
                 <p className="text-gray-600 mb-4">
@@ -225,9 +161,8 @@ export default function ProjectsList() {
                   </div>
                   <div className="flex items-center text-gray-500">
                     <Filter className="h-4 w-4 mr-2" />
-                    <span>Loại: {getProjectTypeName(project.projectType)}</span>
+                    <span>Loại: {getProjectTypeText(project.projectType)}</span>
                   </div>
-                  {/* Nếu bạn có trường carbonCredits, hãy hiển thị nó */}
                   {project.carbonCredits && (
                     <div className="flex items-center text-gray-500">
                       <span className="font-medium text-green-600">
