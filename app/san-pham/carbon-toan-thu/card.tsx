@@ -232,7 +232,7 @@ export default function CarbonCard() {
                 <Link
                   href={
                     isEnterprise
-                      ? "/dang-ky-tu-van"
+                      ? "/san-pham/du-an-tin-chi-carbon#dang-ky-du-an"
                       : `/thanh-toan?product=${_id}`
                   }
                   className="block w-full"
