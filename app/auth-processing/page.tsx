@@ -16,7 +16,6 @@ export default function AuthProcessingPage() {
   useEffect(() => {
     if (isVerifying && !verificationComplete) {
       const delay = 2500;
-
       const timer = setTimeout(() => {
         setIsVerifying(false);
         setVerificationComplete(true);
