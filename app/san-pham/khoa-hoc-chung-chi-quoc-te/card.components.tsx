@@ -121,6 +121,36 @@ export const PricingSection: FC = () => {
             "Phù hợp cho nhà nghiên cứu và người mới bước vào lĩnh vực kiểm kê khí nhà kính, môi trường, ESG, hoặc sinh viên mong muốn lấy chứng chỉ quốc tế để mở rộng cơ hội tương lai."; // Mặc định cho free, research
         }
 
+        // --- Logic cho phần cơ hội nghề nghiệp/lợi ích bổ sung ---
+        let careerOpportunityContent = null; // Khởi tạo là null
+        if (plan.subscriptionTier !== "enterprise") {
+          careerOpportunityContent = (
+            <div className="bg-green-50 p-3 rounded-lg mb-4">
+              <p className="text-sm text-green-800 font-medium">
+                Cơ hội nghề nghiệp {/* Đã dịch */}
+              </p>
+              <ul className="text-sm text-green-700 list-disc pl-5 mt-1">
+                {/* Chỉ render benefits từ API */}
+                {plan.benefits?.length > 0 ? (
+                  plan.benefits.map((benefit: any) => (
+                    <li key={benefit._id}>{benefit.title || "N/A"}</li>
+                  ))
+                ) : (
+                  <li>Không có lợi ích bổ sung nào.</li> // Fallback nếu không có benefits
+                )}
+              </ul>
+            </div>
+          );
+        } else {
+          careerOpportunityContent = (
+            <div className="bg-green-50 p-3 rounded-lg mb-4">
+              <p className="text-sm text-green-800 font-medium">
+                Tuân thủ quy định CBAM và nâng cao uy tín ESG của doanh nghiệp
+              </p>
+            </div>
+          );
+        }
+
         return (
           <Card
             key={plan._id || index} // Dùng _id nếu có, fallback về index
@@ -154,7 +184,7 @@ export const PricingSection: FC = () => {
                     {priceDescription} {/* Sử dụng biến priceDescription */}
                   </p>
                 </div>
-                {includedFeaturesDescription && ( // Chỉ hiển thị nếu có mô tả
+                {includedFeaturesDescription && (
                   <p className="text-sm text-gray-600 italic mb-3">
                     {includedFeaturesDescription} {/* Sử dụng biến mới */}
                   </p>
@@ -180,30 +210,8 @@ export const PricingSection: FC = () => {
                     </p>
                   )}
                 </div>
-                {plan.subscriptionTier !== "enterprise" && (
-                  <div className="bg-green-50 p-3 rounded-lg mb-4">
-                    <p className="text-sm text-green-800 font-medium">
-                      Cơ hội nghề nghiệp {/* Đã dịch */}
-                    </p>
-                    <ul className="text-sm text-green-700 list-disc pl-5 mt-1">
-                      <li>Tăng 80% tỷ lệ phỏng vấn</li> {/* Đã dịch */}
-                      <li>
-                        Tăng lương lên đến{" "}
-                        {plan.subscriptionTier === "expert"
-                          ? "40%"
-                          : "20%"}{" "}
-                      </li>
-                    </ul>
-                  </div>
-                )}
-                {plan.subscriptionTier === "enterprise" && (
-                  <div className="bg-green-50 p-3 rounded-lg mb-4">
-                    <p className="text-sm text-green-800 font-medium">
-                      Tuân thủ quy định CBAM và nâng cao uy tín ESG của doanh
-                      nghiệp
-                    </p>
-                  </div>
-                )}
+                {/* Sử dụng biến đã được xử lý */}
+                {careerOpportunityContent}
                 <p className="text-sm text-gray-500 mb-4">
                   {targetAudienceDescription}
                 </p>
@@ -229,5 +237,4 @@ export const PricingSection: FC = () => {
     </div>
   );
 };
-
 export default PricingSection;
