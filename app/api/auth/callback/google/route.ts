@@ -65,15 +65,10 @@ export async function GET(request: NextRequest) {
       });
 
       const redirectUrl = new URL("/auth-processing", request.url);
-      redirectUrl.searchParams.set("token", token);
-      redirectUrl.searchParams.set("redirectPath", "/quan-ly");
-
       const response = NextResponse.redirect(redirectUrl);
       response.headers.append("Set-Cookie", cookie);
-
       return response;
     }
-
     const errorUrl = new URL("/dang-nhap", request.url);
     errorUrl.searchParams.set("error", "backend_processing_failed");
     errorUrl.searchParams.set("message", "No token returned");

@@ -34,7 +34,7 @@ type TokenPayload = {
 import { jwtDecode } from "jwt-decode";
 import { apiOrders, IOrder } from "../app/fetch/fetch.order";
 type AuthContextType = {
-  setUserFromToken: (token: string) => void,
+  setUserFromToken: (token: string) => void;
   user: User | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
@@ -47,15 +47,14 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function setCookie(name: string, value: string, days = 7): void {
-  const expires = new Date(Date.now() + days * 86400 * 1000).toUTCString()
-  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`
+  const expires = new Date(Date.now() + days * 86400 * 1000).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
 }
 export const getCookie = (name: string): string | null => {
-  const cookies = document.cookie.split('; ');
-  const found = cookies.find(row => row.startsWith(name + '='));
-  return found ? decodeURIComponent(found.split('=')[1]) : null;
+  const cookies = document.cookie.split("; ");
+  const found = cookies.find((row) => row.startsWith(name + "="));
+  return found ? decodeURIComponent(found.split("=")[1]) : null;
 };
-
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -68,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUserFromToken(token);
       } catch (e) {
         console.error("Invalid token", e);
-        logout(); // Log out if token is invalid
+        logout();
       }
     } else if (storedUser) {
       try {
@@ -92,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await apiAuth.login({ email, password });
       if (response && response.token) {
-        setUserFromToken(response.token)
+        setUserFromToken(response.token);
         return true;
       } else {
         throw new Error(`Unexpected status: ${response}`);
@@ -128,15 +127,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(userData);
       setIsAuthenticated(true);
       setCookie("token", token, 7);
-      localStorage.setItem("user", JSON.stringify({
-        userId: decoded.userId,
-        name: decoded.name,
-        email: decoded.email,
-        role: decoded.role,
-        phone: undefined,
-        address: undefined,
-        avatar: undefined,
-      }));
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          userId: decoded.userId,
+          name: decoded.name,
+          email: decoded.email,
+          role: decoded.role,
+          phone: undefined,
+          address: undefined,
+          avatar: undefined,
+        }),
+      );
     } catch (error) {
       console.error("Error setting user from token:", error);
       logout(); // Log out if token is invalid or decoding fails
@@ -216,11 +218,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
   const logout = async () => {
-    localStorage.clear()
-    Cookies.remove('token');
+    localStorage.clear();
+    Cookies.remove("token");
     setUser(null);
     setIsAuthenticated(false);
-    window.location.href = '/';
+    window.location.href = "/";
   };
   return (
     <AuthContext.Provider
