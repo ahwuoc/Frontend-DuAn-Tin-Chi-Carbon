@@ -73,7 +73,7 @@ export default function CarbonCard() {
           _id,
           subscriptionTier,
           price,
-          description,
+          description, // description đã được đưa về đúng chỗ
           billingCycle,
           features,
           benefits,
@@ -93,7 +93,7 @@ export default function CarbonCard() {
         let currentPriceDisplay = "";
 
         if (isExpert) {
-          strikethroughPrice = "";
+          strikethroughPrice = ""; // Expert không có giá gạch ngang theo yêu cầu mới nhất
           currentPriceDisplay = price
             ? `${price.toLocaleString("vi-VN")} VNĐ`
             : "Liên hệ báo giá";
@@ -118,12 +118,30 @@ export default function CarbonCard() {
         if (isResearch) {
           companyDescription =
             "Phù hợp cho nhà nghiên cứu và người mới bước vào lĩnh vực kiểm kê khí nhà kính, môi trường, ESG, hoặc sinh viên mong muốn lấy chứng chỉ quốc tế để mở rộng cơ hội tương lai.";
+        } else if (isFree) {
+          companyDescription =
+            "Phù hợp cho sinh viên các ngành môi trường, kinh tế, quản lý tài nguyên, phát triển bền vững và các ngành liên quan.";
         } else if (isEnterprise) {
           companyDescription =
             "Phù hợp cho các doanh nghiệp vừa và lớn muốn nâng cao năng lực đội ngũ, đáp ứng yêu cầu pháp lý quốc tế, đồng thời triển khai các dự án kiểm kê carbon, ESG một cách toàn diện.";
+        } else if (isExpert) {
+          companyDescription =
+            "Dành cho chuyên gia ESG, quản lý dự án, tư vấn môi trường, nhà đầu tư và những người làm việc trong lĩnh vực phát triển bền vững.";
         } else {
-          companyDescription = company || "Doanh nghiệp và cá nhân"; // Dùng giá trị từ API nếu có, hoặc mặc định
+          companyDescription = company || "Doanh nghiệp và cá nhân"; // Fallback nếu không có tier nào khớp
         }
+
+        const planDescription =
+          description ||
+          (isFree
+            ? "Dành cho sinh viên và người mới bắt đầu"
+            : isExpert
+              ? "Dành cho chuyên gia và người đi làm"
+              : isResearch
+                ? "Dành cho chuyên gia và người đi làm"
+                : isEnterprise
+                  ? "Giải pháp toàn diện cho doanh nghiệp"
+                  : ""); // Mặc định là chuỗi rỗng
 
         return (
           <Card
@@ -159,15 +177,9 @@ export default function CarbonCard() {
                         : billingCycle || "Không xác định"}
                   </p>
                 </div>
+                {/* Sử dụng biến planDescription đã được xử lý */}
                 <p className="text-sm text-gray-600 italic mb-4 line-clamp-2">
-                  {description ||
-                    (isFree
-                      ? "Phù hợp cho sinh viên và người mới bắt đầu muốn tìm hiểu về tín chỉ carbon trước khi quyết định đầu tư."
-                      : isExpert
-                        ? "Dành cho chuyên gia ESG, quản lý dự án, tư vấn môi trường, nhà đầu tư và những người làm việc trong lĩnh vực phát triển bền vững."
-                        : isResearch
-                          ? "Phù hợp cho sinh viên các ngành môi trường, kinh tế, quản lý tài nguyên, phát triển bền vững và các ngành liên quan."
-                          : "Phù hợp cho các doanh nghiệp vừa và lớn muốn nâng cao năng lực đội ngũ, đáp ứng yêu cầu pháp lý quốc tế, đồng thời triển khai các dự án kiểm kê carbon, ESG một cách toàn diện.")}
+                  {planDescription}
                 </p>
 
                 {/* Đã xóa max-h-48 và overflow-y-auto */}
@@ -208,9 +220,7 @@ export default function CarbonCard() {
                   </ul>
                 </div>
 
-                <p className="text-sm text-gray-500">
-                  Phù hợp với: {companyDescription}
-                </p>
+                <p className="text-sm text-gray-500">{companyDescription}</p>
               </div>
 
               <div className="mt-auto pt-6">
