@@ -1,19 +1,17 @@
 // app/auth-processing/AuthProcessingPage.tsx
-"use client"; // RẤT QUAN TRỌNG: Đây là một Client Component
+"use client";
 
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
-import { toast } from "@/hooks/use-toast"; // Đảm bảo import toast nếu bạn dùng
+import { toast } from "@/hooks/use-toast";
 
 export default function AuthProcessingPage() {
   const router = useRouter();
-  // KHAI BÁO useSearchParams ở đây là OK
   const searchParams = useSearchParams();
-  const { setUserFromToken, isAuthenticated, user } = useAuth(); // Lấy thêm isAuthenticated, user để debug
+  const { setUserFromToken, isAuthenticated, user } = useAuth();
 
   useEffect(() => {
-    // TẤT CẢ LOGIC SỬ DỤNG searchParams VÀ router.replace PHẢI NẰM TRONG useEffect
     const token = searchParams.get("token");
     const redirectPath = searchParams.get("redirectPath") || "/quan-ly";
 
@@ -24,30 +22,21 @@ export default function AuthProcessingPage() {
       console.log("   Token length:", token.length);
     }
     console.log("3. Redirect Path:", redirectPath);
-    console.log(
-      "4. isAuthenticated (BEFORE calling setUserFromToken):",
-      isAuthenticated,
-    );
-    console.log("5. Current user (BEFORE calling setUserFromToken):", user);
+    console.log("4. isAuthenticated (BEFORE logic):", isAuthenticated);
+    console.log("5. Current user (BEFORE logic):", user);
 
-    if (token) {
-      console.log("6. Calling setUserFromToken with received token...");
+    if (token && !isAuthenticated) {
+      console.log(
+        "6. Token exists and user is NOT yet authenticated. Calling setUserFromToken...",
+      );
       try {
         setUserFromToken(token);
         console.log("7. setUserFromToken called.");
-
-        // Không cần setTimeout nếu setUserFromToken đồng bộ hoặc bạn đã await trong đó
-        // Tuy nhiên, để đảm bảo không có race condition với context update:
-        // Có thể dùng một check sau khi setUserFromToken (nếu nó đồng bộ)
-        // hoặc biến setUserFromToken thành async và await nó.
-        // Giả sử setUserFromToken là đồng bộ (cập nhật state và cookie/localStorage ngay lập tức)
-        // thì chuyển hướng ngay sau đó là hợp lý.
-        // Nếu nó async và bạn đã làm cho nó async như tôi gợi ý trước đó, thì bạn nên `await` nó.
-
-        // Sau khi setUserFromToken được gọi (và giả định nó đã hoàn tất việc cập nhật context)
-        // Chúng ta có thể chuyển hướng ngay lập arguments đó.
-        console.log("8. Attempting redirect to:", redirectPath);
-        router.replace(redirectPath);
+        console.log(
+          "8. Authentication processed. Attempting to PUSH to:",
+          "/quan-ly", // Log rõ ràng đang push
+        );
+        router.push("/quan-ly");
       } catch (error) {
         console.error(
           "9. ERROR: Exception caught during setUserFromToken:",
@@ -60,12 +49,18 @@ export default function AuthProcessingPage() {
         });
         router.replace("/dang-nhap?error=auth_processing_failed");
       }
-    } else {
-      console.log("6. No token found. Redirecting to login page.");
+    } else if (token && isAuthenticated) {
+      console.log(
+        "6. Token exists and user is ALREADY authenticated. Attempting to REPLACE to:",
+        redirectPath, // Log rõ ràng đang replace
+      );
+      router.replace(redirectPath);
+    } else if (!token) {
+      console.log("6. No token found. Redirecting to login page with error.");
       router.replace("/dang-nhap?error=auth_failed_no_token");
     }
     console.log("--- AuthProcessingPage DEBUG END ---");
-  }, [searchParams, router, setUserFromToken, isAuthenticated, user, toast]); // Dependencies
+  }, [searchParams, router, setUserFromToken, isAuthenticated, user, toast]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-center p-4">
