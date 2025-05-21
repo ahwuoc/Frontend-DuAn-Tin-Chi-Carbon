@@ -22,7 +22,9 @@ import { Eye, EyeOff } from "lucide-react";
 import { signIn } from "next-auth/react";
 import loginTranslations from "./language";
 import { useLanguage } from "@/context/language-context";
-
+const public_url_google = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
+const public_redirect_google =
+  process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI ?? "";
 export default function LoginPage() {
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get("redirect");
@@ -67,8 +69,8 @@ export default function LoginPage() {
     setIsLoading(true);
 
     const params = new URLSearchParams({
-      client_id: NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-      redirect_uri: NEXT_PUBLIC_GOOGLE_REDIRECT_URI,
+      client_id: public_url_google,
+      redirect_uri: public_redirect_google,
       response_type: "code",
       scope: "openid email profile",
       access_type: "offline",

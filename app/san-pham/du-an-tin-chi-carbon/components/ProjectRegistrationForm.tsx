@@ -4,11 +4,25 @@ import React from "react";
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { CheckCircle, LogIn } from "lucide-react";
-import ConfettiEffect from "@/components/confetti-effect";
-
-import { useAuth } from "@/context/auth-context";
+import { useToast } from "@/hooks/use-toast";
 import { apiProjectCarbon } from "@/app/fetch/fetch.project-carbon";
 import {
   getUserFromLocalStorage,
@@ -17,7 +31,9 @@ import {
 
 import dynamic from "next/dynamic";
 import ProjectFormContent from "./ProjectFormContent";
-import { apiProjects } from "@/app/fetch/fetch.projects"; // Đây có thể là `apiProjectCarbon` nếu bạn dùng chung cho cả fetch và add
+import { apiProjects } from "@/app/fetch/fetch.projects";
+import ConfettiEffect from "@/components/confetti-effect";
+import { useAuth } from "@/context/auth-context";
 
 // Định nghĩa lại FormData để phản ánh cấu trúc chi tiết hơn
 interface FormData {
@@ -58,9 +74,7 @@ interface FormErrors {
 // Cập nhật interface Project để khớp với loại bạn đang fetch từ apiProjects.getAll()
 interface Project {
   _id: string;
-  name: string; // Giả định đây là tên loại dự án (ví dụ: "Lâm nghiệp", "Lúa")
-  // Bạn có thể thêm các trường khác nếu apiProjects.getAll() trả về
-  // Ví dụ: type: "forest" | "rice" | "biochar";
+  name: string;
 }
 
 export default function ProjectRegistrationForm() {
@@ -82,7 +96,7 @@ export default function ProjectRegistrationForm() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [kmlFile, setKmlFile] = useState<File | null>(null);
 
-  const [Projects, setProjects] = useState<Project[]>([]); // Danh sách các loại dự án từ API
+  const [Projects, setProjects] = useState<Project[]>([]);
 
   const [formData, setFormData] = useState<FormData>({
     name: user?.name || "",
@@ -129,7 +143,6 @@ export default function ProjectRegistrationForm() {
 
   React.useEffect(() => {
     const getProjectList = async () => {
-      // Giả định apiProjects.getAll() trả về danh sách các Project có _id và name
       const response = await apiProjects.getAll();
       if (response?.payload) {
         setProjects(response.payload);
@@ -216,7 +229,6 @@ export default function ProjectRegistrationForm() {
     }
 
     requiredFields.forEach((field) => {
-      // Sử dụng optional chaining và fallback rỗng cho an toàn
       if (!formData[field as keyof FormData]?.trim()) {
         errors[field] = `${getFieldLabel(field)} là bắt buộc`;
       }
@@ -312,20 +324,17 @@ export default function ProjectRegistrationForm() {
     setIsSubmitting(true);
 
     try {
-      // 1. Upload land documents
+      // 1. Upload land documents và định dạng lại (Xóa bỏ trường 'status')
       const landDocumentUrls = await Promise.all(
         uploadedFiles.map(async (file) => {
           const url = await uploadToCloudinary(file);
           return {
             name: file.name,
             url: url,
-            type: file.type, // Hoặc xác định type dựa trên extension
-            status: "pending", // Trạng thái mặc định khi tải lên
+            type: file.type, // Lấy loại tệp từ đối tượng File
           };
         }),
       );
-
-      // 2. Upload KML file
       let kmlFileData: { name: string; url: string } | null = null;
       if (kmlFile) {
         const kmlUrl = await uploadToCloudinary(kmlFile);
@@ -359,8 +368,8 @@ export default function ProjectRegistrationForm() {
         details.riceTerrain = formData.riceTerrain;
         details.riceClimate = formData.riceClimate;
         details.riceSoilType = formData.riceSoilType;
-        details.riceStartDate = formData.riceStartDate; // Có thể cần chuyển đổi sang Date object nếu backend yêu cầu
-        details.riceEndDate = formData.riceEndDate; // Có thể cần chuyển đổi sang Date object nếu backend yêu cầu
+        details.riceStartDate = formData.riceStartDate;
+        details.riceEndDate = formData.riceEndDate;
       } else if (activeTab === "biochar") {
         details.biocharRawMaterial = formData.biocharRawMaterial;
         details.biocharCarbonContent = formData.biocharCarbonContent;
@@ -371,32 +380,28 @@ export default function ProjectRegistrationForm() {
       // 5. Chuẩn bị dữ liệu để gửi đến backend
       const dataToSendToBackend: any = {
         name: formData.name, // Tên người đăng ký
-        organization: formData.organization || undefined, // Gửi undefined nếu trống
+        organization: formData.organization || undefined,
         phone: formData.phone,
         email: formData.email,
-        address: formData.address || undefined, // Gửi undefined nếu trống
-        projectType: activeTab, // "forest", "rice", "biochar"
-        details: details, // Đối tượng details đã được điền
+        address: formData.address || undefined,
+        projectType: activeTab,
+        details: details,
         status: "pending", // Trạng thái mặc định cho dự án mới đăng ký
-        additionalInfo: formData.additionalInfo || undefined, // Gửi undefined nếu trống
-        landDocuments: landDocumentUrls, // Mảng các đối tượng LandDocument
-        kmlFile: kmlFileData, // Đối tượng KmlFile hoặc null
-        userId: userIdFromLocalStorage, // Đảm bảo userId có giá trị
+        additionalInfo: formData.additionalInfo || undefined,
+        landDocuments: landDocumentUrls, // Mảng các đối tượng LandDocument ĐÃ ĐƯỢC ĐỊNH DẠNG LẠI
+        kmlFile: kmlFileData,
+        userId: userIdFromLocalStorage,
       };
 
-      // Logging dữ liệu trước khi gửi để kiểm tra
       console.log("Data to send to backend:", dataToSendToBackend);
 
-      // 6. Gọi API để gửi dữ liệu
       const result = await apiProjectCarbon.add(dataToSendToBackend);
       console.log("API submission result:", result);
 
-      // 7. Xử lý kết quả thành công
       setIsSuccess(true);
       setShowConfetti(true);
       setShowLoginPrompt(!isAuthenticated);
 
-      // Reset form data sau khi submit thành công
       if (!isAuthenticated) {
         setFormData({
           name: "",
@@ -425,10 +430,9 @@ export default function ProjectRegistrationForm() {
           additionalInfo: "",
         });
       } else {
-        // Nếu người dùng đã đăng nhập, chỉ reset các trường liên quan đến dự án
         setFormData((prev) => ({
           ...prev,
-          organization: "", // reset organization, address nếu người dùng đã đăng nhập
+          organization: "",
           address: "",
           forestLocation: "",
           forestArea: "",
