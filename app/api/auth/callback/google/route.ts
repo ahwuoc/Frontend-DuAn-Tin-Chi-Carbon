@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     const { access_token } = await tokenRes.json();
     if (!access_token) throw new Error("Google không trả access_token.");
     const serverRes = await fetch(
-      `${backendApiUrl}/login/email/${access_token}`,
+      `${backendApiUrl}/auth/login/email/${access_token}`,
     );
     if (!serverRes.ok) {
       const errorData = await serverRes.json();
