@@ -164,7 +164,7 @@ export default function Footer() {
                 <div className="text-gray-300">
                   <p>092.3370.804</p>
                   <p>085.8721.592</p>
-                  <p>036.4444.888</p>
+                  <p>082.220.8881</p>
                 </div>
               </li>
               <li className="flex items-start">

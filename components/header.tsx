@@ -126,7 +126,7 @@ export default function Header() {
             <div className="flex items-center space-x-4 text-sm">
               <div className="flex items-center">
                 <Phone className="h-4 w-4 mr-2" />
-                <span>092.3370.804 | 036.4444.888</span>
+                <span>092.3370.804 | 082.220.8881</span>
               </div>
               <div className="flex items-center">
                 <Mail className="h-4 w-4 mr-2" />
@@ -472,7 +472,7 @@ export default function Header() {
                 <div className="py-2 space-y-2">
                   <div className="flex items-center text-sm text-gray-700">
                     <Phone className="h-4 w-4 mr-2 text-green-600" />
-                    <span>092.3370.804 | 036.4444.888</span>
+                    <span>092.3370.804 | 082.220.8881</span>
                   </div>
                   <div className="flex items-center text-sm text-gray-700">
                     <Mail className="h-4 w-4 mr-2 text-green-600" />
