@@ -162,17 +162,12 @@ export default function CheckoutPage() {
       }));
     }
   }, [isAuthenticated, user]);
-
-  // Cập nhật note mỗi khi formData.fullName, formData.phone hoặc product thay đổi
-  // Điều này đảm bảo note luôn phản ánh thông tin mới nhất
   useEffect(() => {
     if (product) {
-      // Chỉ generate note khi product đã được tải
       const optimizedNote = generateOptimizedNote();
       setFormData((prev) => ({ ...prev, note: optimizedNote }));
     }
   }, [formData.fullName, formData.phone, product, generateOptimizedNote]);
-
   const validateForm = (): boolean => {
     const newErrors: Partial<FormData> = {};
     if (!formData.fullName.trim())
@@ -185,7 +180,6 @@ export default function CheckoutPage() {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {

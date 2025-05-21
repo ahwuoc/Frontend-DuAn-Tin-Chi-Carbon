@@ -1,25 +1,27 @@
-// AuthProcessingPage.tsx
-"use client";
+// app/auth-processing/AuthProcessingPage.tsx
+"use client"; // RẤT QUAN TRỌNG: Đây là một Client Component
 
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
-import { toast } from "@/hooks/use-toast"; // Đảm bảo import toast nếu bạn dùng nó
+import { toast } from "@/hooks/use-toast"; // Đảm bảo import toast nếu bạn dùng
 
 export default function AuthProcessingPage() {
   const router = useRouter();
+  // KHAI BÁO useSearchParams ở đây là OK
   const searchParams = useSearchParams();
   const { setUserFromToken, isAuthenticated, user } = useAuth(); // Lấy thêm isAuthenticated, user để debug
 
   useEffect(() => {
+    // TẤT CẢ LOGIC SỬ DỤNG searchParams VÀ router.replace PHẢI NẰM TRONG useEffect
     const token = searchParams.get("token");
     const redirectPath = searchParams.get("redirectPath") || "/quan-ly";
 
     console.log("--- AuthProcessingPage DEBUG START ---");
     console.log("1. useEffect is running.");
-    console.log("2. Token found in URL:", !!token); // Log true/false nếu có token
+    console.log("2. Token found in URL:", !!token);
     if (token) {
-      console.log("   Token length:", token.length); // Log độ dài token để đảm bảo không rỗng
+      console.log("   Token length:", token.length);
     }
     console.log("3. Redirect Path:", redirectPath);
     console.log(
@@ -33,40 +35,22 @@ export default function AuthProcessingPage() {
       try {
         setUserFromToken(token);
         console.log("7. setUserFromToken called.");
-        setTimeout(() => {
-          console.log(
-            "8. isAuthenticated (AFTER setUserFromToken & setTimeout):",
-            isAuthenticated,
-          );
-          console.log(
-            "9. Current user (AFTER setUserFromToken & setTimeout):",
-            user,
-          );
-          router.replace("/quan-ly"); // Chuyển hướng cứng để test
 
-          if (isAuthenticated) {
-            // Kiểm tra lại isAuthenticated sau khi state có thể đã cập nhật
-            console.log(
-              "10. Authentication successful. Redirecting to:",
-              redirectPath,
-            );
-            router.replace(redirectPath);
-          } else {
-            console.warn(
-              "10. isAuthenticated is still FALSE after setUserFromToken. Possible issue in auth-context.",
-            );
-            toast({
-              title: "Lỗi đăng nhập",
-              description:
-                "Không thể xác thực thông tin tài khoản. Vui lòng thử lại.",
-              variant: "destructive",
-            });
-            router.replace("/dang-nhap?error=auth_failed_context_issue");
-          }
-        }, 100); // Đợi 100ms
+        // Không cần setTimeout nếu setUserFromToken đồng bộ hoặc bạn đã await trong đó
+        // Tuy nhiên, để đảm bảo không có race condition với context update:
+        // Có thể dùng một check sau khi setUserFromToken (nếu nó đồng bộ)
+        // hoặc biến setUserFromToken thành async và await nó.
+        // Giả sử setUserFromToken là đồng bộ (cập nhật state và cookie/localStorage ngay lập tức)
+        // thì chuyển hướng ngay sau đó là hợp lý.
+        // Nếu nó async và bạn đã làm cho nó async như tôi gợi ý trước đó, thì bạn nên `await` nó.
+
+        // Sau khi setUserFromToken được gọi (và giả định nó đã hoàn tất việc cập nhật context)
+        // Chúng ta có thể chuyển hướng ngay lập arguments đó.
+        console.log("8. Attempting redirect to:", redirectPath);
+        router.replace(redirectPath);
       } catch (error) {
         console.error(
-          "11. ERROR: Exception caught during setUserFromToken:",
+          "9. ERROR: Exception caught during setUserFromToken:",
           error,
         );
         toast({
@@ -81,7 +65,7 @@ export default function AuthProcessingPage() {
       router.replace("/dang-nhap?error=auth_failed_no_token");
     }
     console.log("--- AuthProcessingPage DEBUG END ---");
-  }, [searchParams, router, setUserFromToken, isAuthenticated, user, toast]); // Thêm tất cả dependencies
+  }, [searchParams, router, setUserFromToken, isAuthenticated, user, toast]); // Dependencies
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-center p-4">
