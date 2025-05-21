@@ -7,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea"; // Giữ lại Textarea
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Card,
@@ -52,7 +52,6 @@ interface Product {
   title: string;
   description: string;
   price: number;
-  // type?: string; // Đã bỏ trường type
 }
 
 interface User {
@@ -78,7 +77,7 @@ export default function CheckoutPage() {
     email: "",
     phone: "",
     address: "",
-    note: "", // Khởi tạo note rỗng
+    note: "",
   });
 
   const [product, setProduct] = useState<Product | null>(null);
@@ -87,47 +86,50 @@ export default function CheckoutPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  // Hàm rút gọn chuỗi, loại bỏ dấu và ký tự không cần thiết, chuyển thành chữ hoa
+  const generateRandomString = useCallback((length: number) => {
+    let result = "";
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }, []);
+
   const cleanAndShortenString = useCallback(
     (str: string, maxLength: number) => {
       if (!str) return "";
       return str
-        .normalize("NFD") // Chuyển đổi Unicode sang dạng không dấu
-        .replace(/[\u0300-\u036f]/g, "") // Loại bỏ dấu
-        .replace(/[^a-zA-Z0-9\s]/g, "") // Chỉ giữ lại chữ cái, số, khoảng trắng
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9\s]/g, "")
         .trim()
-        .toUpperCase() // Chuyển thành chữ hoa
-        .replace(/\s+/g, "") // Loại bỏ tất cả khoảng trắng
-        .substring(0, maxLength); // Cắt theo độ dài tối đa
+        .toUpperCase()
+        .replace(/\s+/g, "")
+        .substring(0, maxLength);
     },
     [],
   );
 
-  // Hàm tạo nội dung ghi chú tối ưu (tên + sdt + tên sản phẩm)
-  const generateOptimizedNote = useCallback(() => {
-    if (!product) return "";
+  const generateOptimizedNote = useCallback(
+    (productName: string) => {
+      const MAX_NOTE_LENGTH = 25;
+      const RANDOM_PART_LENGTH = 5; // Độ dài của mã random, ví dụ 5 ký tự
 
-    // Giả định tổng độ dài tối đa là 25 ký tự
-    const MAX_NOTE_LENGTH = 25;
+      const cleanedProductName = cleanAndShortenString(
+        productName,
+        MAX_NOTE_LENGTH - RANDOM_PART_LENGTH - 1, // Giữ 1 ký tự cho dấu gạch ngang
+      );
+      const randomString = generateRandomString(RANDOM_PART_LENGTH);
 
-    // Rút gọn họ tên (VD: "NguyenVanA" -> 7 ký tự)
-    const shortenedFullName = cleanAndShortenString(formData.fullName, 7);
-    // Rút gọn số điện thoại (VD: "0912345678" -> 7 ký tự cuối)
-    const shortenedPhone = formData.phone ? formData.phone.slice(-7) : "";
-    // Rút gọn tên sản phẩm (VD: "KhoaHoc" -> 7 ký tự)
-    const shortenedProductName = cleanAndShortenString(product.name, 7);
+      // Kết hợp tên sản phẩm rút gọn và mã random
+      let note = `${cleanedProductName}-${randomString}`;
 
-    // Xây dựng nội dung ghi chú, đảm bảo có dấu gạch nối giữa các phần nếu chúng tồn tại
-    let noteParts: string[] = [];
-    if (shortenedFullName) noteParts.push(shortenedFullName);
-    if (shortenedPhone) noteParts.push(shortenedPhone);
-    if (shortenedProductName) noteParts.push(shortenedProductName);
-
-    const fullNote = noteParts.join("-"); // Nối các phần bằng dấu gạch ngang
-
-    // Đảm bảo tổng độ dài không vượt quá MAX_NOTE_LENGTH
-    return fullNote.substring(0, MAX_NOTE_LENGTH);
-  }, [formData.fullName, formData.phone, product, cleanAndShortenString]);
+      // Đảm bảo tổng độ dài không vượt quá MAX_NOTE_LENGTH
+      return note.substring(0, MAX_NOTE_LENGTH);
+    },
+    [cleanAndShortenString, generateRandomString],
+  );
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -135,7 +137,9 @@ export default function CheckoutPage() {
         const response = await apiProducts.getById(productId);
         if (response && response.payload) {
           setProduct(response.payload);
-          // Gán note sau khi có product, generateOptimizedNote sẽ được gọi ở useEffect riêng
+          // Tạo ghi chú ngay khi sản phẩm được tải
+          const optimizedNote = generateOptimizedNote(response.payload.name);
+          setFormData((prev) => ({ ...prev, note: optimizedNote }));
         } else {
           throw new Error("Không tìm thấy sản phẩm");
         }
@@ -149,7 +153,7 @@ export default function CheckoutPage() {
       }
     };
     fetchProduct();
-  }, [productId, toast]);
+  }, [productId, toast, generateOptimizedNote]);
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -162,12 +166,18 @@ export default function CheckoutPage() {
       }));
     }
   }, [isAuthenticated, user]);
-  useEffect(() => {
-    if (product) {
-      const optimizedNote = generateOptimizedNote();
-      setFormData((prev) => ({ ...prev, note: optimizedNote }));
-    }
-  }, [formData.fullName, formData.phone, product, generateOptimizedNote]);
+
+  // useEffect này không còn cần thiết nếu generateOptimizedNote chỉ dựa vào product.name
+  // và không phụ thuộc vào fullName/phone từ formData.
+  // Nếu bạn muốn note cập nhật khi người dùng thay đổi fullName/phone, hãy giữ nó.
+  // Trong trường hợp này, vì note chỉ dùng productName + random, useEffect này có thể loại bỏ.
+  // useEffect(() => {
+  //   if (product) {
+  //     const optimizedNote = generateOptimizedNote();
+  //     setFormData((prev) => ({ ...prev, note: optimizedNote }));
+  //   }
+  // }, [formData.fullName, formData.phone, product, generateOptimizedNote]);
+
   const validateForm = (): boolean => {
     const newErrors: Partial<FormData> = {};
     if (!formData.fullName.trim())
@@ -180,6 +190,7 @@ export default function CheckoutPage() {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
