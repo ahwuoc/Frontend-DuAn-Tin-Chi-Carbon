@@ -578,10 +578,18 @@ export default function RegistrationForm() {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-5 ">
         <h3 className="text-2xl font-bold text-gray-800 mb-6">
           Đăng ký tư vấn
         </h3>
+        <div className="flex">
+          <Link
+            href="/san-pham/du-an-tin-chi-carbon#dang-ky-du-an"
+            className="flex items-start justify-center space-x-1"
+          >
+            <p className="text-sm  text-gray-600">HOẶC ĐĂNG KÝ DỰ ÁN NGAY</p>
+          </Link>
+        </div>
 
         <div className="space-y-2">
           <Label
@@ -691,17 +699,6 @@ export default function RegistrationForm() {
             <p className="text-sm text-gray-600">
               Cam kết bảo mật thông tin cá nhân
             </p>
-          </div>
-          <div className="flex">
-            <Link
-              href="/san-pham/du-an-tin-chi-carbon#dang-ky-du-an"
-              className="flex items-start space-x-1"
-            >
-              <div className="bg-blue-100 p-1 rounded-full mt-0.5">
-                <ArrowRightCircle className="h-4 w-4 text-blue-600" />
-              </div>
-              <p className="text-sm text-gray-600">Đăng ký dự án ngay</p>
-            </Link>
           </div>
         </div>
 

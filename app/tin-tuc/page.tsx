@@ -15,6 +15,8 @@ import { useEffect, useRef, useState } from "react";
 import { apiNews, INews } from "@/app/fetch/fetch.news";
 import { formatDateUtil } from "../utils/common";
 import Link from "next/link";
+import DOMPurify from "dompurify"; // Import DOMPurify để làm sạch HTML
+
 export default function NewsPage() {
   const { t, language } = useLanguage();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -33,6 +35,7 @@ export default function NewsPage() {
       });
     }
   }, []);
+
   useEffect(() => {
     const fetchNews = async () => {
       setLoading(true);
@@ -53,7 +56,6 @@ export default function NewsPage() {
     fetchNews();
   }, []);
 
-
   if (loading) {
     return (
       <div className="container mx-auto py-10 px-4 text-center">
@@ -72,10 +74,40 @@ export default function NewsPage() {
       </div>
     );
   }
+
   const safeNews = Array.isArray(news) ? news : [];
-  const featuredNews = safeNews[0] ?? null;
-  const gridNews = safeNews.slice(1, 7);
-  const recentPosts = safeNews.slice(0, 4);
+  // Lấy tin tức nổi bật đầu tiên có trạng thái "published"
+  const featuredNews =
+    safeNews.find((item) => item.status === "published") ?? null;
+  // Lấy các tin tức khác cho phần lưới, bỏ qua tin tức nổi bật và chỉ lấy tin đã xuất bản
+  const gridNews = safeNews
+    .filter(
+      (item) => item.status === "published" && item._id !== featuredNews?._id,
+    )
+    .slice(0, 6);
+  // Lấy 4 bài viết gần đây nhất, chỉ lấy tin đã xuất bản
+  const recentPosts = safeNews
+    .filter((item) => item.status === "published")
+    .slice(0, 4);
+
+  /**
+   * Hàm làm sạch và render HTML từ Tiptap.
+   * Sử dụng DOMPurify để ngăn chặn các cuộc tấn công XSS.
+   * @param htmlContent Chuỗi HTML cần hiển thị.
+   * @returns Đối tượng có thuộc tính __html để sử dụng với dangerouslySetInnerHTML.
+   */
+  const renderRichText = (htmlContent: string | undefined) => {
+    // Đảm bảo htmlContent là một chuỗi trước khi xử lý
+    if (!htmlContent) {
+      return { __html: "" };
+    }
+    // Sử dụng DOMPurify để làm sạch HTML
+    // USE_PROFILES: { html: true } cho phép các thẻ HTML thông thường như p, strong, ul, li, v.v.
+    const cleanHtml = DOMPurify.sanitize(htmlContent, {
+      USE_PROFILES: { html: true },
+    });
+    return { __html: cleanHtml };
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -146,17 +178,26 @@ export default function NewsPage() {
                     </div>
                     <div className="flex items-center">
                       <User className="h-4 w-4 mr-2" />
-                      0
+                      {/* userId là null, hiển thị giá trị mặc định */}
+                      <span>Admin</span>
                     </div>
                   </div>
                   <h2 className="text-3xl font-bold mb-4 text-gray-800">
                     {featuredNews.title}
                   </h2>
-                  <p className="text-lg text-gray-600 mb-6">
-                    {featuredNews.content.substring(0, 150)}...
-                  </p>
+                  {/* Dùng dangerouslySetInnerHTML để render nội dung từ Tiptap */}
+                  <div
+                    // Thêm class 'prose' của Tailwind Typography để định dạng nội dung HTML
+                    className="text-lg text-gray-600 mb-6 prose max-w-none"
+                    dangerouslySetInnerHTML={renderRichText(
+                      featuredNews.content,
+                    )}
+                  />
                   <Link href={`/tin-tuc/${featuredNews._id}`}>
-                    <Button variant="link" className="text-green-600 p-0 hover:text-green-700">
+                    <Button
+                      variant="link"
+                      className="text-green-600 p-0 hover:text-green-700"
+                    >
                       Đọc thêm <ArrowRight className="ml-1 h-3 w-3" />
                     </Button>
                   </Link>
@@ -165,51 +206,61 @@ export default function NewsPage() {
 
               {/* News Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {Array.isArray(gridNews) && gridNews.map((newsItem: any, index) => (
-                  <Card
-                    key={index}
-                    className="hover:shadow-lg transition-shadow duration-300"
-                  >
-                    <div className="relative h-48">
-                      <Image
-                        src={
-                          newsItem.image ||
-                          "/placeholder.svg?height=192&width=400"
-                        }
-                        alt={newsItem.title}
-                        fill
-                        className="object-cover rounded-t-lg"
-                      />
-                    </div>
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center gap-4 mb-2 text-sm text-gray-500">
-                        <div className="flex items-center">
-                          <Calendar className="h-3 w-3 mr-1" />
-                          <span>{formatDateUtil(newsItem.createdAt)}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <User className="h-3 w-3 mr-1" />
-                          <span>Admin</span>
-                        </div>
+                {Array.isArray(gridNews) &&
+                  gridNews.map((newsItem: any, index) => (
+                    <Card
+                      key={index}
+                      className="hover:shadow-lg transition-shadow duration-300"
+                    >
+                      <div className="relative h-48">
+                        <Image
+                          src={
+                            newsItem.image ||
+                            "/placeholder.svg?height=192&width=400"
+                          }
+                          alt={newsItem.title}
+                          fill
+                          className="object-cover rounded-t-lg"
+                        />
                       </div>
-                      <CardTitle className="text-xl">
-                        {newsItem.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pb-2">
-                      <p className="text-gray-600">
-                        {newsItem.content.substring(0, 100)}...
-                      </p>
-                    </CardContent>
-                    <CardFooter>
-                      <Link href={`/tin-tuc/${newsItem._id}`}>
-                        <Button variant="link" className="text-green-600 p-0 hover:text-green-700">
-                          Đọc thêm <ArrowRight className="ml-1 h-3 w-3" />
-                        </Button>
-                      </Link>
-                    </CardFooter>
-                  </Card>
-                ))}
+                      <CardHeader className="pb-2">
+                        <div className="flex items-center gap-4 mb-2 text-sm text-gray-500">
+                          <div className="flex items-center">
+                            <Calendar className="h-3 w-3 mr-1" />
+                            <span>{formatDateUtil(newsItem.createdAt)}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <User className="h-3 w-3 mr-1" />
+                            <span>Admin</span>
+                          </div>
+                        </div>
+                        <CardTitle className="text-xl">
+                          {newsItem.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pb-2">
+                        {/* Dùng dangerouslySetInnerHTML để render nội dung tóm tắt đã cắt */}
+                        <div
+                          className="text-gray-600 prose-sm max-w-none" // prose-sm để định dạng nhỏ hơn
+                          dangerouslySetInnerHTML={renderRichText(
+                            newsItem.content
+                              ? newsItem.content.substring(0, 100) + "..."
+                              : "", // Đảm bảo content không phải undefined
+                          )}
+                        />
+                      </CardContent>
+                      <CardFooter>
+                        <Link href={`/tin-tuc/${newsItem._id}`}>
+                          <Button
+                            variant="link"
+                            className="text-green-600 p-0 hover:text-green-700"
+                          >
+                            Đọc thêm <ArrowRight className="ml-1 h-3 w-3" />
+                          </Button>
+                        </Link>
+                      </CardFooter>
+                    </Card>
+                  ))}
               </div>
 
               {/* Pagination */}
@@ -239,7 +290,6 @@ export default function NewsPage() {
                   {t("categories")}
                 </h3>
                 <div className="space-y-2">
-
                   {Array.from(new Set(news.map((n) => n.category))).map(
                     (category, index) => (
                       <div
@@ -260,31 +310,32 @@ export default function NewsPage() {
                   {t("recent_posts")}
                 </h3>
                 <div className="space-y-4">
-                  {Array.isArray(recentPosts) && recentPosts.map((post, index) => (
-                    <div key={index} className="flex gap-4">
-                      <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                        <Image
-                          src={
-                            post.image || "/placeholder.svg?height=80&width=80"
-                          }
-                          alt={post.title}
-                          fill
-                          className="object-cover"
-                        />
+                  {Array.isArray(recentPosts) &&
+                    recentPosts.map((post, index) => (
+                      <div key={index} className="flex gap-4">
+                        <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                          <Image
+                            src={
+                              post.image ||
+                              "/placeholder.svg?height=80&width=80"
+                            }
+                            alt={post.title}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div>
+                          <Link href={`/tin-tuc/${post._id}`}>
+                            <h4 className="font-medium text-gray-800 hover:text-green-600 transition-colors duration-200 cursor-pointer">
+                              {post.title}
+                            </h4>
+                            <p className="text-sm text-gray-500 mt-1">
+                              {formatDateUtil(post.createdAt)}
+                            </p>
+                          </Link>
+                        </div>
                       </div>
-                      <div>
-
-                        <Link href={`/tin-tuc/${post._id}`}>
-                          <h4 className="font-medium text-gray-800 hover:text-green-600 transition-colors duration-200 cursor-pointer">
-                            {post.title}
-                          </h4>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {formatDateUtil(post.createdAt)}
-                          </p>
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
 
