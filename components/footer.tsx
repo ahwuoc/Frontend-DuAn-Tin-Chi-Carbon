@@ -1,37 +1,47 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import Link from "next/link"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Facebook, Instagram, Linkedin, Mail, Phone, MapPin, ArrowRight, Send } from "lucide-react"
-import { useLanguage } from "@/context/language-context"
-import { useState } from "react"
+import Link from "next/link";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Facebook,
+  Instagram,
+  Linkedin,
+  Mail,
+  Phone,
+  MapPin,
+  ArrowRight,
+  Send,
+} from "lucide-react";
+import { useLanguage } from "@/context/language-context";
+import { useState } from "react";
 
 export default function Footer() {
-  const { language, t } = useLanguage()
-  const [email, setEmail] = useState("")
+  const { language, t } = useLanguage();
+  const [email, setEmail] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (email) {
       // Xử lý gửi email đăng ký
-      alert(t("newsletter_success"))
-      setEmail("")
+      alert(t("newsletter_success"));
+      setEmail("");
     }
-  }
+  };
 
   const quickLinks = [
     { name: t("home"), href: "/" },
     { name: t("about"), href: "/gioi-thieu" },
     { name: t("news"), href: "/tin-tuc" },
     { name: t("contact"), href: "/lien-he" },
-  ]
+  ];
 
   // Xác định tên công ty dựa trên ngôn ngữ
-  const companyName = language === "en" ? "Carbon Credits Vietnam" : t("company_name")
+  const companyName =
+    language === "en" ? "Carbon Credits Vietnam" : t("company_name");
 
   return (
     <footer className="bg-gray-900 text-white relative">
@@ -83,14 +93,20 @@ export default function Footer() {
             </h3>
             <div className="relative h-16 w-64 mb-6 bg-white rounded-md p-2">
               <Image
-                src={language === "en" ? "/images/logo-english.png" : "/images/logo-vietnamese.png"}
+                src={
+                  language === "en"
+                    ? "/images/logo-english.png"
+                    : "/images/logo-vietnamese.png"
+                }
                 alt={t("company_name")}
                 fill
                 className="object-contain object-left"
                 priority
               />
             </div>
-            <p className="text-gray-300 mb-6 leading-relaxed">{t("company_description")}</p>
+            <p className="text-gray-300 mb-6 leading-relaxed">
+              {t("company_description")}
+            </p>
             <div className="flex space-x-3">
               <a
                 href="https://www.facebook.com/tinchicarbonvn"
@@ -201,7 +217,9 @@ export default function Footer() {
             </ul>
             <div className="mt-6 pt-6 border-t border-gray-800">
               <Link href="/dang-ky-tu-van">
-                <Button className="bg-green-600 hover:bg-green-700 w-full">{t("contact_now")}</Button>
+                <Button className="bg-green-600 hover:bg-green-700 w-full">
+                  {t("contact_now")}
+                </Button>
               </Link>
             </div>
           </div>
@@ -210,13 +228,19 @@ export default function Footer() {
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm mb-4 md:mb-0">
-              © {new Date().getFullYear()} {t("company_name")}.{" " + t("copyright")}
+              © {new Date().getFullYear()} {t("company_name")}
             </p>
             <div className="flex space-x-4 text-sm text-gray-400">
-              <Link href="/chinh-sach-quyen-rieng-tu" className="hover:text-white transition-colors">
+              <Link
+                href="/chinh-sach-quyen-rieng-tu"
+                className="hover:text-white transition-colors"
+              >
                 {t("privacy_policy")}
               </Link>
-              <Link href="/dieu-khoan-su-dung" className="hover:text-white transition-colors">
+              <Link
+                href="/dieu-khoan-su-dung"
+                className="hover:text-white transition-colors"
+              >
                 {t("terms_of_use")}
               </Link>
             </div>
@@ -224,5 +248,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

@@ -190,7 +190,9 @@ export default function NewsPage() {
                     // Thêm class 'prose' của Tailwind Typography để định dạng nội dung HTML
                     className="text-lg text-gray-600 mb-6 prose max-w-none"
                     dangerouslySetInnerHTML={renderRichText(
-                      featuredNews.content,
+                      featuredNews.content
+                        ? featuredNews.content.substring(0, 250) + "..."
+                        : "",
                     )}
                   />
                   <Link href={`/tin-tuc/${featuredNews._id}`}>
