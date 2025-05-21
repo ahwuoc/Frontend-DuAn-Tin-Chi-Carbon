@@ -19,14 +19,34 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle } from "lucide-react"; // Chỉ giữ lại CheckCircle icon
+import { CheckCircle, Eye } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiProjects } from "../../../fetch/fetch.projects";
+import { formatDateUtil } from "@/app/utils/common";
+import {
+  getProjectTypeText,
+  getStatusBadge,
+  getStatusText,
+} from "@/app/components/projects/project";
 
-// Cập nhật interface IProject để phù hợp với dữ liệu bạn cung cấp
+export type ProjectStatus =
+  | "surveying"
+  | "designing"
+  | "verifying"
+  | "implementing"
+  | "credit_issuing"
+  | "trading";
+
 export interface IProject {
   _id: string;
-  name: string; // Tên dự án
+  name: string;
   organization: string;
   phone: string;
   email: string;
@@ -43,7 +63,7 @@ export interface IProject {
   userId: {
     _id: string;
     email: string;
-    name: string; // Tên người dùng/người gửi
+    name: string;
     role: string;
     avatar: string;
     provider: string;
@@ -55,7 +75,7 @@ export interface IProject {
   createdAt: string;
   updatedAt: string;
   __v: number;
-  status?: "pending" | "active" | "completed" | "archived";
+  status?: ProjectStatus;
   details?: {
     forestLocation?: string;
     forestArea?: string;
@@ -77,6 +97,18 @@ export default function AdminProjectCarbonPage() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<IProject | null>(null);
+
+  const projectStatusOrder: ProjectStatus[] = [
+    "surveying",
+    "designing",
+    "verifying",
+    "implementing",
+    "credit_issuing",
+    "trading",
+  ];
+
   const fetchProjects = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -85,7 +117,10 @@ export default function AdminProjectCarbonPage() {
       if (Array.isArray(response.payload)) {
         const formattedProjects = response.payload.map((project: IProject) => ({
           ...project,
-          status: project.status || "pending",
+          status:
+            project.status && projectStatusOrder.includes(project.status)
+              ? project.status
+              : "surveying",
           carbonCredits: project.carbonCredits || 0,
           carbonCreditsTotal: project.carbonCreditsTotal || 0,
           progress: project.progress || 0,
@@ -111,88 +146,54 @@ export default function AdminProjectCarbonPage() {
     fetchProjects();
   }, [fetchProjects]);
 
-  const handleApproveProject = async (id: string) => {
-    if (!confirm("Bạn có chắc chắn muốn phê duyệt dự án này không?")) return;
+  const handleAdvanceProjectStatus = async (project: IProject) => {
+    const currentIndex = projectStatusOrder.indexOf(
+      project.status || "surveying",
+    );
+    const nextStatusIndex = currentIndex + 1;
+
+    if (nextStatusIndex >= projectStatusOrder.length) {
+      toast({
+        title: "Thông báo",
+        description: "Dự án đã ở trạng thái cuối cùng.",
+        variant: "default",
+      });
+      return;
+    }
+
+    const nextStatus = projectStatusOrder[nextStatusIndex];
+
+    if (
+      !confirm(
+        `Bạn có chắc chắn muốn chuyển dự án "${project.name}" sang trạng thái "${getStatusText(nextStatus)}"`,
+      )
+    )
+      return;
+
     try {
-      // Giả định apiProjects.update có endpoint để cập nhật trạng thái
-      await apiProjects.update(id, { status: "active" });
+      await apiProjects.update(project._id, { status: nextStatus });
 
       setProjects((prev) =>
-        prev.map((project) =>
-          project._id === id ? { ...project, status: "active" } : project,
+        prev.map((p) =>
+          p._id === project._id ? { ...p, status: nextStatus } : p,
         ),
       );
       toast({
         title: "Thành công",
-        description: "Dự án đã được phê duyệt!",
+        description: `Dự án "${project.name}" đã được chuyển sang trạng thái "${getStatusText(nextStatus)}"`,
       });
     } catch (err) {
       toast({
         title: "Lỗi",
-        description: "Không thể phê duyệt dự án! Vui lòng thử lại.",
+        description: `Không thể chuyển trạng thái dự án "${project.name}"! Vui lòng thử lại.`,
         variant: "destructive",
       });
     }
   };
 
-  // Xóa hàm handleDeleteProject
-  // const handleDeleteProject = async (id: string) => {
-  //   if (!confirm("Bạn có chắc chắn muốn xóa dự án này không?")) return;
-  //   try {
-  //     await apiProjects.delete(id);
-  //     setProjects((prev) => prev.filter((project) => project._id !== id));
-  //     toast({
-  //       title: "Thành công",
-  //       description: "Xóa dự án thành công!",
-  //     });
-  //   } catch (err) {
-  //     toast({
-  //       title: "Lỗi",
-  //       description: "Không thể xóa dự án! Vui lòng thử lại.",
-  //       variant: "destructive",
-  //     });
-  //   }
-  // };
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      try {
-        const isoDate = new Date(dateString + "Z");
-        if (!isNaN(isoDate.getTime())) {
-          return isoDate.toLocaleDateString("vi-VN", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          });
-        }
-      } catch (e) {}
-      return "Ngày không hợp lệ";
-    }
-    return date.toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  };
-
-  const getStatusBadge = (status: IProject["status"]) => {
-    const styles = {
-      pending: "bg-yellow-100 text-yellow-800",
-      active: "bg-green-100 text-green-800",
-      completed: "bg-blue-100 text-blue-800",
-      archived: "bg-gray-100 text-gray-800",
-    };
-    const text =
-      status === "pending"
-        ? "Chờ duyệt"
-        : status === "active"
-          ? "Hoạt động"
-          : status === "completed"
-            ? "Hoàn thành"
-            : "Lưu trữ";
-    return <Badge className={styles[status || "pending"]}>{text}</Badge>;
+  const handleViewProject = (project: IProject) => {
+    setSelectedProject(project);
+    setIsModalOpen(true);
   };
 
   if (loading) {
@@ -261,7 +262,9 @@ export default function AdminProjectCarbonPage() {
                         >
                           {project.userId?.name || "N/A"}
                         </TableCell>
-                        <TableCell>{project.projectType || "N/A"}</TableCell>
+                        <TableCell>
+                          {getProjectTypeText(project.projectType)}
+                        </TableCell>
                         <TableCell>{getStatusBadge(project.status)}</TableCell>
                         <TableCell>
                           {project.details?.forestLocation ||
@@ -286,32 +289,33 @@ export default function AdminProjectCarbonPage() {
                             ? `${project.progress}%`
                             : "N/A"}
                         </TableCell>
-                        <TableCell>{formatDate(project.createdAt)}</TableCell>
+                        <TableCell>
+                          {formatDateUtil(project.createdAt)}
+                        </TableCell>
                         <TableCell>
                           <div className="flex gap-2">
-                            {project.status === "pending" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewProject(project)}
+                              className="hover:bg-blue-50 hover:text-blue-600"
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              Xem
+                            </Button>
+                            {project.status !== "trading" && (
                               <Button
                                 variant="outline"
                                 size="sm"
                                 className="hover:bg-green-50 hover:text-green-600"
                                 onClick={() =>
-                                  handleApproveProject(project._id)
+                                  handleAdvanceProjectStatus(project)
                                 }
                               >
                                 <CheckCircle className="w-4 h-4 mr-1" />
-                                Phê duyệt
+                                Chuyển trạng thái
                               </Button>
                             )}
-                            {/* Nút "Xóa" đã được loại bỏ */}
-                            {/* <Button
-                              variant="outline"
-                              size="sm"
-                              className="hover:bg-red-50 hover:text-red-600"
-                              onClick={() => handleDeleteProject(project._id)}
-                            >
-                              <Trash2 className="w-4 h-4 mr-1" />
-                              Xóa
-                            </Button> */}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -323,6 +327,212 @@ export default function AdminProjectCarbonPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[700px]">
+          <DialogHeader>
+            <DialogTitle>Chi tiết Dự án Carbon</DialogTitle>
+            <DialogDescription>
+              Thông tin chi tiết về dự án được gửi bởi người dùng.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedProject && (
+            <div className="grid gap-4 py-4 max-h-[80vh] overflow-y-auto">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <p className="col-span-1 text-sm text-gray-500">
+                  Tên người gửi:
+                </p>
+                <p className="col-span-3 text-sm font-semibold">
+                  {selectedProject.userId?.name || "N/A"}
+                </p>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <p className="col-span-1 text-sm text-gray-500">Email:</p>
+                <p className="col-span-3 text-sm">
+                  {selectedProject.userId?.email || "N/A"}
+                </p>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <p className="col-span-1 text-sm text-gray-500">Tổ chức:</p>
+                <p className="col-span-3 text-sm">
+                  {selectedProject.organization || "N/A"}
+                </p>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <p className="col-span-1 text-sm text-gray-500">
+                  Số điện thoại:
+                </p>
+                <p className="col-span-3 text-sm">
+                  {selectedProject.phone || "N/A"}
+                </p>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <p className="col-span-1 text-sm text-gray-500">Loại dự án:</p>
+                <p className="col-span-3 text-sm font-semibold">
+                  {getProjectTypeText(selectedProject.projectType)}
+                </p>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <p className="col-span-1 text-sm text-gray-500">Trạng thái:</p>
+                <p className="col-span-3 text-sm">
+                  {getStatusBadge(selectedProject.status)}
+                </p>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <p className="col-span-1 text-sm text-gray-500">Địa chỉ:</p>
+                <p className="col-span-3 text-sm">
+                  {selectedProject.address || "N/A"}
+                </p>
+              </div>
+              {selectedProject.details?.forestLocation && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <p className="col-span-1 text-sm text-gray-500">
+                    Vị trí rừng:
+                  </p>
+                  <p className="col-span-3 text-sm">
+                    {selectedProject.details.forestLocation}
+                  </p>
+                </div>
+              )}
+              {selectedProject.details?.forestArea && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <p className="col-span-1 text-sm text-gray-500">
+                    Diện tích rừng:
+                  </p>
+                  <p className="col-span-3 text-sm">
+                    {selectedProject.details.forestArea} ha
+                  </p>
+                </div>
+              )}
+              {selectedProject.details?.treeSpecies && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <p className="col-span-1 text-sm text-gray-500">Loại cây:</p>
+                  <p className="col-span-3 text-sm">
+                    {selectedProject.details.treeSpecies}
+                  </p>
+                </div>
+              )}
+              {selectedProject.details?.plantingAge && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <p className="col-span-1 text-sm text-gray-500">
+                    Tuổi cây trồng:
+                  </p>
+                  <p className="col-span-3 text-sm">
+                    {selectedProject.details.plantingAge}
+                  </p>
+                </div>
+              )}
+              {selectedProject.details?.averageHeight && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <p className="col-span-1 text-sm text-gray-500">
+                    Chiều cao trung bình:
+                  </p>
+                  <p className="col-span-3 text-sm">
+                    {selectedProject.details.averageHeight}
+                  </p>
+                </div>
+              )}
+              {selectedProject.details?.averageCircumference && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <p className="col-span-1 text-sm text-gray-500">
+                    Chu vi trung bình:
+                  </p>
+                  <p className="col-span-3 text-sm">
+                    {selectedProject.details.averageCircumference}
+                  </p>
+                </div>
+              )}
+              {selectedProject.details?.previousDeforestation && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <p className="col-span-1 text-sm text-gray-500">
+                    Phá rừng trước đó:
+                  </p>
+                  <p className="col-span-3 text-sm">
+                    {selectedProject.details.previousDeforestation}
+                  </p>
+                </div>
+              )}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <p className="col-span-1 text-sm text-gray-500">
+                  Thông tin bổ sung:
+                </p>
+                <p className="col-span-3 text-sm">
+                  {selectedProject.additionalInfo || "N/A"}
+                </p>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <p className="col-span-1 text-sm text-gray-500">
+                  Tín chỉ Carbon:
+                </p>
+                <p className="col-span-3 text-sm">
+                  {selectedProject.carbonCredits !== undefined &&
+                  selectedProject.carbonCreditsTotal !== undefined
+                    ? `${selectedProject.carbonCredits.toLocaleString()} / ${selectedProject.carbonCreditsTotal.toLocaleString()} tấn`
+                    : selectedProject.carbonCredits !== undefined
+                      ? `${selectedProject.carbonCredits.toLocaleString()} tấn`
+                      : "N/A"}
+                </p>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <p className="col-span-1 text-sm text-gray-500">Tiến độ:</p>
+                <p className="col-span-3 text-sm">
+                  {selectedProject.progress !== undefined
+                    ? `${selectedProject.progress}%`
+                    : "N/A"}
+                </p>
+              </div>
+              {selectedProject.landDocuments &&
+                selectedProject.landDocuments.length > 0 && (
+                  <div className="grid grid-cols-4 items-start gap-4">
+                    <p className="col-span-1 text-sm text-gray-500">
+                      Tài liệu đất đai:
+                    </p>
+                    <div className="col-span-3 flex flex-col gap-2">
+                      {selectedProject.landDocuments.map((doc, index) => (
+                        <a
+                          key={index}
+                          href={doc.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline text-sm"
+                        >
+                          {doc.name || `Tài liệu ${index + 1}`}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              {selectedProject.kmlFile && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <p className="col-span-1 text-sm text-gray-500">File KML:</p>
+                  <a
+                    href={selectedProject.kmlFile.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="col-span-3 text-blue-600 hover:underline text-sm"
+                  >
+                    {selectedProject.kmlFile.name || "Tải xuống file KML"}
+                  </a>
+                </div>
+              )}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <p className="col-span-1 text-sm text-gray-500">Ngày tạo:</p>
+                <p className="col-span-3 text-sm">
+                  {formatDateUtil(selectedProject.createdAt)}
+                </p>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <p className="col-span-1 text-sm text-gray-500">
+                  Ngày cập nhật:
+                </p>
+                <p className="col-span-3 text-sm">
+                  {formatDateUtil(selectedProject.updatedAt)}
+                </p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

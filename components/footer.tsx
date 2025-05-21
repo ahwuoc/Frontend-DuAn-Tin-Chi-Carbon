@@ -46,8 +46,6 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white relative">
       <div className="absolute top-0 left-0 right-0 h-1 bg-green-600"></div>
-
-      {/* Newsletter Section */}
       <div className="bg-green-600 py-12 relative">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
