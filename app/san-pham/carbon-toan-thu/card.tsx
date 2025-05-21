@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CheckCircle } from "lucide-react";
 import { apiProducts } from "../../fetch/fetch.products";
 import { subscriptionTierMap } from "../utils/common";
+
 interface Product {
   _id: string;
   subscriptionTier: "free" | "enterprise" | "expert" | "research" | string; // Giữ nguyên type string nếu có thể có giá trị khác
@@ -25,10 +26,33 @@ export default function CarbonCard() {
     const fetchProducts = async () => {
       try {
         const response = await apiProducts.getProducts("carbon_credits");
-        const productData = response.payload;
+        let productData = response.payload; // Sử dụng let để có thể gán lại
 
         if (Array.isArray(productData)) {
-          setProducts(productData);
+          // Lọc bỏ gói "free" nếu bạn đã xóa nó khỏi API hoặc muốn bỏ qua nó
+          productData = productData.filter(
+            (p) => p.subscriptionTier !== "free",
+          );
+
+          // --- Logic sắp xếp sản phẩm được cập nhật ---
+          const sortedProducts = productData.sort((a, b) => {
+            // Định nghĩa thứ tự ưu tiên cho từng gói
+            const order = {
+              enterprise: 1, // Enterprise: đầu tiên
+              research: 2, // Research: thứ hai (ở giữa trong 3 gói)
+              expert: 3, // Expert: thứ ba (cuối cùng bên phải)
+            };
+
+            const orderA =
+              order[a.subscriptionTier as keyof typeof order] || 99; // 99 cho các loại không xác định
+            const orderB =
+              order[b.subscriptionTier as keyof typeof order] || 99;
+
+            return orderA - orderB;
+          });
+          // --- Kết thúc logic sắp xếp ---
+
+          setProducts(sortedProducts);
         } else {
           setError("Dữ liệu sản phẩm không đúng định dạng.");
         }
@@ -67,7 +91,10 @@ export default function CarbonCard() {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+    // Điều chỉnh grid để phù hợp với 3 cột chính, và có thể căn giữa
+    // grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3
+    // md:grid-cols-3 đã đủ để hiện 3 cột trên màn hình trung bình trở lên
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
       {products.map((product) => {
         const {
           _id,
