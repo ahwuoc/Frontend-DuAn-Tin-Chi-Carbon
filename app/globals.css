@@ -28,7 +28,13 @@
     --chart-4: 222 76.2% 36.3%;
     --chart-5: 249 76.2% 36.3%;
 }
+.image-center-wrapper {
+    @apply text-center my-4;
+}
 
+.image-center-wrapper img {
+    @apply inline-block max-w-full h-auto rounded-lg;
+}
 .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
