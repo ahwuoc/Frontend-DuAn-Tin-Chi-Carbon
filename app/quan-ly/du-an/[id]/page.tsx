@@ -18,7 +18,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge"; // Cần Badge cho getStatusBadge
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -41,7 +41,7 @@ import {
   Leaf,
   MapPin,
   Calendar,
-  Clock, // Cần Clock cho getStatusBadge
+  Clock,
   FileText,
   BarChart3,
   Upload,
@@ -54,6 +54,7 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
+import { useLanguage } from "@/context/language-context"; // Import useLanguage hook
 
 // NHẬP CÁC KIỂU DỮ LIỆU CƠ BẢN
 import {
@@ -68,11 +69,15 @@ import {
   ProjectStatus,
   getStatusText,
   getStatusBadge,
-  getProjectTypeText,
+  getProjectTypeText, // Keeping these for consistency, though getStatusBadge/getProjectTypeText should probably be translated
 } from "@/app/components/projects/project";
+import projectDetailPageTranslations from "./language-page";
+
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { language } = useLanguage(); // Get current language
+
   const [project, setProject] = useState<IProject | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
@@ -84,6 +89,7 @@ export default function ProjectDetailPage() {
     "landDocument" | "kmlFile"
   >("landDocument");
 
+  // These might be better to be translated directly if used as labels/strings
   const projectStatusOrder: ProjectStatus[] = [
     "surveying",
     "designing",
@@ -124,7 +130,10 @@ export default function ProjectDetailPage() {
 
   const handleUploadFile = async () => {
     if (!selectedFile || !project?._id) {
-      setUploadError("Vui lòng chọn một tệp để tải lên.");
+      setUploadError(
+        projectDetailPageTranslations.documentsTab.uploadNewFileCard
+          .uploadError[language],
+      );
       return;
     }
 
@@ -162,13 +171,22 @@ export default function ProjectDetailPage() {
           }));
           setUploadSuccess(true);
           setSelectedFile(null);
-          alert("Tài liệu đất đai đã được tải lên thành công!");
+          alert(
+            projectDetailPageTranslations.documentsTab.uploadNewFileCard
+              .uploadSuccessMessage[language],
+          );
         } else {
-          setUploadError("Lỗi khi cập nhật dự án với tài liệu đất đai.");
+          setUploadError(
+            projectDetailPageTranslations.documentsTab.uploadNewFileCard
+              .updateProjectError[language],
+          );
         }
       } else if (fileTypeToUpload === "kmlFile") {
         if (!selectedFile.name.toLowerCase().endsWith(".kml")) {
-          setUploadError("Vui lòng chọn tệp KML hợp lệ (.kml).");
+          setUploadError(
+            projectDetailPageTranslations.documentsTab.uploadNewFileCard
+              .invalidKml[language],
+          );
           setUploading(false);
           return;
         }
@@ -190,13 +208,22 @@ export default function ProjectDetailPage() {
           }));
           setUploadSuccess(true);
           setSelectedFile(null);
-          alert("Tệp KML đã được tải lên thành công!");
+          alert(
+            projectDetailPageTranslations.documentsTab.uploadNewFileCard
+              .uploadSuccessMessage[language],
+          );
         } else {
-          setUploadError("Lỗi khi cập nhật dự án với tệp KML.");
+          setUploadError(
+            projectDetailPageTranslations.documentsTab.uploadNewFileCard
+              .updateKmlError[language],
+          );
         }
       }
     } catch (error) {
-      setUploadError("Lỗi khi tải tệp lên.");
+      setUploadError(
+        projectDetailPageTranslations.documentsTab.uploadNewFileCard
+          .uploadFailure[language],
+      );
       console.error("Lỗi tải tài liệu:", error);
     } finally {
       setUploading(false);
@@ -208,7 +235,8 @@ export default function ProjectDetailPage() {
 
     if (
       !confirm(
-        "Bạn có chắc chắn muốn xóa tài liệu này không? Hành động này không thể hoàn tác.",
+        projectDetailPageTranslations.documentsTab.landDocumentsCard
+          .deleteConfirm[language],
       )
     ) {
       return;
@@ -228,13 +256,22 @@ export default function ProjectDetailPage() {
             (response.payload as IProject).landDocuments ||
             updatedLandDocuments,
         }));
-        alert("Tài liệu đã được xóa thành công!");
+        alert(
+          projectDetailPageTranslations.documentsTab.landDocumentsCard
+            .deleteSuccess[language],
+        );
       } else {
-        alert("Lỗi khi xóa tài liệu.");
+        alert(
+          projectDetailPageTranslations.documentsTab.landDocumentsCard
+            .deleteError[language],
+        );
         console.error("Lỗi khi xóa tài liệu:", response);
       }
     } catch (error) {
-      alert("Đã xảy ra lỗi khi xóa tài liệu.");
+      alert(
+        projectDetailPageTranslations.documentsTab.landDocumentsCard
+          .deleteGeneralError[language],
+      );
       console.error("Lỗi xóa tài liệu:", error);
     }
   };
@@ -244,7 +281,9 @@ export default function ProjectDetailPage() {
 
     if (
       !confirm(
-        "Bạn có chắc chắn muốn xóa tệp KML này không? Hành động này không thể hoàn tác.",
+        projectDetailPageTranslations.documentsTab.kmlFileCard.deleteConfirm[
+          language
+        ],
       )
     ) {
       return;
@@ -260,13 +299,24 @@ export default function ProjectDetailPage() {
           ...(prevProject as IProject),
           kmlFile: (response.payload as IProject).kmlFile || null,
         }));
-        alert("Tệp KML đã được xóa thành công!");
+        alert(
+          projectDetailPageTranslations.documentsTab.kmlFileCard.deleteSuccess[
+            language
+          ],
+        );
       } else {
-        alert("Lỗi khi xóa tệp KML.");
+        alert(
+          projectDetailPageTranslations.documentsTab.kmlFileCard.deleteError[
+            language
+          ],
+        );
         console.error("Lỗi khi xóa tệp KML:", response);
       }
     } catch (error) {
-      alert("Đã xảy ra lỗi khi xóa tệp KML.");
+      alert(
+        projectDetailPageTranslations.documentsTab.kmlFileCard
+          .deleteGeneralError[language],
+      );
       console.error("Lỗi xóa tệp KML:", error);
     }
   };
@@ -296,14 +346,19 @@ export default function ProjectDetailPage() {
   if (!project) {
     return (
       <div className="container mx-auto py-10 px-4 text-center">
-        <h2 className="text-2xl font-bold mb-4">Không tìm thấy dự án</h2>
+        <h2 className="text-2xl font-bold mb-4">
+          {projectDetailPageTranslations.projectNotFound.title[language]}
+        </h2>
         <p className="text-gray-500 mb-6">
-          Dự án bạn đang tìm kiếm không tồn tại hoặc bạn không có quyền truy
-          cập.
+          {projectDetailPageTranslations.projectNotFound.message[language]}
         </p>
         <Button onClick={() => router.push("/quan-ly")}>
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Quay lại trang quản lý
+          {
+            projectDetailPageTranslations.projectNotFound.backToManagement[
+              language
+            ]
+          }
         </Button>
       </div>
     );
@@ -319,7 +374,7 @@ export default function ProjectDetailPage() {
           className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
-          Quay lại trang quản lý
+          {projectDetailPageTranslations.backToManagementLink[language]}
         </Link>
       </div>
 
@@ -328,11 +383,13 @@ export default function ProjectDetailPage() {
           <ProjectIcon type={project.projectType} />
           <div className="ml-3">
             <h1 className="text-3xl font-bold">
-              Dự án {getProjectTypeText(project.projectType)} của{" "}
-              {project.name}{" "}
+              {projectDetailPageTranslations.projectTitle[language](
+                getProjectTypeText(project.projectType),
+                project.name,
+              )}
             </h1>
             <p className="text-gray-500">
-              Đăng ký ngày:{" "}
+              {projectDetailPageTranslations.registrationDate[language]}{" "}
               {formatDateUtil(project.createdAt || new Date().toISOString())}
             </p>
           </div>
@@ -346,31 +403,42 @@ export default function ProjectDetailPage() {
         <TabsList className="grid grid-cols-3 mb-8">
           <TabsTrigger value="overview">
             <BarChart3 className="w-4 h-4 mr-2" />
-            Tổng quan
+            {projectDetailPageTranslations.tabs.overview.label[language]}
           </TabsTrigger>
           <TabsTrigger value="documents">
             <FileText className="w-4 h-4 mr-2" />
-            Tài liệu
+            {projectDetailPageTranslations.tabs.documents.label[language]}
           </TabsTrigger>
           <TabsTrigger value="activities">
             <Clock className="w-4 h-4 mr-2" />
-            Hoạt động
+            {projectDetailPageTranslations.tabs.activities.label[language]}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Thông tin dự án</CardTitle>
+              <CardTitle>
+                {
+                  projectDetailPageTranslations.overviewTab.projectInfoCard
+                    .title[language]
+                }
+              </CardTitle>
               <CardDescription>
-                Chi tiết về dự án tín chỉ carbon
+                {
+                  projectDetailPageTranslations.overviewTab.projectInfoCard
+                    .description[language]
+                }
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    Loại dự án
+                    {
+                      projectDetailPageTranslations.overviewTab.projectInfoCard
+                        .projectTypeLabel[language]
+                    }
                   </h3>
                   <p className="font-medium">
                     {getProjectTypeText(project.projectType)}
@@ -381,7 +449,10 @@ export default function ProjectDetailPage() {
                   <>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Địa điểm rừng
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectInfoCard.fields.forestLocation.vi
+                        }
                       </h3>
                       <p className="font-medium flex items-center">
                         <MapPin className="w-4 h-4 mr-1 text-gray-400" />
@@ -390,7 +461,10 @@ export default function ProjectDetailPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Diện tích rừng
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectInfoCard.fields.forestArea.vi
+                        }
                       </h3>
                       <p className="font-medium">
                         {project.details?.forestArea || "N/A"} ha
@@ -398,7 +472,10 @@ export default function ProjectDetailPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Loài cây
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectInfoCard.fields.treeSpecies.vi
+                        }
                       </h3>
                       <p className="font-medium">
                         {project.details?.treeSpecies || "N/A"}
@@ -406,7 +483,10 @@ export default function ProjectDetailPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Tuổi cây trồng
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectInfoCard.fields.plantingAge.vi
+                        }
                       </h3>
                       <p className="font-medium">
                         {project.details?.plantingAge || "N/A"}
@@ -414,7 +494,10 @@ export default function ProjectDetailPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Chiều cao trung bình
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectInfoCard.fields.averageHeight.vi
+                        }
                       </h3>
                       <p className="font-medium">
                         {project.details?.averageHeight || "N/A"}
@@ -422,7 +505,10 @@ export default function ProjectDetailPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Chu vi trung bình
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectInfoCard.fields.averageCircumference.vi
+                        }
                       </h3>
                       <p className="font-medium">
                         {project.details?.averageCircumference || "N/A"}
@@ -430,16 +516,27 @@ export default function ProjectDetailPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Lịch sử chặt phá
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectInfoCard.fields.previousDeforestation.vi
+                        }
                       </h3>
                       <p className="font-medium">
                         {project.details?.previousDeforestation === "no"
-                          ? "Không"
+                          ? projectDetailPageTranslations.overviewTab
+                              .projectInfoCard.fields
+                              .previousDeforestationOptions.no[language]
                           : project.details?.previousDeforestation === "yes"
-                            ? "Có"
+                            ? projectDetailPageTranslations.overviewTab
+                                .projectInfoCard.fields
+                                .previousDeforestationOptions.yes[language]
                             : project.details?.previousDeforestation ===
                                 "unknown"
-                              ? "Không rõ"
+                              ? projectDetailPageTranslations.overviewTab
+                                  .projectInfoCard.fields
+                                  .previousDeforestationOptions.unknown[
+                                  language
+                                ]
                               : "N/A"}
                       </p>
                     </div>
@@ -450,7 +547,10 @@ export default function ProjectDetailPage() {
                   <>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Địa điểm lúa gạo
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectInfoCard.fields.riceLocation.vi
+                        }
                       </h3>
                       <p className="font-medium flex items-center">
                         <MapPin className="w-4 h-4 mr-1 text-gray-400" />
@@ -459,7 +559,10 @@ export default function ProjectDetailPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Diện tích lúa gạo
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectInfoCard.fields.riceArea.vi
+                        }
                       </h3>
                       <p className="font-medium">
                         {project.details?.riceArea || "N/A"} ha
@@ -467,7 +570,10 @@ export default function ProjectDetailPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Địa hình
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectInfoCard.fields.riceTerrain.vi
+                        }
                       </h3>
                       <p className="font-medium">
                         {project.details?.riceTerrain || "N/A"}
@@ -475,7 +581,10 @@ export default function ProjectDetailPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Khí hậu
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectInfoCard.fields.riceClimate.vi
+                        }
                       </h3>
                       <p className="font-medium">
                         {project.details?.riceClimate || "N/A"}
@@ -483,7 +592,10 @@ export default function ProjectDetailPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Loại đất
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectInfoCard.fields.riceSoilType.vi
+                        }
                       </h3>
                       <p className="font-medium">
                         {project.details?.riceSoilType || "N/A"}
@@ -491,7 +603,10 @@ export default function ProjectDetailPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Ngày bắt đầu (lúa gạo)
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectInfoCard.fields.riceStartDate.vi
+                        }
                       </h3>
                       <p className="font-medium flex items-center">
                         <Calendar className="w-4 h-4 mr-1 text-gray-400" />
@@ -502,7 +617,10 @@ export default function ProjectDetailPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Ngày kết thúc (lúa gạo)
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectInfoCard.fields.riceEndDate.vi
+                        }
                       </h3>
                       <p className="font-medium flex items-center">
                         <Calendar className="w-4 h-4 mr-1 text-gray-400" />
@@ -518,7 +636,10 @@ export default function ProjectDetailPage() {
                   <>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Nguyên liệu thô
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectInfoCard.fields.biocharRawMaterial.vi
+                        }
                       </h3>
                       <p className="font-medium">
                         {project.details?.biocharRawMaterial || "N/A"}
@@ -526,7 +647,10 @@ export default function ProjectDetailPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Hàm lượng carbon
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectInfoCard.fields.biocharCarbonContent.vi
+                        }
                       </h3>
                       <p className="font-medium">
                         {project.details?.biocharCarbonContent || "N/A"}
@@ -534,7 +658,10 @@ export default function ProjectDetailPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Diện tích đất ứng dụng
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectInfoCard.fields.biocharLandArea.vi
+                        }
                       </h3>
                       <p className="font-medium">
                         {project.details?.biocharLandArea || "N/A"}
@@ -542,7 +669,10 @@ export default function ProjectDetailPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Phương pháp ứng dụng
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectInfoCard.fields.biocharApplicationMethod.vi
+                        }
                       </h3>
                       <p className="font-medium">
                         {project.details?.biocharApplicationMethod || "N/A"}
@@ -553,31 +683,46 @@ export default function ProjectDetailPage() {
 
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    Người đăng ký
+                    {
+                      projectDetailPageTranslations.overviewTab.projectInfoCard
+                        .fields.applicantName.vi
+                    }
                   </h3>
                   <p className="font-medium">{project.name || "N/A"}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    Tổ chức
+                    {
+                      projectDetailPageTranslations.overviewTab.projectInfoCard
+                        .fields.organization.vi
+                    }
                   </h3>
                   <p className="font-medium">{project.organization || "N/A"}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    Email liên hệ
+                    {
+                      projectDetailPageTranslations.overviewTab.projectInfoCard
+                        .fields.contactEmail.vi
+                    }
                   </h3>
                   <p className="font-medium">{project.email || "N/A"}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    Số điện thoại
+                    {
+                      projectDetailPageTranslations.overviewTab.projectInfoCard
+                        .fields.phoneNumber.vi
+                    }
                   </h3>
                   <p className="font-medium">{project.phone || "N/A"}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    Địa chỉ
+                    {
+                      projectDetailPageTranslations.overviewTab.projectInfoCard
+                        .fields.address.vi
+                    }
                   </h3>
                   <p className="font-medium">{project.address || "N/A"}</p>
                 </div>
@@ -585,55 +730,93 @@ export default function ProjectDetailPage() {
 
               <div className="pt-4 border-t">
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
-                  Thông tin bổ sung
+                  {
+                    projectDetailPageTranslations.overviewTab.projectInfoCard
+                      .fields.additionalInfo.vi
+                  }
                 </h3>
                 <p className="text-gray-700">
-                  {project.additionalInfo || "Không có thông tin bổ sung."}
+                  {project.additionalInfo ||
+                    projectDetailPageTranslations.overviewTab.projectInfoCard
+                      .fields.noAdditionalInfo[language]}
                 </p>
               </div>
             </CardContent>
             <CardFooter className="flex gap-3">
-              <Button>Cập nhật thông tin</Button>
-              <Button variant="outline">Tải xuống báo cáo</Button>
+              <Button>
+                {
+                  projectDetailPageTranslations.overviewTab.projectInfoCard
+                    .updateButton[language]
+                }
+              </Button>
+              <Button variant="outline">
+                {
+                  projectDetailPageTranslations.overviewTab.projectInfoCard
+                    .downloadReportButton[language]
+                }
+              </Button>
             </CardFooter>
           </Card>
 
           {project.carbonCreditsTotal !== undefined && (
             <Card>
               <CardHeader>
-                <CardTitle>Thông tin Tín chỉ Carbon</CardTitle>
+                <CardTitle>
+                  {
+                    projectDetailPageTranslations.overviewTab.carbonInfoCard
+                      .title[language]
+                  }
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h3 className="text-sm font-medium text-gray-500 mb-1">
-                      Tổng tín chỉ carbon
+                      {
+                        projectDetailPageTranslations.overviewTab.carbonInfoCard
+                          .totalCredits[language]
+                      }
                     </h3>
                     <p className="font-medium">
                       {project.carbonCreditsTotal?.toLocaleString() || "N/A"}{" "}
-                      tấn CO₂
+                      {
+                        projectDetailPageTranslations.overviewTab.carbonInfoCard
+                          .tonsCo2[language]
+                      }
                     </p>
                   </div>
                   {project.carbonCredits !== undefined && (
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Tín chỉ hiện có
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .carbonInfoCard.availableCredits[language]
+                        }
                       </h3>
                       <p className="font-medium">
-                        {project.carbonCredits?.toLocaleString() || "N/A"} tấn
-                        CO₂
+                        {project.carbonCredits?.toLocaleString() || "N/A"}{" "}
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .carbonInfoCard.tonsCo2[language]
+                        }
                       </p>
                     </div>
                   )}
                   {project.carbonCreditsClaimed !== undefined && (
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">
-                        Tín chỉ đã yêu cầu
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .carbonInfoCard.claimedCredits[language]
+                        }
                       </h3>
                       <p className="font-medium">
                         {project.carbonCreditsClaimed?.toLocaleString() ||
                           "N/A"}{" "}
-                        tấn CO₂
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .carbonInfoCard.tonsCo2[language]
+                        }
                       </p>
                     </div>
                   )}
@@ -645,13 +828,23 @@ export default function ProjectDetailPage() {
           {typeof project.progress === "number" && (
             <Card>
               <CardHeader>
-                <CardTitle>Tiến độ dự án</CardTitle>
+                <CardTitle>
+                  {
+                    projectDetailPageTranslations.overviewTab
+                      .projectProgressCard.title[language]
+                  }
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-sm font-medium">Tiến độ tổng</span>
+                      <span className="text-sm font-medium">
+                        {
+                          projectDetailPageTranslations.overviewTab
+                            .projectProgressCard.overallProgress[language]
+                        }
+                      </span>
                       <span className="text-sm font-medium">
                         {project.progress}%
                       </span>
@@ -672,9 +865,17 @@ export default function ProjectDetailPage() {
         <TabsContent value="documents" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Tài liệu đất đai</CardTitle>
+              <CardTitle>
+                {
+                  projectDetailPageTranslations.documentsTab.landDocumentsCard
+                    .title[language]
+                }
+              </CardTitle>
               <CardDescription>
-                Các tài liệu liên quan đến quyền sở hữu/sử dụng đất của dự án.
+                {
+                  projectDetailPageTranslations.documentsTab.landDocumentsCard
+                    .description[language]
+                }
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -683,10 +884,32 @@ export default function ProjectDetailPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Tên tài liệu</TableHead>
-                        <TableHead>Loại</TableHead>
-                        <TableHead>Ngày tải lên</TableHead>
-                        <TableHead className="text-right">Hành động</TableHead>
+                        <TableHead>
+                          {
+                            projectDetailPageTranslations.documentsTab
+                              .landDocumentsCard.tableHeaders.docName[language]
+                          }
+                        </TableHead>
+                        <TableHead>
+                          {
+                            projectDetailPageTranslations.documentsTab
+                              .landDocumentsCard.tableHeaders.type[language]
+                          }
+                        </TableHead>
+                        <TableHead>
+                          {
+                            projectDetailPageTranslations.documentsTab
+                              .landDocumentsCard.tableHeaders.uploadDate[
+                              language
+                            ]
+                          }
+                        </TableHead>
+                        <TableHead className="text-right">
+                          {
+                            projectDetailPageTranslations.documentsTab
+                              .landDocumentsCard.tableHeaders.actions[language]
+                          }
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
 
@@ -697,7 +920,10 @@ export default function ProjectDetailPage() {
                             {doc.name ||
                               decodeURIComponent(
                                 doc.url.split("/").pop() ||
-                                  "Tài liệu không tên",
+                                  projectDetailPageTranslations.documentsTab
+                                    .landDocumentsCard.unnamedDocument[
+                                    language
+                                  ],
                               )}
                           </TableCell>
                           <TableCell>{doc.type || "N/A"}</TableCell>
@@ -713,7 +939,10 @@ export default function ProjectDetailPage() {
                                 size="sm"
                                 onClick={() => handleViewFile(doc.url)}
                               >
-                                Xem
+                                {
+                                  projectDetailPageTranslations.documentsTab
+                                    .landDocumentsCard.viewButton[language]
+                                }
                               </Button>
                               <Button
                                 variant="destructive"
@@ -733,7 +962,10 @@ export default function ProjectDetailPage() {
                 </div>
               ) : (
                 <p className="text-gray-500 text-center">
-                  Chưa có tài liệu đất đai nào được đính kèm.
+                  {
+                    projectDetailPageTranslations.documentsTab.landDocumentsCard
+                      .noDocuments[language]
+                  }
                 </p>
               )}
             </CardContent>
@@ -741,9 +973,18 @@ export default function ProjectDetailPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Tệp KML</CardTitle>
+              <CardTitle>
+                {
+                  projectDetailPageTranslations.documentsTab.kmlFileCard.title[
+                    language
+                  ]
+                }
+              </CardTitle>
               <CardDescription>
-                Tệp KML định vị khu vực địa lý của dự án trên bản đồ.
+                {
+                  projectDetailPageTranslations.documentsTab.kmlFileCard
+                    .description[language]
+                }
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -759,7 +1000,10 @@ export default function ProjectDetailPage() {
                       size="sm"
                       onClick={() => handleViewFile(project.kmlFile!.url)}
                     >
-                      Xem
+                      {
+                        projectDetailPageTranslations.documentsTab.kmlFileCard
+                          .viewButton[language]
+                      }
                     </Button>
                     <Button
                       variant="destructive"
@@ -772,7 +1016,10 @@ export default function ProjectDetailPage() {
                 </div>
               ) : (
                 <p className="text-gray-500 text-center">
-                  Chưa có tệp KML nào được đính kèm.
+                  {
+                    projectDetailPageTranslations.documentsTab.kmlFileCard
+                      .noKmlFile[language]
+                  }
                 </p>
               )}
             </CardContent>
@@ -780,15 +1027,28 @@ export default function ProjectDetailPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Tải lên tệp mới</CardTitle>
+              <CardTitle>
+                {
+                  projectDetailPageTranslations.documentsTab.uploadNewFileCard
+                    .title[language]
+                }
+              </CardTitle>
               <CardDescription>
-                Tải lên tài liệu đất đai hoặc tệp KML mới cho dự án.
+                {
+                  projectDetailPageTranslations.documentsTab.uploadNewFileCard
+                    .description[language]
+                }
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="fileType">Loại tệp tải lên</Label>
+                  <Label htmlFor="fileType">
+                    {
+                      projectDetailPageTranslations.documentsTab
+                        .uploadNewFileCard.fileTypeLabel[language]
+                    }
+                  </Label>
                   <Select
                     value={fileTypeToUpload}
                     onValueChange={(value: "landDocument" | "kmlFile") =>
@@ -796,19 +1056,37 @@ export default function ProjectDetailPage() {
                     }
                   >
                     <SelectTrigger id="fileType">
-                      <SelectValue placeholder="Chọn loại tệp" />
+                      <SelectValue
+                        placeholder={
+                          projectDetailPageTranslations.documentsTab
+                            .uploadNewFileCard.selectFileTypePlaceholder[
+                            language
+                          ]
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="landDocument">
-                        Tài liệu đất đai
+                        {
+                          projectDetailPageTranslations.documentsTab
+                            .uploadNewFileCard.landDocumentOption[language]
+                        }
                       </SelectItem>
-                      <SelectItem value="kmlFile">Tệp KML</SelectItem>
+                      <SelectItem value="kmlFile">
+                        {
+                          projectDetailPageTranslations.documentsTab
+                            .uploadNewFileCard.kmlFileOption[language]
+                        }
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
                   <Label htmlFor="document" className="mb-2 block">
-                    Chọn tệp
+                    {
+                      projectDetailPageTranslations.documentsTab
+                        .uploadNewFileCard.chooseFileLabel[language]
+                    }
                   </Label>
                   <Input
                     id="document"
@@ -822,7 +1100,10 @@ export default function ProjectDetailPage() {
 
               {selectedFile && (
                 <p className="text-sm text-gray-600">
-                  Đã chọn tệp:{" "}
+                  {
+                    projectDetailPageTranslations.documentsTab.uploadNewFileCard
+                      .selectedFile[language]
+                  }{" "}
                   <span className="font-medium">{selectedFile.name}</span>
                 </p>
               )}
@@ -835,7 +1116,10 @@ export default function ProjectDetailPage() {
               {uploadSuccess && (
                 <div className="flex items-center text-green-500 text-sm mt-2">
                   <CheckCircle2 className="w-4 h-4 mr-1" />
-                  Tải lên thành công!
+                  {
+                    projectDetailPageTranslations.documentsTab.uploadNewFileCard
+                      .uploadSuccessMessage[language]
+                  }
                 </div>
               )}
               <Button
@@ -845,12 +1129,18 @@ export default function ProjectDetailPage() {
                 {uploading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Đang tải lên...
+                    {
+                      projectDetailPageTranslations.documentsTab
+                        .uploadNewFileCard.uploadingButton[language]
+                    }
                   </>
                 ) : (
                   <>
                     <Upload className="w-4 h-4 mr-2" />
-                    Tải lên
+                    {
+                      projectDetailPageTranslations.documentsTab
+                        .uploadNewFileCard.uploadButton[language]
+                    }
                   </>
                 )}
               </Button>
@@ -861,9 +1151,15 @@ export default function ProjectDetailPage() {
         <TabsContent value="activities" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Lịch sử hoạt động</CardTitle>
+              <CardTitle>
+                {projectDetailPageTranslations.activitiesTab.title[language]}
+              </CardTitle>
               <CardDescription>
-                Các hoạt động gần đây liên quan đến dự án
+                {
+                  projectDetailPageTranslations.activitiesTab.description[
+                    language
+                  ]
+                }
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -886,7 +1182,10 @@ export default function ProjectDetailPage() {
                     ))
                   ) : (
                     <p className="text-gray-500 text-center">
-                      Chưa có hoạt động nào được ghi nhận.
+                      {
+                        projectDetailPageTranslations.activitiesTab
+                          .noActivities[language]
+                      }
                     </p>
                   )}
                 </div>

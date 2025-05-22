@@ -14,12 +14,15 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/auth-context";
 import { useLanguage } from "@/context/language-context";
-import { User, Save, Edit } from "lucide-react"; // Đã thêm biểu tượng Edit
+import { User, Save, Edit } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import apiAuth from "@/app/fetch/fetch.auth";
+
+// Import tệp ngôn ngữ riêng cho SettingsPage
+import settingsPageTranslations from "./language";
 
 export default function SettingsPage() {
   const { language } = useLanguage();
@@ -30,17 +33,24 @@ export default function SettingsPage() {
 
   const [isEditing, setIsEditing] = useState(false);
 
-
-
   const [formData, setFormData] = useState<any>(() => {
-    return user ?? {
-      name: "",
-      email: "",
-      avatar: "",
-      phone: "",
-      address: "",
-    };
+    return (
+      user ?? {
+        name: "",
+        email: "",
+        avatar: "",
+        phone: "",
+        address: "",
+      }
+    );
   });
+
+  // Sử dụng useEffect để cập nhật formData khi user thay đổi (ví dụ: sau khi tải dữ liệu)
+  useEffect(() => {
+    if (user) {
+      setFormData(user);
+    }
+  }, [user]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -58,22 +68,18 @@ export default function SettingsPage() {
       const res = await apiAuth.update(formData);
       if (res && res.success) {
         toast({
-          title: language === "vi" ? "Đã lưu thông tin" : "Profile saved",
+          title: settingsPageTranslations.toast.saveSuccessTitle[language],
           description:
-            language === "vi"
-              ? "Thông tin cá nhân của bạn đã được cập nhật thành công."
-              : "Your profile information has been updated successfully.",
+            settingsPageTranslations.toast.saveSuccessDescription[language],
         });
         setIsEditing(false); // Sau khi lưu, tắt chế độ chỉnh sửa
       }
     } catch (err) {
       toast({
         variant: "destructive",
-        title: language === "vi" ? "Lỗi khi lưu" : "Save failed",
+        title: settingsPageTranslations.toast.saveErrorTitle[language],
         description:
-          language === "vi"
-            ? "Đã xảy ra lỗi khi cập nhật thông tin. Vui lòng thử lại."
-            : "Something went wrong while updating. Please try again.",
+          settingsPageTranslations.toast.saveErrorDescription[language],
       });
     }
   };
@@ -87,12 +93,10 @@ export default function SettingsPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold">
-            {language === "vi" ? "Cài đặt" : "Settings"}
+            {settingsPageTranslations.header.title[language]}
           </h1>
           <p className="text-gray-500 mt-1">
-            {language === "vi"
-              ? "Quản lý tài khoản và tùy chỉnh trải nghiệm của bạn"
-              : "Manage your account and customize your experience"}
+            {settingsPageTranslations.header.description[language]}
           </p>
         </div>
       </div>
@@ -107,7 +111,7 @@ export default function SettingsPage() {
             <TabsList className="flex flex-col h-auto bg-white border rounded-md p-1 space-y-1">
               <TabsTrigger value="profile" className="justify-start">
                 <User className="w-4 h-4 mr-2" />
-                {language === "vi" ? "Hồ sơ" : "Profile"}
+                {settingsPageTranslations.tabs.profile[language]}
               </TabsTrigger>
             </TabsList>
 
@@ -115,7 +119,7 @@ export default function SettingsPage() {
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="avatar">
-                    {language === "vi" ? "Avatar" : "Avatar"}
+                    {settingsPageTranslations.profileCard.avatarLabel[language]}
                   </Label>
                   <div className="w-full ">
                     <img
@@ -137,14 +141,17 @@ export default function SettingsPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>
-                    {language === "vi"
-                      ? "Thông tin cá nhân"
-                      : "Personal Information"}
+                    {
+                      settingsPageTranslations.profileCard.personalInfoTitle[
+                        language
+                      ]
+                    }
                   </CardTitle>
                   <CardDescription>
-                    {language === "vi"
-                      ? "Cập nhật thông tin cá nhân và liên hệ của bạn"
-                      : "Update your personal and contact information"}
+                    {
+                      settingsPageTranslations.profileCard
+                        .personalInfoDescription[language]
+                    }
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -152,7 +159,11 @@ export default function SettingsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="name">
-                          {language === "vi" ? "Họ tên" : "Full Name"}
+                          {
+                            settingsPageTranslations.profileCard.fullNameLabel[
+                              language
+                            ]
+                          }
                         </Label>
                         <Input
                           id="name"
@@ -160,15 +171,20 @@ export default function SettingsPage() {
                           value={formData.name}
                           onChange={handleInputChange}
                           placeholder={
-                            language === "vi"
-                              ? "Nhập họ tên của bạn"
-                              : "Enter your full name"
+                            settingsPageTranslations.profileCard
+                              .fullNamePlaceholder[language]
                           }
-                          disabled={!isEditing} // Disable input when not in editing mode
+                          disabled={!isEditing}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
+                        <Label htmlFor="email">
+                          {
+                            settingsPageTranslations.profileCard.emailLabel[
+                              language
+                            ]
+                          }
+                        </Label>
                         <Input
                           id="email"
                           name="email"
@@ -176,9 +192,8 @@ export default function SettingsPage() {
                           value={formData.email}
                           onChange={handleInputChange}
                           placeholder={
-                            language === "vi"
-                              ? "Nhập email của bạn"
-                              : "Enter your email"
+                            settingsPageTranslations.profileCard
+                              .emailPlaceholder[language]
                           }
                           disabled={!isEditing}
                         />
@@ -187,7 +202,11 @@ export default function SettingsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="phone">
-                          {language === "vi" ? "Số điện thoại" : "Phone"}
+                          {
+                            settingsPageTranslations.profileCard.phoneLabel[
+                              language
+                            ]
+                          }
                         </Label>
                         <Input
                           id="phone"
@@ -195,16 +214,19 @@ export default function SettingsPage() {
                           value={formData.phone}
                           onChange={handleInputChange}
                           placeholder={
-                            language === "vi"
-                              ? "Nhập số điện thoại của bạn"
-                              : "Enter your phone number"
+                            settingsPageTranslations.profileCard
+                              .phonePlaceholder[language]
                           }
                           disabled={!isEditing}
                         />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="address">
-                          {language === "vi" ? "Địa chỉ" : "Address"}
+                          {
+                            settingsPageTranslations.profileCard.addressLabel[
+                              language
+                            ]
+                          }
                         </Label>
                         <Textarea
                           id="address"
@@ -212,9 +234,8 @@ export default function SettingsPage() {
                           value={formData.address}
                           onChange={handleInputChange}
                           placeholder={
-                            language === "vi"
-                              ? "Nhập địa chỉ của bạn"
-                              : "Enter your address"
+                            settingsPageTranslations.profileCard
+                              .addressPlaceholder[language]
                           }
                           disabled={!isEditing}
                         />
@@ -223,7 +244,11 @@ export default function SettingsPage() {
 
                     <div className="space-y-2">
                       <Label htmlFor="avatar">
-                        {language === "vi" ? "Avatar" : "Avatar"}
+                        {
+                          settingsPageTranslations.profileCard.avatarLabel[
+                            language
+                          ]
+                        }
                       </Label>
                       <Input
                         id="avatar"
@@ -231,9 +256,8 @@ export default function SettingsPage() {
                         value={formData.avatar}
                         onChange={handleInputChange}
                         placeholder={
-                          language === "vi"
-                            ? "Nhập đường dẫn avatar của bạn"
-                            : "Enter your avatar URL"
+                          settingsPageTranslations.profileCard
+                            .avatarPlaceholder[language]
                         }
                         disabled={!isEditing}
                       />
@@ -244,17 +268,21 @@ export default function SettingsPage() {
                   <Button variant="outline" onClick={handleEditToggle}>
                     <Edit className="w-4 h-4 mr-2" />
                     {isEditing
-                      ? language === "vi"
-                        ? "Hủy chỉnh sửa"
-                        : "Cancel Edit"
-                      : language === "vi"
-                        ? "Chỉnh sửa"
-                        : "Edit"}
+                      ? settingsPageTranslations.profileCard.editButton.cancel[
+                          language
+                        ]
+                      : settingsPageTranslations.profileCard.editButton.edit[
+                          language
+                        ]}
                   </Button>
                   {isEditing && (
                     <Button onClick={handleSaveProfile}>
                       <Save className="w-4 h-4 mr-2" />
-                      {language === "vi" ? "Lưu thay đổi" : "Save changes"}
+                      {
+                        settingsPageTranslations.profileCard.saveButton[
+                          language
+                        ]
+                      }
                     </Button>
                   )}
                 </CardFooter>

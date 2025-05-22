@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, JSX } from "react";
 import { useRouter } from "next/navigation";
 import { ProductFilter } from "./components/product-filter";
 import { ProductSidebar } from "./components/product-sidebar";
 import { EmptyState } from "./components/empty-state";
 import { Product } from "./components/type";
-import { userProducts } from "./data";
+import { userProducts } from "./data"; // This is your fallback data
 import { Badge } from "@/components/ui/badge";
 import {
   AlertCircle,
@@ -30,15 +30,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProductTabs } from "./components/product-tab";
 import { apiOrders } from "../../fetch/fetch.order";
 import { getUserFromLocalStorage } from "../../utils/common";
+import { useLanguage } from "@/context/language-context"; // Import language hook
+import productsManagementTranslations from "./langauge_page";
+
 export default function ProductsManagementPage() {
   const router = useRouter();
+  const { language } = useLanguage(); // Get current language
+
   const [activeTab, setActiveTab] = useState("all");
   const [activeTypeTab, setActiveTypeTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [products, setProducts] = useState<Product[]>([]);
-  const [orders, setOrders] = useState<any[]>([]);
-  const [pendingOrders, setPendingOrders] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]); // Products the user has bought (active/completed)
+  const [orders, setOrders] = useState<any[]>([]); // All orders, including pending
+  const [pendingOrders, setPendingOrders] = useState<any[]>([]); // Only pending orders
 
   useEffect(() => {
     const fetchProductByUser = async () => {
@@ -52,7 +57,7 @@ export default function ProductsManagementPage() {
         if (response.status === 200) {
           const { orders = [], products = [] } = response.payload ?? {};
           setOrders(orders);
-          setProducts(products.length > 0 ? products : userProducts);
+          setProducts(products.length > 0 ? products : userProducts); // Fallback to userProducts if API returns empty
           setPendingOrders(
             orders.filter((order: any) => order.status === "pending"),
           );
@@ -65,11 +70,13 @@ export default function ProductsManagementPage() {
     };
     fetchProductByUser();
   }, []);
+
+  // Filter out products that have a pending order
   const filteredProducts = products.filter((product) => {
-    const relatedOrder = orders.find(
+    const isPending = pendingOrders.some(
       (order) => order.productId === product._id && order.status === "pending",
     );
-    if (relatedOrder) {
+    if (isPending) {
       return false;
     }
 
@@ -84,40 +91,48 @@ export default function ProductsManagementPage() {
       );
     return matchesStatusTab && matchesTypeTab && matchesSearch;
   });
+
+  // Combine product and order data for pending items
   const pendingProducts = pendingOrders
     .map((order) => ({
       order,
       product: products.find((p) => p._id === order.productId),
     }))
-    .filter((item) => item.product);
+    .filter((item) => item.product); // Ensure product data is available
 
   const getStatusBadge = (status: string) => {
+    const statusText =
+      productsManagementTranslations.statusBadges[
+        status as keyof typeof productsManagementTranslations.statusBadges
+      ]?.[language] ||
+      productsManagementTranslations.statusBadges.unknown[language];
+
     switch (status) {
       case "active":
         return (
           <Badge className="bg-green-100 text-green-800 hover:bg-green-200 flex items-center">
             <CheckCircle2 className="w-3 h-3 mr-1" />
-            Đang hoạt động
+            {statusText}
           </Badge>
         );
       case "pending":
         return (
           <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 flex items-center">
             <Clock className="w-3 h-3 mr-1" />
-            Đang xử lý
+            {statusText}
           </Badge>
         );
       case "expired":
         return (
           <Badge className="bg-red-100 text-red-800 hover:bg-red-200 flex items-center">
             <AlertCircle className="w-3 h-3 mr-1" />
-            Hết hạn
+            {statusText}
           </Badge>
         );
       default:
         return (
           <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200">
-            {status || "Không xác định"}
+            {statusText}
           </Badge>
         );
     }
@@ -126,9 +141,10 @@ export default function ProductsManagementPage() {
   const getProductDetailLink = (productId: string) => `/products/${productId}`;
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return "Không xác định";
+    if (!dateString)
+      return productsManagementTranslations.misc.notSpecified[language];
     const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN", {
+    return date.toLocaleDateString(language === "vi" ? "vi-VN" : "en-US", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -136,24 +152,21 @@ export default function ProductsManagementPage() {
   };
 
   const formatCurrency = (amount: number) => {
-    if (!amount && amount !== 0) return "0 VND";
-    return new Intl.NumberFormat("vi-VN", {
+    if (amount === null || amount === undefined)
+      return `0 ${productsManagementTranslations.misc.currency[language]}`;
+    return new Intl.NumberFormat(language === "vi" ? "vi-VN" : "en-US", {
       style: "currency",
-      currency: "VND",
+      currency: productsManagementTranslations.misc.currency[language],
     }).format(amount);
   };
 
   const getProductTypeName = (type: string) => {
-    switch (type) {
-      case "carbon_credits":
-        return "Tín chỉ Carbon";
-      case "carbon_accounting":
-        return "Carbon Toàn Thư";
-      case "international_certificates":
-        return "Chứng chỉ Quốc tế";
-      default:
-        return type || "Không xác định";
-    }
+    const typeKey =
+      type as keyof typeof productsManagementTranslations.productTypes;
+    return (
+      productsManagementTranslations.productTypes[typeKey]?.[language] ||
+      productsManagementTranslations.productTypes.default[language]
+    );
   };
 
   const getProductTypeIcon = (type: string) => {
@@ -178,25 +191,44 @@ export default function ProductsManagementPage() {
     } else if (
       text.includes("báo cáo") ||
       text.includes("esg") ||
-      text.includes("kiểm toán")
+      text.includes("kiểm toán") ||
+      text.includes("report") ||
+      text.includes("audit")
     ) {
       return <FileCheck className="w-4 h-4 text-blue-500" />;
     } else if (
       text.includes("phân tích") ||
       text.includes("trend") ||
-      text.includes("xu hướng")
+      text.includes("xu hướng") ||
+      text.includes("analysis")
     ) {
       return <BarChart2 className="w-4 h-4 text-orange-500" />;
-    } else if (text.includes("cộng đồng") || text.includes("tư vấn")) {
+    } else if (
+      text.includes("cộng đồng") ||
+      text.includes("tư vấn") ||
+      text.includes("community") ||
+      text.includes("consultation")
+    ) {
       return <Users className="w-4 h-4 text-indigo-500" />;
-    } else if (text.includes("bảo tồn") || text.includes("bảo vệ")) {
+    } else if (
+      text.includes("bảo tồn") ||
+      text.includes("bảo vệ") ||
+      text.includes("conservation") ||
+      text.includes("protection")
+    ) {
       return <Shield className="w-4 h-4 text-green-500" />;
-    } else if (text.includes("quốc tế") || text.includes("toàn cầu")) {
+    } else if (
+      text.includes("quốc tế") ||
+      text.includes("toàn cầu") ||
+      text.includes("international") ||
+      text.includes("global")
+    ) {
       return <Globe className="w-4 h-4 text-cyan-500" />;
     } else if (
       text.includes("chứng nhận") ||
       text.includes("vcs") ||
-      text.includes("ccb")
+      text.includes("ccb") ||
+      text.includes("certification")
     ) {
       return <Tag className="w-4 h-4 text-red-500" />;
     } else {
@@ -212,19 +244,45 @@ export default function ProductsManagementPage() {
             {product.projectLocation && (
               <div className="flex items-center text-sm text-gray-600">
                 <Globe className="h-4 w-4 mr-2 flex-shrink-0 text-green-600" />
-                <span>{product.projectLocation}</span>
+                <span>
+                  {
+                    productsManagementTranslations.additionalInfo.carbonCredits
+                      .projectLocation[language]
+                  }{" "}
+                  {product.projectLocation}
+                </span>
               </div>
             )}
             {product.carbonAmount && (
               <div className="flex items-center text-sm text-gray-600">
                 <Leaf className="h-4 w-4 mr-2 flex-shrink-0 text-green-600" />
-                <span>Tổng tín chỉ: {product.carbonAmount} tCO2e</span>
+                <span>
+                  {
+                    productsManagementTranslations.additionalInfo.carbonCredits
+                      .totalCredits[language]
+                  }{" "}
+                  {product.carbonAmount}{" "}
+                  {
+                    productsManagementTranslations.additionalInfo.carbonCredits
+                      .unit[language]
+                  }
+                </span>
               </div>
             )}
             {product.carbonUsed !== undefined && product.carbonAmount && (
               <div className="mt-2">
                 <div className="flex justify-between text-xs mb-1">
-                  <span>Đã sử dụng: {product.carbonUsed} tCO2e</span>
+                  <span>
+                    {
+                      productsManagementTranslations.additionalInfo
+                        .carbonCredits.usedCredits[language]
+                    }{" "}
+                    {product.carbonUsed}{" "}
+                    {
+                      productsManagementTranslations.additionalInfo
+                        .carbonCredits.unit[language]
+                    }
+                  </span>
                   <span>
                     {Math.round(
                       (product.carbonUsed / product.carbonAmount) * 100,
@@ -249,7 +307,12 @@ export default function ProductsManagementPage() {
           <div className="mt-3 space-y-2">
             <div className="flex items-center text-sm text-gray-600">
               <BookOpen className="h-4 w-4 mr-2 flex-shrink-0 text-blue-600" />
-              <span>Nền tảng tri thức toàn diện về Carbon</span>
+              <span>
+                {
+                  productsManagementTranslations.additionalInfo.carbonAccounting
+                    .description[language]
+                }
+              </span>
             </div>
           </div>
         );
@@ -259,19 +322,36 @@ export default function ProductsManagementPage() {
             {product.issuer && (
               <div className="flex items-center text-sm text-gray-600">
                 <Award className="h-4 w-4 mr-2 flex-shrink-0 text-yellow-600" />
-                <span>Đơn vị cấp: {product.issuer}</span>
+                <span>
+                  {
+                    productsManagementTranslations.additionalInfo
+                      .internationalCertificates.issuer[language]
+                  }{" "}
+                  {product.issuer}
+                </span>
               </div>
             )}
             {product.certificationLevel && (
               <div className="flex items-center text-sm text-gray-600">
                 <Award className="h-4 w-4 mr-2 flex-shrink-0 text-yellow-600" />
-                <span>Cấp độ: {product.certificationLevel}</span>
+                <span>
+                  {
+                    productsManagementTranslations.additionalInfo
+                      .internationalCertificates.certificationLevel[language]
+                  }{" "}
+                  {product.certificationLevel}
+                </span>
               </div>
             )}
             {product.courseProgress !== undefined && (
               <div className="mt-2">
                 <div className="flex justify-between text-xs mb-1">
-                  <span>Tiến độ khóa học</span>
+                  <span>
+                    {
+                      productsManagementTranslations.additionalInfo
+                        .internationalCertificates.courseProgress[language]
+                    }
+                  </span>
                   <span>{product.courseProgress}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
@@ -286,7 +366,11 @@ export default function ProductsManagementPage() {
               <div className="flex items-center text-sm text-gray-600">
                 <Clock className="h-4 w-4 mr-2 flex-shrink-0 text-yellow-600" />
                 <span>
-                  Truy cập gần nhất: {formatDate(product.lastAccessed)}
+                  {
+                    productsManagementTranslations.additionalInfo
+                      .internationalCertificates.lastAccessed[language]
+                  }{" "}
+                  {formatDate(product.lastAccessed)}
                 </span>
               </div>
             )}
@@ -307,9 +391,11 @@ export default function ProductsManagementPage() {
     <div className="container mx-auto py-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Quản lý sản phẩm</h1>
+          <h1 className="text-3xl font-bold">
+            {productsManagementTranslations.pageHeader.title[language]}
+          </h1>
           <p className="text-gray-500 mt-1">
-            Quản lý tất cả sản phẩm và dịch vụ bạn đã đăng ký
+            {productsManagementTranslations.pageHeader.description[language]}
           </p>
         </div>
         <Button
@@ -317,43 +403,80 @@ export default function ProductsManagementPage() {
           className="bg-green-600 hover:bg-green-700"
         >
           <ShoppingCart className="w-4 h-4 mr-2" />
-          Mua thêm sản phẩm
+          {productsManagementTranslations.pageHeader.buyMoreButton[language]}
         </Button>
       </div>
 
-      {/* Hiển thị danh sách sản phẩm chưa thanh toán */}
+      {/* Display pending products list */}
       {pendingProducts.length > 0 && (
         <div className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">
-            Sản phẩm chưa thanh toán
+            {productsManagementTranslations.pendingProducts.title[language]}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {pendingProducts.map(({ order, product }) => (
+            {pendingProducts.map(({ order, product }) =>
               product ? (
-                <Card key={order._id} className="hover:shadow-md transition-shadow">
+                <Card
+                  key={order._id}
+                  className="hover:shadow-md transition-shadow"
+                >
                   <CardHeader>
                     <CardTitle className="text-lg">
-                      {product.name ?? "Không có tiêu đề"}
+                      {product.name ??
+                        productsManagementTranslations.misc.notAvailable[
+                          language
+                        ]}
                     </CardTitle>
                     <div className="flex items-center text-sm text-gray-500">
-                      <span>Mã đơn hàng: {order.orderCode}</span>
+                      <span>
+                        {
+                          productsManagementTranslations.pendingProducts
+                            .orderCode[language]
+                        }{" "}
+                        {order.orderCode}
+                      </span>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
                       <p className="text-sm text-gray-600">
-                        {product.description ?? "Không có mô tả"}
+                        {product.description ??
+                          productsManagementTranslations.misc.noDescription[
+                            language
+                          ]}
                       </p>
                       <div className="flex items-center text-sm text-gray-600">
-                        <span>Số tiền: {formatCurrency(order.amount)}</span>
+                        <span>
+                          {
+                            productsManagementTranslations.pendingProducts
+                              .amount[language]
+                          }{" "}
+                          {formatCurrency(order.amount)}
+                        </span>
                       </div>
                       <div className="flex items-center text-sm text-gray-600">
-                        <span>Hết hạn: {formatDate(order.expiredAt)}</span>
+                        <span>
+                          {
+                            productsManagementTranslations.pendingProducts
+                              .expires[language]
+                          }{" "}
+                          {formatDate(order.expiredAt)}
+                        </span>
                       </div>
                       {order.linkthanhtoan && (
-                        <Button asChild className="bg-yellow-600 hover:bg-yellow-700">
-                          <a href={order.linkthanhtoan} target="_blank" rel="noopener noreferrer">
-                            Thanh toán ngay
+                        <Button
+                          asChild
+                          className="bg-yellow-600 hover:bg-yellow-700"
+                        >
+                          <a
+                            href={order.linkthanhtoan}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {
+                              productsManagementTranslations.pendingProducts
+                                .payNowButton[language]
+                            }
                           </a>
                         </Button>
                       )}
@@ -362,12 +485,14 @@ export default function ProductsManagementPage() {
                 </Card>
               ) : (
                 <div key={order._id} className="p-4 text-red-500">
-                  Product không tồn tại
+                  {
+                    productsManagementTranslations.pendingProducts
+                      .productNotFound[language]
+                  }
                 </div>
-              )
-            ))}
+              ),
+            )}
           </div>
-
         </div>
       )}
 
@@ -389,11 +514,25 @@ export default function ProductsManagementPage() {
         </div>
         <div className="lg:col-span-3">
           {filteredProducts.length === 0 && pendingProducts.length === 0 ? (
-            <EmptyState resetFilters={resetFilters} />
+            <EmptyState
+              resetFilters={resetFilters}
+              translations={{
+                title:
+                  productsManagementTranslations.emptyState.title[language],
+                description:
+                  productsManagementTranslations.emptyState.description[
+                    language
+                  ],
+                resetButton:
+                  productsManagementTranslations.emptyState.resetButton[
+                    language
+                  ],
+              }}
+            />
           ) : (
             filteredProducts.length > 0 && (
               <ProductTabs
-                products={products}
+                products={products} // This should likely be `filteredProducts` for the tab content
                 viewMode="grid"
                 getStatusBadge={getStatusBadge}
                 formatDate={formatDate}
@@ -404,7 +543,6 @@ export default function ProductsManagementPage() {
                 getProductDetailLink={getProductDetailLink}
                 renderAdditionalInfo={renderAdditionalInfo}
               />
-
             )
           )}
         </div>

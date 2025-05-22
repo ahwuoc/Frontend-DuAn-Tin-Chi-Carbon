@@ -1,183 +1,188 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, JSX } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { ProductFilter } from "./components/product-filter";
+import { ProductSidebar } from "./components/product-sidebar";
+import { EmptyState } from "./components/empty-state";
+import { Product } from "./components/type";
+import { userProducts } from "./data"; // This is your fallback data
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/context/auth-context";
 import {
-  ShoppingCart,
-  ArrowRight,
-  Calendar,
+  AlertCircle,
+  Award,
+  BarChart2,
+  BookOpen,
   CheckCircle2,
   Clock,
-  AlertCircle,
+  FileCheck,
+  Globe,
+  Leaf,
+  Package,
+  Shield,
+  ShoppingCart,
+  Tag,
+  Users,
+  Zap,
   Filter,
   Search,
   Download,
   FileText,
   Settings,
   Trash2,
-  Leaf,
-  BookOpen,
-  Award,
-  Package,
-  BarChart2,
-  Users,
-  Zap,
-  Shield,
-  Globe,
-  FileCheck,
-  Tag,
+  ArrowRight,
+  Calendar,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ProductTabs } from "./components/product-tab";
+import { apiOrders } from "../../fetch/fetch.order";
+import { getUserFromLocalStorage } from "../../utils/common";
+import { useLanguage } from "@/context/language-context"; // Import language hook
+import productsManagementTranslations from "./langauge-manager";
 
-// Định nghĩa kiểu Product
-interface Product {
-  id: string;
-  name: string;
-  type: "carbon_credits" | "carbon_accounting" | "international_certificates";
-  description: string;
-  purchaseDate: string;
-  status: "active" | "pending" | "expired";
-  expiryDate?: string;
-  image?: string;
-  features?: string[];
-  price?: number;
-  usageStats?: {
-    totalUsage: number;
-    lastMonthUsage: number;
-    trend: "up" | "down" | "stable";
-  };
-  certificationLevel?: string;
-  projectLocation?: string;
-  carbonAmount?: number;
-  carbonUsed?: number;
-  verificationStandard?: string;
-  courseProgress?: number;
-  lastAccessed?: string;
-  nextPayment?: string;
-  subscriptionTier?: "basic" | "professional" | "enterprise";
-  issuer?: string;
-}
-import { userProducts } from "./data";
 export default function ProductsManagementPage() {
-  const { user, isAuthenticated } = useAuth();
   const router = useRouter();
-  const [isClient, setIsClient] = useState(false);
+  const { language } = useLanguage(); // Get current language
+
   const [activeTab, setActiveTab] = useState("all");
   const [activeTypeTab, setActiveTypeTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [products, setProducts] = useState<Product[]>([]); // Products the user has bought (active/completed)
+  const [orders, setOrders] = useState<any[]>([]); // All orders, including pending
+  const [pendingOrders, setPendingOrders] = useState<any[]>([]); // Only pending orders
 
-  // Lọc sản phẩm theo trạng thái, loại và tìm kiếm
-  const filteredProducts = userProducts.filter((product) => {
+  useEffect(() => {
+    const fetchProductByUser = async () => {
+      const user = getUserFromLocalStorage();
+      try {
+        if (!user?.userId) {
+          console.warn("No user ID found in localStorage");
+          return;
+        }
+        const response = await apiOrders.getOrderByUser(user.userId);
+        if (response.status === 200) {
+          const { orders = [], products = [] } = response.payload ?? {};
+          setOrders(orders);
+          setProducts(products.length > 0 ? products : userProducts); // Fallback to userProducts if API returns empty
+          setPendingOrders(
+            orders.filter((order: any) => order.status === "pending"),
+          );
+        } else {
+          console.warn("Failed to fetch data, using fallback products");
+        }
+      } catch (error) {
+        console.error("Error fetching products and orders:", error);
+      }
+    };
+    fetchProductByUser();
+  }, []);
+
+  // Filter out products that have a pending order
+  const filteredProducts = products.filter((product) => {
+    const isPending = pendingOrders.some(
+      (order) => order.productId === product._id && order.status === "pending",
+    );
+    if (isPending) {
+      return false;
+    }
+
     const matchesStatusTab =
       activeTab === "all" || product.status === activeTab;
     const matchesTypeTab =
       activeTypeTab === "all" || product.type === activeTypeTab;
     const matchesSearch =
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase());
+      (product.name?.toLowerCase() ?? "").includes(searchTerm.toLowerCase()) ||
+      (product.description?.toLowerCase() ?? "").includes(
+        searchTerm.toLowerCase(),
+      );
     return matchesStatusTab && matchesTypeTab && matchesSearch;
   });
 
-  // Hiển thị trạng thái sản phẩm
+  // Combine product and order data for pending items
+  const pendingProductsList = pendingOrders
+    .map((order) => ({
+      order,
+      product: products.find((p) => p._id === order.productId),
+    }))
+    .filter((item) => item.product); // Ensure product data is available
+
   const getStatusBadge = (status: string) => {
+    const statusText =
+      productsManagementTranslations.statusBadges[
+        status as keyof typeof productsManagementTranslations.statusBadges
+      ]?.[language] ||
+      productsManagementTranslations.statusBadges.unknown[language];
+
     switch (status) {
       case "active":
         return (
           <Badge className="bg-green-100 text-green-800 hover:bg-green-200 flex items-center">
             <CheckCircle2 className="w-3 h-3 mr-1" />
-            Đang hoạt động
+            {statusText}
           </Badge>
         );
       case "pending":
         return (
           <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 flex items-center">
             <Clock className="w-3 h-3 mr-1" />
-            Đang xử lý
+            {statusText}
           </Badge>
         );
       case "expired":
         return (
           <Badge className="bg-red-100 text-red-800 hover:bg-red-200 flex items-center">
             <AlertCircle className="w-3 h-3 mr-1" />
-            Hết hạn
+            {statusText}
           </Badge>
         );
       default:
         return (
           <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200">
-            {status}
+            {statusText}
           </Badge>
         );
     }
   };
 
-  // Định dạng ngày tháng
+  const getProductDetailLink = (productId: string) => `/products/${productId}`;
+
   const formatDate = (dateString: string) => {
+    if (!dateString)
+      return productsManagementTranslations.misc.notSpecified[language];
     const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN", {
+    return date.toLocaleDateString(language === "vi" ? "vi-VN" : "en-US", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
     });
   };
 
-  // Định dạng tiền tệ
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("vi-VN", {
+    if (amount === null || amount === undefined)
+      return `0 ${productsManagementTranslations.misc.currency[language]}`;
+    return new Intl.NumberFormat(language === "vi" ? "vi-VN" : "en-US", {
       style: "currency",
-      currency: "VND",
+      currency: productsManagementTranslations.misc.currency[language],
     }).format(amount);
   };
 
-  // Lấy đường dẫn chi tiết sản phẩm
-  const getProductDetailLink = (type: string, id: string) => {
-    switch (type) {
-      case "carbon_credits":
-        return `/quan-ly/tin-chi-carbon/${id}`;
-      case "carbon_accounting":
-        return `/quan-ly/carbon-toan-thu/${id}`;
-      case "international_certificates":
-        if (id === "ic-001") {
-          return `/quan-ly/chung-chi-quoc-te/ic-001`; // Gói Nghiên cứu
-        } else if (id === "ic-002") {
-          return `/quan-ly/chung-chi-quoc-te/ic-002`; // Gói Chuyên gia
-        } else {
-          return `/quan-ly/chung-chi-quoc-te/${id}`;
-        }
-      default:
-        return `/quan-ly`;
-    }
-  };
-
-  // Lấy tên loại sản phẩm
   const getProductTypeName = (type: string) => {
-    switch (type) {
-      case "carbon_credits":
-        return "Tín chỉ Carbon";
-      case "carbon_accounting":
-        return "Carbon Toàn Thư";
-      case "international_certificates":
-        return "Chứng chỉ Quốc tế";
-      default:
-        return type;
-    }
+    const typeKey =
+      type as keyof typeof productsManagementTranslations.productTypes;
+    return (
+      productsManagementTranslations.productTypes[typeKey]?.[language] ||
+      productsManagementTranslations.productTypes.default[language]
+    );
   };
 
-  // Lấy icon cho loại sản phẩm
   const getProductTypeIcon = (type: string) => {
     switch (type) {
       case "carbon_credits":
@@ -191,32 +196,56 @@ export default function ProductsManagementPage() {
     }
   };
 
-  // Lấy icon cho tính năng
   const getFeatureIcon = (feature: string) => {
-    if (feature.includes("AI") || feature.includes("CarbonSeek")) {
+    // Standardize feature text for icon matching
+    const lowerCaseFeature = feature.toLowerCase();
+
+    if (
+      lowerCaseFeature.includes("ai") ||
+      lowerCaseFeature.includes("carbonseek")
+    ) {
       return <Zap className="w-4 h-4 text-purple-500" />;
     } else if (
-      feature.includes("Báo cáo") ||
-      feature.includes("ESG") ||
-      feature.includes("Kiểm toán")
+      lowerCaseFeature.includes("báo cáo") ||
+      lowerCaseFeature.includes("esg") ||
+      lowerCaseFeature.includes("kiểm toán") ||
+      lowerCaseFeature.includes("report") ||
+      lowerCaseFeature.includes("audit")
     ) {
       return <FileCheck className="w-4 h-4 text-blue-500" />;
     } else if (
-      feature.includes("Phân tích") ||
-      feature.includes("Trend") ||
-      feature.includes("Xu hướng")
+      lowerCaseFeature.includes("phân tích") ||
+      lowerCaseFeature.includes("trend") ||
+      lowerCaseFeature.includes("xu hướng") ||
+      lowerCaseFeature.includes("analysis")
     ) {
       return <BarChart2 className="w-4 h-4 text-orange-500" />;
-    } else if (feature.includes("Cộng đồng") || feature.includes("Tư vấn")) {
+    } else if (
+      lowerCaseFeature.includes("cộng đồng") ||
+      lowerCaseFeature.includes("tư vấn") ||
+      lowerCaseFeature.includes("community") ||
+      lowerCaseFeature.includes("consultation")
+    ) {
       return <Users className="w-4 h-4 text-indigo-500" />;
-    } else if (feature.includes("Bảo tồn") || feature.includes("Bảo vệ")) {
+    } else if (
+      lowerCaseFeature.includes("bảo tồn") ||
+      lowerCaseFeature.includes("bảo vệ") ||
+      lowerCaseFeature.includes("conservation") ||
+      lowerCaseFeature.includes("protection")
+    ) {
       return <Shield className="w-4 h-4 text-green-500" />;
-    } else if (feature.includes("Quốc tế") || feature.includes("Toàn cầu")) {
+    } else if (
+      lowerCaseFeature.includes("quốc tế") ||
+      lowerCaseFeature.includes("toàn cầu") ||
+      lowerCaseFeature.includes("international") ||
+      lowerCaseFeature.includes("global")
+    ) {
       return <Globe className="w-4 h-4 text-cyan-500" />;
     } else if (
-      feature.includes("Chứng nhận") ||
-      feature.includes("VCS") ||
-      feature.includes("CCB")
+      lowerCaseFeature.includes("chứng nhận") ||
+      lowerCaseFeature.includes("vcs") ||
+      lowerCaseFeature.includes("ccb") ||
+      lowerCaseFeature.includes("certification")
     ) {
       return <Tag className="w-4 h-4 text-red-500" />;
     } else {
@@ -224,7 +253,6 @@ export default function ProductsManagementPage() {
     }
   };
 
-  // Hiển thị thông tin bổ sung dựa trên loại sản phẩm
   const renderAdditionalInfo = (product: Product) => {
     switch (product.type) {
       case "carbon_credits":
@@ -233,22 +261,48 @@ export default function ProductsManagementPage() {
             {product.projectLocation && (
               <div className="flex items-center text-sm text-gray-600">
                 <Globe className="h-4 w-4 mr-2 flex-shrink-0 text-green-600" />
-                <span>{product.projectLocation}</span>
+                <span>
+                  {
+                    productsManagementTranslations.additionalInfo.carbonCredits
+                      .projectLocation[language]
+                  }{" "}
+                  {product.projectLocation}
+                </span>
               </div>
             )}
             {product.carbonAmount && (
               <div className="flex items-center text-sm text-gray-600">
                 <Leaf className="h-4 w-4 mr-2 flex-shrink-0 text-green-600" />
-                <span>Tổng tín chỉ: {product.carbonAmount} tCO2e</span>
+                <span>
+                  {
+                    productsManagementTranslations.additionalInfo.carbonCredits
+                      .totalCredits[language]
+                  }{" "}
+                  {product.carbonAmount}{" "}
+                  {
+                    productsManagementTranslations.additionalInfo.carbonCredits
+                      .unit[language]
+                  }
+                </span>
               </div>
             )}
-            {product.carbonUsed !== undefined && (
+            {product.carbonUsed !== undefined && product.carbonAmount && (
               <div className="mt-2">
                 <div className="flex justify-between text-xs mb-1">
-                  <span>Đã sử dụng: {product.carbonUsed} tCO2e</span>
+                  <span>
+                    {
+                      productsManagementTranslations.additionalInfo
+                        .carbonCredits.usedCredits[language]
+                    }{" "}
+                    {product.carbonUsed}{" "}
+                    {
+                      productsManagementTranslations.additionalInfo
+                        .carbonCredits.unit[language]
+                    }
+                  </span>
                   <span>
                     {Math.round(
-                      (product.carbonUsed / product.carbonAmount!) * 100,
+                      (product.carbonUsed / product.carbonAmount) * 100,
                     )}
                     %
                   </span>
@@ -257,7 +311,7 @@ export default function ProductsManagementPage() {
                   <div
                     className="bg-green-600 h-2 rounded-full"
                     style={{
-                      width: `${(product.carbonUsed / product.carbonAmount!) * 100}%`,
+                      width: `${(product.carbonUsed / product.carbonAmount) * 100}%`,
                     }}
                   ></div>
                 </div>
@@ -270,7 +324,12 @@ export default function ProductsManagementPage() {
           <div className="mt-3 space-y-2">
             <div className="flex items-center text-sm text-gray-600">
               <BookOpen className="h-4 w-4 mr-2 flex-shrink-0 text-blue-600" />
-              <span>Nền tảng tri thức toàn diện về Carbon</span>
+              <span>
+                {
+                  productsManagementTranslations.additionalInfo.carbonAccounting
+                    .description[language]
+                }
+              </span>
             </div>
           </div>
         );
@@ -280,19 +339,36 @@ export default function ProductsManagementPage() {
             {product.issuer && (
               <div className="flex items-center text-sm text-gray-600">
                 <Award className="h-4 w-4 mr-2 flex-shrink-0 text-yellow-600" />
-                <span>Đơn vị cấp: {product.issuer}</span>
+                <span>
+                  {
+                    productsManagementTranslations.additionalInfo
+                      .internationalCertificates.issuer[language]
+                  }{" "}
+                  {product.issuer}
+                </span>
               </div>
             )}
             {product.certificationLevel && (
               <div className="flex items-center text-sm text-gray-600">
                 <Award className="h-4 w-4 mr-2 flex-shrink-0 text-yellow-600" />
-                <span>Cấp độ: {product.certificationLevel}</span>
+                <span>
+                  {
+                    productsManagementTranslations.additionalInfo
+                      .internationalCertificates.certificationLevel[language]
+                  }{" "}
+                  {product.certificationLevel}
+                </span>
               </div>
             )}
             {product.courseProgress !== undefined && (
               <div className="mt-2">
                 <div className="flex justify-between text-xs mb-1">
-                  <span>Tiến độ khóa học</span>
+                  <span>
+                    {
+                      productsManagementTranslations.additionalInfo
+                        .internationalCertificates.courseProgress[language]
+                    }
+                  </span>
                   <span>{product.courseProgress}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
@@ -307,7 +383,11 @@ export default function ProductsManagementPage() {
               <div className="flex items-center text-sm text-gray-600">
                 <Clock className="h-4 w-4 mr-2 flex-shrink-0 text-yellow-600" />
                 <span>
-                  Truy cập gần nhất: {formatDate(product.lastAccessed)}
+                  {
+                    productsManagementTranslations.additionalInfo
+                      .internationalCertificates.lastAccessed[language]
+                  }{" "}
+                  {formatDate(product.lastAccessed)}
                 </span>
               </div>
             )}
@@ -318,13 +398,13 @@ export default function ProductsManagementPage() {
     }
   };
 
-  // Hiển thị sản phẩm dạng lưới
+  // Render Grid View
   const renderGridView = () => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {filteredProducts.map((product) => (
           <Card
-            key={product._id}
+            key={product._id} // Assuming _id is available from API
             className="overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow"
           >
             <div className="relative h-48 w-full">
@@ -343,11 +423,18 @@ export default function ProductsManagementPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-lg line-clamp-2">
-                    {product.name}
+                    {product.name ??
+                      productsManagementTranslations.misc.notAvailable[
+                        language
+                      ]}
                   </CardTitle>
                   <CardDescription className="flex items-center text-sm text-gray-500 mt-1">
                     <Calendar className="h-4 w-4 mr-1 flex-shrink-0" />
-                    Ngày mua: {formatDate(product.purchaseDate)}
+                    {
+                      productsManagementTranslations.productDetails
+                        .purchaseDate[language]
+                    }{" "}
+                    {formatDate(product.purchaseDate)}
                   </CardDescription>
                 </div>
                 <div className="flex items-center">
@@ -360,7 +447,8 @@ export default function ProductsManagementPage() {
             </CardHeader>
             <CardContent className="flex-grow">
               <p className="text-sm text-gray-600 line-clamp-3">
-                {product.description}
+                {product.description ??
+                  productsManagementTranslations.misc.noDescription[language]}
               </p>
 
               {renderAdditionalInfo(product)}
@@ -368,7 +456,11 @@ export default function ProductsManagementPage() {
               {product.features && product.features.length > 0 && (
                 <div className="mt-4">
                   <p className="text-sm font-medium text-gray-700 mb-2">
-                    Tính năng chính:
+                    {
+                      productsManagementTranslations.productDetails.keyFeatures[
+                        language
+                      ]
+                    }
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {product.features.slice(0, 3).map((feature, index) => (
@@ -392,13 +484,18 @@ export default function ProductsManagementPage() {
               {product.expiryDate && (
                 <p className="text-sm text-gray-500 mt-3 flex items-center">
                   <Clock className="h-4 w-4 mr-1 flex-shrink-0" />
-                  Hết hạn: {formatDate(product.expiryDate)}
+                  {
+                    productsManagementTranslations.productDetails.expires[
+                      language
+                    ]
+                  }{" "}
+                  {formatDate(product.expiryDate)}
                 </p>
               )}
             </CardContent>
             <CardFooter className="flex flex-wrap gap-2 pt-0">
               <Link
-                href={getProductDetailLink(product.type, product.id)}
+                href={getProductDetailLink(product.type, product._id)}
                 className="flex-1"
               >
                 <Button
@@ -406,18 +503,32 @@ export default function ProductsManagementPage() {
                   size="sm"
                   className="w-full bg-green-600 hover:bg-green-700"
                 >
-                  Quản lý
+                  {
+                    productsManagementTranslations.productDetails.manageButton[
+                      language
+                    ]
+                  }
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" className="p-2">
                   <FileText className="h-4 w-4" />
-                  <span className="sr-only">Xem chi tiết</span>
+                  <span className="sr-only">
+                    {
+                      productsManagementTranslations.productDetails
+                        .viewDetailsSrOnly[language]
+                    }
+                  </span>
                 </Button>
                 <Button variant="outline" size="sm" className="p-2">
                   <Settings className="h-4 w-4" />
-                  <span className="sr-only">Cài đặt</span>
+                  <span className="sr-only">
+                    {
+                      productsManagementTranslations.productDetails
+                        .settingsSrOnly[language]
+                    }
+                  </span>
                 </Button>
                 {product.status !== "active" && (
                   <Button
@@ -426,7 +537,12 @@ export default function ProductsManagementPage() {
                     className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50"
                   >
                     <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Xóa</span>
+                    <span className="sr-only">
+                      {
+                        productsManagementTranslations.productDetails
+                          .deleteSrOnly[language]
+                      }
+                    </span>
                   </Button>
                 )}
               </div>
@@ -437,13 +553,13 @@ export default function ProductsManagementPage() {
     );
   };
 
-  // Hiển thị sản phẩm dạng danh sách
+  // Render List View
   const renderListView = () => {
     return (
       <div className="space-y-4">
         {filteredProducts.map((product) => (
           <Card
-            key={product.id}
+            key={product._id} // Assuming _id is available from API
             className="overflow-hidden hover:shadow-md transition-shadow"
           >
             <div className="flex flex-col md:flex-row">
@@ -462,7 +578,11 @@ export default function ProductsManagementPage() {
                     <h3 className="text-lg font-medium">{product.name}</h3>
                     <div className="flex items-center text-sm text-gray-500 mt-1">
                       <Calendar className="h-4 w-4 mr-1 flex-shrink-0" />
-                      Ngày mua: {formatDate(product.purchaseDate)}
+                      {
+                        productsManagementTranslations.productDetails
+                          .purchaseDate[language]
+                      }{" "}
+                      {formatDate(product.purchaseDate)}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -477,7 +597,8 @@ export default function ProductsManagementPage() {
                 </div>
 
                 <p className="text-sm text-gray-600 mb-3">
-                  {product.description}
+                  {product.description ??
+                    productsManagementTranslations.misc.noDescription[language]}
                 </p>
 
                 {renderAdditionalInfo(product)}
@@ -508,24 +629,37 @@ export default function ProductsManagementPage() {
                     {product.expiryDate && (
                       <span className="text-sm text-gray-500 ml-4 flex items-center">
                         <Clock className="h-4 w-4 mr-1 flex-shrink-0" />
-                        Hết hạn: {formatDate(product.expiryDate)}
+                        {
+                          productsManagementTranslations.productDetails.expires[
+                            language
+                          ]
+                        }{" "}
+                        {formatDate(product.expiryDate)}
                       </span>
                     )}
                   </div>
                   <div className="flex gap-2">
-                    <Link href={getProductDetailLink(product.type, product.id)}>
+                    <Link
+                      href={getProductDetailLink(product.type, product._id)}
+                    >
                       <Button
                         variant="default"
                         size="sm"
                         className="bg-green-600 hover:bg-green-700"
                       >
-                        Quản lý
+                        {
+                          productsManagementTranslations.productDetails
+                            .manageButton[language]
+                        }
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>
                     <Button variant="outline" size="sm">
                       <FileText className="h-4 w-4 mr-2" />
-                      Chi tiết
+                      {
+                        productsManagementTranslations.productDetails
+                          .detailsButton[language]
+                      }
                     </Button>
                   </div>
                 </div>
@@ -537,13 +671,21 @@ export default function ProductsManagementPage() {
     );
   };
 
+  const resetFilters = () => {
+    setActiveTab("all");
+    setActiveTypeTab("all");
+    setSearchTerm("");
+  };
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Quản lý sản phẩm</h1>
+          <h1 className="text-3xl font-bold">
+            {productsManagementTranslations.pageHeader.title[language]}
+          </h1>
           <p className="text-gray-500 mt-1">
-            Quản lý tất cả sản phẩm và dịch vụ bạn đã đăng ký
+            {productsManagementTranslations.pageHeader.description[language]}
           </p>
         </div>
         <Button
@@ -551,10 +693,11 @@ export default function ProductsManagementPage() {
           className="bg-green-600 hover:bg-green-700"
         >
           <ShoppingCart className="w-4 h-4 mr-2" />
-          Mua thêm sản phẩm
+          {productsManagementTranslations.pageHeader.buyMoreButton[language]}
         </Button>
       </div>
 
+      {/* Product Filter and Search Section */}
       <div className="bg-white rounded-lg shadow-sm border p-4 mb-8">
         <div className="flex flex-col md:flex-row gap-4 justify-between">
           <div className="relative w-full md:w-96">
@@ -564,13 +707,18 @@ export default function ProductsManagementPage() {
             />
             <input
               type="text"
-              placeholder="Tìm kiếm sản phẩm..."
+              placeholder={
+                productsManagementTranslations.filterSection.searchPlaceholder[
+                  language
+                ]
+              }
               className="pl-10 pr-4 py-2 border rounded-md w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <div className="flex gap-2">
+            {/* View Mode Buttons */}
             <div className="flex border rounded-md overflow-hidden">
               <button
                 onClick={() => setViewMode("grid")}
@@ -619,149 +767,163 @@ export default function ProductsManagementPage() {
             </div>
             <Button variant="outline" size="sm" className="flex items-center">
               <Filter className="w-4 h-4 mr-2" />
-              Lọc
+              {
+                productsManagementTranslations.filterSection.filterButton[
+                  language
+                ]
+              }
             </Button>
             <Button variant="outline" size="sm" className="flex items-center">
               <Download className="w-4 h-4 mr-2" />
-              Xuất
+              {
+                productsManagementTranslations.filterSection.exportButton[
+                  language
+                ]
+              }
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg border p-4">
-            <h3 className="font-medium text-lg mb-4">Loại sản phẩm</h3>
-            <div className="space-y-2">
-              <button
-                onClick={() => setActiveTypeTab("all")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  activeTypeTab === "all"
-                    ? "bg-green-50 text-green-600"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                <Package className="w-5 h-5 mr-3" />
-                Tất cả sản phẩm
-              </button>
-              <button
-                onClick={() => setActiveTypeTab("carbon_credits")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  activeTypeTab === "carbon_credits"
-                    ? "bg-green-50 text-green-600"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                <Leaf className="w-5 h-5 mr-3" />
-                Tín chỉ Carbon
-              </button>
-              <button
-                onClick={() => setActiveTypeTab("carbon_accounting")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  activeTypeTab === "carbon_accounting"
-                    ? "bg-green-50 text-green-600"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                <BookOpen className="w-5 h-5 mr-3" />
-                Carbon Toàn Thư
-              </button>
-              <button
-                onClick={() => setActiveTypeTab("international_certificates")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  activeTypeTab === "international_certificates"
-                    ? "bg-green-50 text-green-600"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                <Award className="w-5 h-5 mr-3" />
-                Chứng chỉ Quốc tế
-              </button>
-            </div>
-
-            <h3 className="font-medium text-lg mt-8 mb-4">Trạng thái</h3>
-            <div className="space-y-2">
-              <button
-                onClick={() => setActiveTab("all")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  activeTab === "all"
-                    ? "bg-green-50 text-green-600"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                Tất cả trạng thái
-              </button>
-              <button
-                onClick={() => setActiveTab("active")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  activeTab === "active"
-                    ? "bg-green-50 text-green-600"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                <CheckCircle2 className="w-4 h-4 mr-2 text-green-600" />
-                Đang hoạt động
-              </button>
-              <button
-                onClick={() => setActiveTab("pending")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  activeTab === "pending"
-                    ? "bg-green-50 text-green-600"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                <Clock className="w-4 h-4 mr-2 text-yellow-600" />
-                Đang xử lý
-              </button>
-              <button
-                onClick={() => setActiveTab("expired")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  activeTab === "expired"
-                    ? "bg-green-50 text-green-600"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                <AlertCircle className="w-4 h-4 mr-2 text-red-600" />
-                Hết hạn
-              </button>
-            </div>
+      {/* Display pending products list */}
+      {pendingProductsList.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">
+            {productsManagementTranslations.pendingProducts.title[language]}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {pendingProductsList.map(({ order, product }) =>
+              product ? (
+                <Card
+                  key={order._id}
+                  className="hover:shadow-md transition-shadow"
+                >
+                  <CardHeader>
+                    <CardTitle className="text-lg">
+                      {product.name ??
+                        productsManagementTranslations.misc.notAvailable[
+                          language
+                        ]}
+                    </CardTitle>
+                    <div className="flex items-center text-sm text-gray-500">
+                      <span>
+                        {
+                          productsManagementTranslations.pendingProducts
+                            .orderCode[language]
+                        }{" "}
+                        {order.orderCode}
+                      </span>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <p className="text-sm text-gray-600">
+                        {product.description ??
+                          productsManagementTranslations.misc.noDescription[
+                            language
+                          ]}
+                      </p>
+                      <div className="flex items-center text-sm text-gray-600">
+                        <span>
+                          {
+                            productsManagementTranslations.pendingProducts
+                              .amount[language]
+                          }{" "}
+                          {formatCurrency(order.amount)}
+                        </span>
+                      </div>
+                      <div className="flex items-center text-sm text-gray-600">
+                        <span>
+                          {
+                            productsManagementTranslations.pendingProducts
+                              .expires[language]
+                          }{" "}
+                          {formatDate(order.expiredAt)}
+                        </span>
+                      </div>
+                      {order.linkthanhtoan && (
+                        <Button
+                          asChild
+                          className="bg-yellow-600 hover:bg-yellow-700"
+                        >
+                          <a
+                            href={order.linkthanhtoan}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {
+                              productsManagementTranslations.pendingProducts
+                                .payNowButton[language]
+                            }
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div key={order._id} className="p-4 text-red-500">
+                  {
+                    productsManagementTranslations.pendingProducts
+                      .productNotFound[language]
+                  }
+                </div>
+              ),
+            )}
           </div>
         </div>
+      )}
 
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+        <div className="lg:col-span-1">
+          <ProductSidebar
+            activeTypeTab={activeTypeTab}
+            setActiveTypeTab={setActiveTypeTab}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
+        </div>
         <div className="lg:col-span-3">
-          {filteredProducts.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-lg border">
-              <ShoppingCart className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Không tìm thấy sản phẩm nào
-              </h3>
-              <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                Không tìm thấy sản phẩm nào phù hợp với tiêu chí tìm kiếm của
-                bạn.
-              </p>
-              <Button
-                onClick={() => {
-                  setActiveTab("all");
-                  setActiveTypeTab("all");
-                  setSearchTerm("");
-                }}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                Xem tất cả sản phẩm
-              </Button>
-            </div>
+          {filteredProducts.length === 0 && pendingProductsList.length === 0 ? (
+            <EmptyState
+              resetFilters={resetFilters}
+              translations={{
+                title:
+                  productsManagementTranslations.emptyState.title[language],
+                description:
+                  productsManagementTranslations.emptyState.description[
+                    language
+                  ],
+                resetButton:
+                  productsManagementTranslations.emptyState.resetButton[
+                    language
+                  ],
+              }}
+            />
           ) : (
-            <div>
+            filteredProducts.length > 0 && (
+              // This is where you would typically render the products based on filteredProducts
+              // I'm including the original render functions for context, assuming ProductTabs
+              // might eventually use these or similar logic for rendering its internal products.
               <Tabs defaultValue="all" className="mb-6">
                 <TabsList>
-                  <TabsTrigger value="all"></TabsTrigger>
+                  {/* This TabsList seems empty or only has a default "all" trigger without visible text.
+                     Consider adding actual tabs here based on product status/type if needed
+                     Example: <TabsTrigger value="all">{productsManagementTranslations.productStatusFilters.all.label[language]}</TabsTrigger>
+                 */}
+                  <TabsTrigger value="all">
+                    {
+                      productsManagementTranslations.productStatusFilters.all
+                        .label[language]
+                    }
+                  </TabsTrigger>{" "}
+                  {/* Added text */}
                 </TabsList>
                 <TabsContent value="all" className="mt-4">
                   {viewMode === "grid" ? renderGridView() : renderListView()}
                 </TabsContent>
               </Tabs>
-            </div>
+            )
           )}
         </div>
       </div>

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Package,
   Leaf,
@@ -7,6 +9,8 @@ import {
   Clock,
   AlertCircle,
 } from "lucide-react";
+import { useLanguage } from "@/context/language-context"; // Import language hook
+import productSidebarTranslations from "./langauge-product-sidebar";
 
 interface ProductSidebarProps {
   activeTypeTab: string;
@@ -21,9 +25,13 @@ export function ProductSidebar({
   activeTab,
   setActiveTab,
 }: ProductSidebarProps) {
+  const { language } = useLanguage(); // Get current language
+
   return (
     <div className="bg-white rounded-lg border p-4">
-      <h3 className="font-medium text-lg mb-4">Loại sản phẩm</h3>
+      <h3 className="font-medium text-lg mb-4">
+        {productSidebarTranslations.productTypeTitle[language]}
+      </h3>
       <div className="space-y-2">
         <button
           onClick={() => setActiveTypeTab("all")}
@@ -34,7 +42,7 @@ export function ProductSidebar({
           }`}
         >
           <Package className="w-5 h-5 mr-3" />
-          Tất cả sản phẩm
+          {productSidebarTranslations.productTypeOptions.all[language]}
         </button>
         <button
           onClick={() => setActiveTypeTab("carbon_credits")}
@@ -45,7 +53,11 @@ export function ProductSidebar({
           }`}
         >
           <Leaf className="w-5 h-5 mr-3" />
-          Tín chỉ Carbon
+          {
+            productSidebarTranslations.productTypeOptions.carbon_credits[
+              language
+            ]
+          }
         </button>
         <button
           onClick={() => setActiveTypeTab("carbon_accounting")}
@@ -56,7 +68,11 @@ export function ProductSidebar({
           }`}
         >
           <BookOpen className="w-5 h-5 mr-3" />
-          Carbon Toàn Thư
+          {
+            productSidebarTranslations.productTypeOptions.carbon_accounting[
+              language
+            ]
+          }
         </button>
         <button
           onClick={() => setActiveTypeTab("international_certificates")}
@@ -67,11 +83,16 @@ export function ProductSidebar({
           }`}
         >
           <Award className="w-5 h-5 mr-3" />
-          Chứng chỉ Quốc tế
+          {
+            productSidebarTranslations.productTypeOptions
+              .international_certificates[language]
+          }
         </button>
       </div>
 
-      <h3 className="font-medium text-lg mt-8 mb-4">Trạng thái</h3>
+      <h3 className="font-medium text-lg mt-8 mb-4">
+        {productSidebarTranslations.statusTitle[language]}
+      </h3>
       <div className="space-y-2">
         <button
           onClick={() => setActiveTab("all")}
@@ -81,7 +102,7 @@ export function ProductSidebar({
               : "text-gray-700 hover:bg-gray-50"
           }`}
         >
-          Tất cả trạng thái
+          {productSidebarTranslations.statusOptions.all[language]}
         </button>
         <button
           onClick={() => setActiveTab("active")}
@@ -92,7 +113,7 @@ export function ProductSidebar({
           }`}
         >
           <CheckCircle2 className="w-4 h-4 mr-2 text-green-600" />
-          Đang hoạt độngss
+          {productSidebarTranslations.statusOptions.active[language]}
         </button>
         <button
           onClick={() => setActiveTab("pending")}
@@ -103,7 +124,7 @@ export function ProductSidebar({
           }`}
         >
           <Clock className="w-4 h-4 mr-2 text-yellow-600" />
-          Đang xử lý
+          {productSidebarTranslations.statusOptions.pending[language]}
         </button>
         <button
           onClick={() => setActiveTab("expired")}
@@ -114,7 +135,7 @@ export function ProductSidebar({
           }`}
         >
           <AlertCircle className="w-4 h-4 mr-2 text-red-600" />
-          Hết hạn
+          {productSidebarTranslations.statusOptions.expired[language]}
         </button>
       </div>
     </div>

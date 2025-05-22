@@ -8,7 +8,10 @@ import ForestExplorer from "@/components/forest/ForestExplorer";
 import StaticCertificate from "@/components/static-certificate";
 import CertificateGenerator from "@/components/certificate-generator";
 import { apiDonation } from "../fetch/fetch.donation";
-import dynamic from "next/dynamic";
+// Removed 'dynamic' import as it was unused
+import translations from "./language"; // Đảm bảo đường dẫn đúng đến file language.js
+import { useLanguage } from "@/context/language-context"; // Đảm bảo hook useLanguage có sẵn
+
 export default function GopMamXanhPage() {
   const [donorName, setDonorName] = useState<string>("");
   const [donorNote, setDonorNote] = useState<string>("");
@@ -16,6 +19,8 @@ export default function GopMamXanhPage() {
   const [treeCount, setTreeCount] = useState<number>(1);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [showCertificate, setShowCertificate] = useState<boolean>(false);
+  // Sử dụng hook useLanguage để lấy ngôn ngữ hiện tại
+  const { language } = useLanguage();
   const [forestStats, setForestStats] = useState<{
     treeCount: number;
     contributorCount: number;
@@ -85,10 +90,10 @@ export default function GopMamXanhPage() {
         </div>
         <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center items-start">
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-            Góp Mầm Xanh
+            {translations.hero.title[language]}
           </h1>
           <p className="text-white text-lg max-w-xl">
-            Cùng chung tay góp cây xanh cho xã hội, vì một tương lai bền vững.
+            {translations.hero.subtitle[language]}
           </p>
         </div>
       </section>
@@ -97,10 +102,11 @@ export default function GopMamXanhPage() {
       <section className="py-16 px-4 bg-gradient-to-b from-gray-50 to-green-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Rừng cộng đồng</h2>
+            <h2 className="text-3xl font-bold mb-4">
+              {translations.communityForest.title[language]}
+            </h2>
             <p className="max-w-3xl mx-auto text-gray-600">
-              Khám phá khu rừng cộng đồng đang phát triển với những tác động
-              thật sự lên các dự án phủ xanh tại Việt Nam.
+              {translations.communityForest.description[language]}
             </p>
           </div>
           <div
@@ -120,7 +126,9 @@ export default function GopMamXanhPage() {
                     forestStats.treeCount || 0
                   )}
                 </div>
-                <div className="text-sm text-gray-500 mt-1">Cây đã góp</div>
+                <div className="text-sm text-gray-500 mt-1">
+                  {translations.communityForest.treeCount[language]}
+                </div>
               </div>
               <div className="p-6 text-center border-b md:border-b-0 md:border-r border-emerald-100">
                 <div className="text-3xl font-bold text-emerald-600">
@@ -130,7 +138,9 @@ export default function GopMamXanhPage() {
                     forestStats.contributorCount || 0
                   )}
                 </div>
-                <div className="text-sm text-gray-500 mt-1">Người đóng góp</div>
+                <div className="text-sm text-gray-500 mt-1">
+                  {translations.communityForest.contributorCount[language]}
+                </div>
               </div>
               <div className="p-6 text-center">
                 <div className="text-3xl font-bold text-emerald-600">
@@ -141,7 +151,7 @@ export default function GopMamXanhPage() {
                   )}
                 </div>
                 <div className="text-sm text-gray-500 mt-1">
-                  CO₂ giảm thiểu mỗi năm
+                  {translations.communityForest.co2Reduction[language]}
                 </div>
               </div>
             </div>
@@ -162,11 +172,10 @@ export default function GopMamXanhPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-6">
                 <h2 className="text-3xl font-bold text-white mb-2">
-                  Dự án thực tế triển khai
+                  {translations.projectDetails.title[language]}
                 </h2>
                 <p className="text-white max-w-2xl">
-                  Dự án trồng rừng 21 hecta tại xã Cự Đồng, huyện Thanh Sơn,
-                  tỉnh Phú Thọ - Mã dự án: TCCV_VN_19_001
+                  {translations.projectDetails.subtitle[language]}
                 </p>
               </div>
             </div>
@@ -174,7 +183,7 @@ export default function GopMamXanhPage() {
             <div className="p-6">
               <div className="mb-4">
                 <h3 className="text-xl font-bold text-center">
-                  chi tiết dự án
+                  {translations.projectDetails.technicalInfo.title[language]}
                 </h3>
               </div>
 
@@ -182,77 +191,39 @@ export default function GopMamXanhPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
                     <p className="text-gray-700 mb-4">
-                      Dự án trồng rừng bền vững tại Cự Đồng được triển khai bởi
-                      Carbon Credits Vietnam với sự hợp tác của chính quyền địa
-                      phương và cộng đồng dân cư. Dự án không chỉ giúp phủ xanh
-                      đất trống đồi núi trọc mà còn tạo sinh kế bền vững cho
-                      người dân địa phương.
+                      {translations.projectDetails.intro[language]}
                     </p>
 
                     <div className="bg-green-50 p-4 rounded-lg border border-green-100 mb-4">
                       <h4 className="font-semibold text-green-800 mb-2">
-                        Tác động môi trường
+                        {
+                          translations.projectDetails.environmentalImpact.title[
+                            language
+                          ]
+                        }
                       </h4>
                       <ul className="space-y-2">
-                        <li className="flex items-start">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 text-green-600 mr-2 mt-0.5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                          <span>
-                            Hấp thụ 1.292 tấn CO₂ mỗi năm, góp phần giảm thiểu
-                            biến đổi khí hậu
-                          </span>
-                        </li>
-                        <li className="flex items-start">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 text-green-600 mr-2 mt-0.5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                          <span>
-                            Ngăn chặn xói mòn đất và cải thiện chất lượng nguồn
-                            nước
-                          </span>
-                        </li>
-                        <li className="flex items-start">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 text-green-600 mr-2 mt-0.5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                          <span>
-                            Tăng cường đa dạng sinh học với các loài cây bản địa
-                          </span>
-                        </li>
+                        {translations.projectDetails.environmentalImpact.items.map(
+                          (item, index) => (
+                            <li key={index} className="flex items-start">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5 text-green-600 mr-2 mt-0.5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                              <span>{item[language]}</span>
+                            </li>
+                          ),
+                        )}
                       </ul>
                     </div>
                   </div>
@@ -260,69 +231,34 @@ export default function GopMamXanhPage() {
                   <div>
                     <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4">
                       <h4 className="font-semibold text-blue-800 mb-2">
-                        Tác động xã hội
+                        {
+                          translations.projectDetails.socialImpact.title[
+                            language
+                          ]
+                        }
                       </h4>
                       <ul className="space-y-2">
-                        <li className="flex items-start">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 text-blue-600 mr-2 mt-0.5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                          <span>
-                            Tạo ra 50 việc làm ổn định cho người dân địa phương
-                            mỗi năm
-                          </span>
-                        </li>
-                        <li className="flex items-start">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 text-blue-600 mr-2 mt-0.5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                          <span>
-                            Tăng thu nhập bình quân hộ gia đình lên 30% thông
-                            qua các hoạt động lâm nghiệp bền vững
-                          </span>
-                        </li>
-                        <li className="flex items-start">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 text-blue-600 mr-2 mt-0.5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                          <span>
-                            Đào tạo kỹ thuật lâm nghiệp bền vững cho hơn 200
-                            người dân địa phương
-                          </span>
-                        </li>
+                        {translations.projectDetails.socialImpact.items.map(
+                          (item, index) => (
+                            <li key={index} className="flex items-start">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5 text-blue-600 mr-2 mt-0.5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                              <span>{item[language]}</span>
+                            </li>
+                          ),
+                        )}
                       </ul>
                     </div>
 
@@ -330,7 +266,10 @@ export default function GopMamXanhPage() {
                       <div className="relative h-[120px] rounded-lg overflow-hidden">
                         <Image
                           src="https://res.cloudinary.com/dyticflm3/image/upload/v1744836233/20240915_093409_lknqhd.jpg"
-                          alt="Đội ngũ dự án"
+                          alt={
+                            translations.projectDetails.additionalImages[0]
+                              .title[language]
+                          }
                           fill
                           className="object-cover"
                         />
@@ -338,7 +277,10 @@ export default function GopMamXanhPage() {
                       <div className="relative h-[120px] rounded-lg overflow-hidden">
                         <Image
                           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1730032197659.jpg-nD2t3kPh1A7zPzSkNZ1kVWYm9tVQMM.jpeg"
-                          alt="Lễ ký kết giữa Kiểm lâm địa phương và đơn vị"
+                          alt={
+                            translations.projectDetails.additionalImages[1]
+                              .title[language]
+                          }
                           fill
                           className="object-cover"
                         />
@@ -349,104 +291,128 @@ export default function GopMamXanhPage() {
 
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h4 className="font-semibold mb-3">
-                    Thông tin kỹ thuật dự án
+                    {translations.projectDetails.technicalInfo.title[language]}
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <p className="text-sm text-gray-500">Loại dự án</p>
-                      <p className="font-medium">Tái trồng rừng (ARR)</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Loại cây trồng</p>
-                      <p className="font-medium">
-                        Gù Hương (Cinnamomum Parthenoxylon) và Thông
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Mật độ trồng</p>
-                      <p className="font-medium">1.100 cây/hecta</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Thời gian dự án</p>
-                      <p className="font-medium">40 năm</p>
-                    </div>
-                    <div>
                       <p className="text-sm text-gray-500">
-                        Tiêu chuẩn áp dụng
+                        {
+                          translations.projectDetails.technicalInfo.projectType
+                            .label[language]
+                        }
                       </p>
                       <p className="font-medium">
-                        ARR Carbon Whitepaper - Version 1, 2023
+                        {
+                          translations.projectDetails.technicalInfo.projectType
+                            .value[language]
+                        }
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">
-                        Mục tiêu phát triển bền vững
+                        {
+                          translations.projectDetails.technicalInfo.treeSpecies
+                            .label[language]
+                        }
                       </p>
-                      <p className="font-medium">SDG 13, 15, 1, 4</p>
+                      <p className="font-medium">
+                        {
+                          translations.projectDetails.technicalInfo.treeSpecies
+                            .value[language]
+                        }
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">
+                        {
+                          translations.projectDetails.technicalInfo
+                            .plantingDensity.label[language]
+                        }
+                      </p>
+                      <p className="font-medium">
+                        {
+                          translations.projectDetails.technicalInfo
+                            .plantingDensity.value[language]
+                        }
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">
+                        {
+                          translations.projectDetails.technicalInfo
+                            .projectDuration.label[language]
+                        }
+                      </p>
+                      <p className="font-medium">
+                        {
+                          translations.projectDetails.technicalInfo
+                            .projectDuration.value[language]
+                        }
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">
+                        {
+                          translations.projectDetails.technicalInfo
+                            .standardsApplied.label[language]
+                        }
+                      </p>
+                      <p className="font-medium">
+                        {
+                          translations.projectDetails.technicalInfo
+                            .standardsApplied.value[language]
+                        }
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">
+                        {
+                          translations.projectDetails.technicalInfo.sdgGoals
+                            .label[language]
+                        }
+                      </p>
+                      <p className="font-medium">
+                        {
+                          translations.projectDetails.technicalInfo.sdgGoals
+                            .value[language]
+                        }
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
-                    <div className="relative h-[140px]">
-                      <Image
-                        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_2085.jpg-Z3cyOVYXCBpwCLMNNqO7yuhM5QU9Z4.jpeg"
-                        alt="Hệ thống tưới nhỏ giọt"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="p-3">
-                      <h5 className="font-medium text-sm mb-1">
-                        Công nghệ tưới tiên tiến
-                      </h5>
-                      <p className="text-xs text-gray-600">
-                        Hệ thống tưới nhỏ giọt tiết kiệm 60% lượng nước so với
-                        phương pháp truyền thống
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
-                    <div className="relative h-[140px]">
-                      <Image
-                        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_2014.jpg-CNdj11tLzOAmSHK0FXwtVTwWPXnigk.jpeg"
-                        alt="Khu vực trồng cây"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="p-3">
-                      <h5 className="font-medium text-sm mb-1">
-                        Quy hoạch khoa học
-                      </h5>
-                      <p className="text-xs text-gray-600">
-                        Thiết kế trồng rừng tối ưu dựa trên nghiên cứu địa hình
-                        và thổ nhưỡng
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
-                    <div className="relative h-[140px]">
-                      <Image
-                        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_2033.jpg-5ckI5Hz41LfL9Yc7raxiNZDaLkirlD.jpeg"
-                        alt="Khảo sát địa hình"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="p-3">
-                      <h5 className="font-medium text-sm mb-1">
-                        Giám sát liên tục
-                      </h5>
-                      <p className="text-xs text-gray-600">
-                        Hệ thống giám sát tăng trưởng cây và hấp thụ carbon theo
-                        thời gian thực
-                      </p>
-                    </div>
-                  </div>
+                  {translations.projectDetails.additionalImages.map(
+                    (item, index) => (
+                      <div
+                        key={index}
+                        className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100"
+                      >
+                        <div className="relative h-[140px]">
+                          <Image
+                            src={
+                              index === 0
+                                ? "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_2085.jpg-Z3cyOVYXCBpwCLMNNqO7yuhM5QU9Z4.jpeg"
+                                : index === 1
+                                  ? "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_2014.jpg-CNdj11tLzOAmSHK0FXwtVTwWPXnigk.jpeg"
+                                  : "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_2033.jpg-5ckI5Hz41LfL9Yc7raxiNZDaLkirlD.jpeg"
+                            }
+                            alt={item.title[language]}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="p-3">
+                          <h5 className="font-medium text-sm mb-1">
+                            {item.title[language]}
+                          </h5>
+                          <p className="text-xs text-gray-600">
+                            {item.description[language]}
+                          </p>
+                        </div>
+                      </div>
+                    ),
+                  )}
                 </div>
               </div>
 
@@ -478,7 +444,7 @@ export default function GopMamXanhPage() {
                     <path d="M18 12h.01"></path>
                     <path d="M6 12h.01"></path>
                   </svg>
-                  Góp thêm mầm xanh
+                  {translations.projectDetails.contributeButton[language]}
                 </Button>
               </div>
             </div>
@@ -491,11 +457,10 @@ export default function GopMamXanhPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold mb-4">
-              Mô hình 3D khu vực dự án
+              {translations.modelSection.title[language]}
             </h2>
             <p className="max-w-3xl mx-auto text-gray-600">
-              Khám phá mô hình 3D chi tiết của khu vực dự án được tạo từ dữ liệu
-              LiDAR.
+              {translations.modelSection.description[language]}
             </p>
           </div>
 
@@ -528,8 +493,7 @@ export default function GopMamXanhPage() {
             </div>
             <div className="p-4 bg-gray-50 border-t border-gray-200">
               <p className="text-sm text-gray-600 text-center">
-                Mô hình 3D này giúp chúng tôi lập kế hoạch trồng cây hiệu quả và
-                theo dõi sự phát triển của rừng theo thời gian.
+                {translations.modelSection.caption[language]}
               </p>
             </div>
           </div>
@@ -540,17 +504,18 @@ export default function GopMamXanhPage() {
       <section className="py-12 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-4">Mục tiêu trồng cây</h2>
+            <h2 className="text-3xl font-bold mb-4">
+              {translations.plantingGoals.title[language]}
+            </h2>
             <p className="max-w-3xl mx-auto text-gray-600">
-              Chúng tôi đặt mục tiêu trồng 10.000 cây xanh để tạo nên một khu
-              rừng cộng đồng bền vững.
+              {translations.plantingGoals.description[language]}
             </p>
           </div>
 
           <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
             <div className="flex justify-between mb-2">
               <span className="font-semibold text-gray-700">
-                Tiến độ hiện tại
+                {translations.plantingGoals.progress[language]}
               </span>
               <span className="font-semibold text-gray-700">
                 {forestStats.isLoading
@@ -586,11 +551,10 @@ export default function GopMamXanhPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">
-              Trồng một cây xanh, vì tương lai bền vững
+              {translations.plantTreeSection.title[language]}
             </h2>
             <p className="max-w-3xl mx-auto text-gray-600">
-              Với mỗi 55.000 VND đóng góp, bạn sẽ trồng được một cây xanh và
-              nhận được một hòn đảo 3D tương tác mang tên của bạn.
+              {translations.plantTreeSection.description[language]}
             </p>
           </div>
 
@@ -618,12 +582,17 @@ export default function GopMamXanhPage() {
                         </svg>
                       </div>
                       <h3 className="text-xl font-semibold text-green-800">
-                        Đóng góp thành công!
+                        {
+                          translations.plantTreeSection.donationSuccess.title[
+                            language
+                          ]
+                        }
                       </h3>
                     </div>
                     <p className="text-green-700 mb-6">
-                      Cảm ơn {donorName} đã đóng góp trồng {treeCount} cây xanh.
-                      Mã đóng góp của bạn là: {treeId}.
+                      {translations.plantTreeSection.donationSuccess.message[
+                        language
+                      ](donorName, treeCount, treeId)}
                     </p>
 
                     <div className="flex justify-center">
@@ -640,7 +609,10 @@ export default function GopMamXanhPage() {
                           }
                         }}
                       >
-                        Xem chứng nhận của bạn
+                        {
+                          translations.plantTreeSection.donationSuccess
+                            .viewCertificateButton[language]
+                        }
                       </Button>
                     </div>
                   </div>
@@ -651,7 +623,10 @@ export default function GopMamXanhPage() {
                   >
                     <div className="mb-6">
                       <h3 className="text-2xl font-bold text-center mb-6">
-                        Chứng nhận đóng góp
+                        {
+                          translations.plantTreeSection.certificateSection
+                            .title[language]
+                        }
                       </h3>
 
                       <div className="space-y-8">
@@ -685,7 +660,10 @@ export default function GopMamXanhPage() {
                                   ry="2"
                                 ></rect>
                               </svg>
-                              Chứng nhận video
+                              {
+                                translations.plantTreeSection.certificateSection
+                                  .videoTab[language]
+                              }
                             </button>
                             <button
                               onClick={() => setActiveTab("image")}
@@ -716,7 +694,10 @@ export default function GopMamXanhPage() {
                                 <circle cx="8.5" cy="8.5" r="1.5"></circle>
                                 <polyline points="21 15 16 10 5 21"></polyline>
                               </svg>
-                              Chứng nhận hình ảnh
+                              {
+                                translations.plantTreeSection.certificateSection
+                                  .imageTab[language]
+                              }
                             </button>
                           </nav>
                         </div>
@@ -725,7 +706,10 @@ export default function GopMamXanhPage() {
                           className={activeTab === "video" ? "block" : "hidden"}
                         >
                           <h4 className="text-xl font-semibold mb-4 text-center">
-                            Chứng nhận video
+                            {
+                              translations.plantTreeSection.certificateSection
+                                .videoTab[language]
+                            }
                           </h4>
                           <div className="bg-white rounded-lg overflow-hidden">
                             <CertificateGenerator
@@ -741,7 +725,10 @@ export default function GopMamXanhPage() {
                           className={activeTab === "image" ? "block" : "hidden"}
                         >
                           <h4 className="text-xl font-semibold mb-4 text-center">
-                            Chứng nhận hình ảnh
+                            {
+                              translations.plantTreeSection.certificateSection
+                                .imageTab[language]
+                            }
                           </h4>
                           <div id="static-certificate">
                             <StaticCertificate
@@ -763,34 +750,51 @@ export default function GopMamXanhPage() {
 
             {/* Right column - Project information */}
             <div>
-              <h3 className="text-2xl font-bold mb-6">Về dự án trồng cây</h3>
+              <h3 className="text-2xl font-bold mb-6">
+                {translations.plantTreeSection.aboutProject.title[language]}
+              </h3>
 
               <div className="space-y-6">
                 <p>
-                  Dự án "Góp Mầm Xanh" là sáng kiến nhằm khôi phục và bảo vệ môi
-                  trường thông qua việc trồng cây. Mỗi cây xanh được trồng sẽ
-                  góp phần giảm thiểu tác động của biến đổi khí hậu và tạo ra
-                  môi trường sống tốt hơn cho các thế hệ tương lai. Những hỗ trợ
-                  của bạn không chỉ giúp môi trường mà còn giúp những người cộng
-                  đồng người yếu thế tại các điểm dự án. Thay mặt các cộng đồng,
-                  chúng tôi xin chân thành cảm ơn những đóng góp của bạn!
+                  {
+                    translations.plantTreeSection.aboutProject.description[
+                      language
+                    ]
+                  }
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <div className="font-semibold text-lg mb-2">
-                      1 cây xanh =
+                      {
+                        translations.plantTreeSection.aboutProject
+                          .co2Equivalent[language]
+                      }
                     </div>
                     <div className="text-3xl font-bold text-green-600">
-                      21kg CO₂
+                      {
+                        translations.plantTreeSection.aboutProject.co2Amount[
+                          language
+                        ]
+                      }
                     </div>
                     <div className="text-sm text-gray-500 mt-1">
-                      giảm thiểu mỗi năm
+                      {
+                        translations.plantTreeSection.aboutProject.co2Caption[
+                          language
+                        ]
+                      }
                     </div>
                   </div>
 
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="font-semibold text-lg mb-2">Đã trồng</div>
+                    <div className="font-semibold text-lg mb-2">
+                      {
+                        translations.plantTreeSection.aboutProject.plantedTrees[
+                          language
+                        ]
+                      }
+                    </div>
                     <div className="text-3xl font-bold text-green-600">
                       {forestStats.isLoading ? (
                         <span className="inline-block w-16 h-8 bg-emerald-100 animate-pulse rounded"></span>
@@ -798,14 +802,16 @@ export default function GopMamXanhPage() {
                         forestStats.treeCount || 0
                       )}
                     </div>
-                    <div className="text-sm text-gray-500 mt-1">cây xanh</div>
+                    <div className="text-sm text-gray-500 mt-1">
+                      {translations.plantingGoals.units[language]}
+                    </div>
                   </div>
                 </div>
 
                 <div className="relative h-[200px] rounded-lg overflow-hidden">
                   <Image
                     src="https://res.cloudinary.com/dyticflm3/image/upload/v1744836233/20240915_093409_lknqhd.jpg"
-                    alt="Hoạt động trồng cây"
+                    alt="Hoạt động trồng cây" // Đây là alt text của ảnh, có thể cũng nên dịch.
                     fill
                     className="object-cover"
                   />
@@ -813,14 +819,18 @@ export default function GopMamXanhPage() {
 
                 <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                   <h4 className="font-semibold mb-2">
-                    Lợi ích của việc trồng cây:
+                    {
+                      translations.plantTreeSection.aboutProject.benefitsTitle[
+                        language
+                      ]
+                    }
                   </h4>
                   <ul className="list-disc pl-5 space-y-1">
-                    <li>Giảm thiểu CO₂ trong khí quyển</li>
-                    <li>Tạo môi trường sống cho động vật hoang dã</li>
-                    <li>Ngăn chặn xói mòn đất</li>
-                    <li>Cải thiện chất lượng không khí</li>
-                    <li>Tạo sinh kế cho cộng đồng địa phương</li>
+                    {translations.plantTreeSection.aboutProject.benefitsList.map(
+                      (item, index) => (
+                        <li key={index}>{item[language]}</li>
+                      ),
+                    )}
                   </ul>
                 </div>
               </div>
@@ -833,52 +843,25 @@ export default function GopMamXanhPage() {
       <section className="py-16 px-4">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Câu hỏi thường gặp</h2>
+            <h2 className="text-3xl font-bold mb-4">
+              {translations.faqSection.title[language]}
+            </h2>
           </div>
 
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold mb-2">
-                Làm thế nào để tôi biết cây của tôi đã được trồng?
-              </h3>
-              <p className="text-gray-600">
-                Sau khi cây được trồng, chúng tôi sẽ cập nhật hình ảnh thực tế
-                của cây trên trang chi tiết. Bạn có thể xem bằng cách nhấp vào
-                hòn đảo 3D của mình.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold mb-2">
-                Cây sẽ được trồng ở đâu?
-              </h3>
-              <p className="text-gray-600">
-                Cây sẽ được trồng tại các dự án trồng rừng của chúng tôi ở các
-                tỉnh miền núi phía Bắc Việt Nam, nơi có nhu cầu tái trồng rừng
-                cao.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold mb-2">
-                Tôi có thể đóng góp nhiều cây không?
-              </h3>
-              <p className="text-gray-600">
-                Có, bạn có thể đóng góp nhiều cây bằng cách điều chỉnh số lượng
-                trong biểu mẫu đóng góp. Mỗi cây sẽ có ID riêng.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold mb-2">
-                Loại cây nào sẽ được trồng?
-              </h3>
-              <p className="text-gray-600">
-                Chúng tôi trồng các loại cây bản địa phù hợp với hệ sinh thái
-                địa phương, bao gồm cây lim, cây sao, cây dầu và các loại cây
-                khác.
-              </p>
-            </div>
+            {[
+              translations.faqSection.q1,
+              translations.faqSection.q2,
+              translations.faqSection.q3,
+              translations.faqSection.q4,
+            ].map((faqItem, index) => (
+              <div key={index} className="bg-white rounded-lg shadow-md p-6">
+                <h3 className="text-lg font-semibold mb-2">
+                  {faqItem.question[language]}
+                </h3>
+                <p className="text-gray-600">{faqItem.answer[language]}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

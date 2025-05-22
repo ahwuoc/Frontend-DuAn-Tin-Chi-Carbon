@@ -185,9 +185,7 @@ export default function AffiliateDashboard() {
   return (
     <div className="py-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Quản lý tiếp thị liên kết
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-900">\</h1>
         <p className="text-gray-600 mt-2">
           Quản lý hoạt động tiếp thị liên kết, theo dõi hoa hồng và truy cập
           công cụ tiếp thị

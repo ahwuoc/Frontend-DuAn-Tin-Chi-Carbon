@@ -29,11 +29,13 @@ import {
   uploadToCloudinary,
 } from "@/app/utils/common";
 
-import dynamic from "next/dynamic";
+// Removed 'dynamic' import as it was unused
 import ProjectFormContent from "./ProjectFormContent";
 import { apiProjects } from "@/app/fetch/fetch.projects";
 import ConfettiEffect from "@/components/confetti-effect";
 import { useAuth } from "@/context/auth-context";
+import { useLanguage } from "@/context/language-context"; // Import useLanguage hook
+import projectRegistrationTranslations from "./language-form";
 
 // Định nghĩa lại FormData để phản ánh cấu trúc chi tiết hơn
 interface FormData {
@@ -80,6 +82,7 @@ interface Project {
 export default function ProjectRegistrationForm() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
+  const { language } = useLanguage(); // Lấy ngôn ngữ hiện tại
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const kmlFileInputRef = useRef<HTMLInputElement>(null);
@@ -230,7 +233,10 @@ export default function ProjectRegistrationForm() {
 
     requiredFields.forEach((field) => {
       if (!formData[field as keyof FormData]?.trim()) {
-        errors[field] = `${getFieldLabel(field)} là bắt buộc`;
+        errors[field] =
+          projectRegistrationTranslations.formValidation.requiredField[
+            language
+          ](getFieldLabel(field));
       }
     });
 
@@ -238,11 +244,15 @@ export default function ProjectRegistrationForm() {
       formData.email.trim() &&
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
     ) {
-      errors.email = "Định dạng email không hợp lệ";
+      errors.email =
+        projectRegistrationTranslations.formValidation.invalidEmail[language];
     }
 
     if (uploadedFiles.length === 0) {
-      errors.landDocuments = "Vui lòng tải lên giấy tờ sử dụng đất";
+      errors.landDocuments =
+        projectRegistrationTranslations.formValidation.noLandDocuments[
+          language
+        ];
     }
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -275,35 +285,12 @@ export default function ProjectRegistrationForm() {
   };
 
   const getFieldLabel = (fieldName: string): string => {
-    const labels: Record<string, string> = {
-      name: "Họ và tên",
-      organization: "Tổ chức/Doanh nghiệp",
-      phone: "Số điện thoại",
-      email: "Email",
-      address: "Địa chỉ",
-      forestLocation: "Vị trí dự án",
-      forestArea: "Diện tích đất trồng cây",
-      treeSpecies: "Các loài cây",
-      plantingAge: "Thời gian đã trồng",
-      averageHeight: "Chiều cao trung bình",
-      averageCircumference: "Chu vi ngang ngực thân cây",
-      previousDeforestation: "Lịch sử chặt phá",
-      riceLocation: "Vị trí dự án",
-      riceArea: "Diện tích đất trồng lúa",
-      riceTerrain: "Địa hình",
-      riceClimate: "Khí hậu",
-      riceSoilType: "Loại đất",
-      riceStartDate: "Thời gian bắt đầu trồng",
-      riceEndDate: "Thời gian kết thúc trồng",
-      biocharRawMaterial: "Nguyên liệu đầu vào",
-      biocharCarbonContent: "Hàm lượng carbon cố định",
-      biocharLandArea: "Diện tích đất được cải tạo",
-      biocharApplicationMethod: "Phương pháp ứng dụng",
-      additionalInfo: "Thông tin bổ sung",
-      landDocuments: "Giấy tờ sử dụng đất",
-      kmlFile: "File KML",
-    };
-    return labels[fieldName] || fieldName;
+    // Sử dụng bản dịch cho các nhãn trường
+    return (
+      projectRegistrationTranslations.formValidation.fieldLabels[
+        fieldName as keyof typeof projectRegistrationTranslations.formValidation.fieldLabels
+      ]?.[language] || fieldName
+    );
   };
 
   const handleGoToLogin = () => {
@@ -470,7 +457,12 @@ export default function ProjectRegistrationForm() {
       }, 5000);
     } catch (error) {
       console.error("Lỗi trong quá trình submit:", error);
-      alert(`Đã xảy ra lỗi: ${(error as Error).message || "Không rõ lỗi"}`);
+      alert(
+        `${projectRegistrationTranslations.loadingMessages.submissionError[language]}${
+          (error as Error).message ||
+          projectRegistrationTranslations.loadingMessages.unknownError[language]
+        }`,
+      );
 
       setIsSuccess(false);
       setShowLoginPrompt(false);
@@ -482,33 +474,46 @@ export default function ProjectRegistrationForm() {
   return (
     <div className="space-y-6">
       <h3 className="text-2xl font-bold text-gray-800 mb-6">
-        Đăng ký dự án tín chỉ carbon
+        {projectRegistrationTranslations.formTitle[language]}
       </h3>
       {isSuccess ? (
         <div className="bg-white p-8 rounded-lg shadow-md">
+          {showConfetti && <ConfettiEffect isActive={showConfetti} />}
           <div className="text-center mb-6">
             <div className="mx-auto mb-4 bg-green-100 w-16 h-16 rounded-full flex items-center justify-center">
               <CheckCircle className="h-10 w-10 text-green-600" />
             </div>
             <h3 className="text-2xl font-bold text-green-700 mb-2">
-              Đăng ký dự án thành công!
+              {projectRegistrationTranslations.successScreen.title[language]}
             </h3>
             <p className="text-gray-600">
-              Cảm ơn bạn đã đăng ký dự án tín chỉ carbon với chúng tôi.
+              {projectRegistrationTranslations.successScreen.message[language]}
             </p>
           </div>
           <div className="bg-gray-50 p-4 rounded-lg mb-6">
             <h4 className="font-semibold text-lg mb-3">
-              Thông tin dự án của bạn
+              {
+                projectRegistrationTranslations.successScreen.projectInfoTitle[
+                  language
+                ]
+              }
             </h4>
             <div className="space-y-2 text-sm text-gray-700">
               <p>
-                <span className="font-medium">Loại dự án:</span>
+                <span className="font-medium">
+                  {
+                    projectRegistrationTranslations.successScreen.projectType
+                      .label[language]
+                  }
+                </span>
                 {activeTab === "forest"
-                  ? "Lâm nghiệp"
+                  ? projectRegistrationTranslations.successScreen.projectType
+                      .forest[language]
                   : activeTab === "rice"
-                    ? "Lúa"
-                    : "Biochar"}
+                    ? projectRegistrationTranslations.successScreen.projectType
+                        .rice[language]
+                    : projectRegistrationTranslations.successScreen.projectType
+                        .biochar[language]}
               </p>
               <p>
                 <span className="font-medium">{getFieldLabel("name")}:</span>
@@ -612,33 +617,43 @@ export default function ProjectRegistrationForm() {
           </div>
           <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
             <h4 className="font-semibold text-lg mb-2 text-blue-800">
-              Các bước tiếp theo
+              {
+                projectRegistrationTranslations.successScreen.nextStepsTitle[
+                  language
+                ]
+              }
             </h4>
             <ul className="text-blue-700 space-y-1 list-disc pl-5 text-sm">
-              <li>
-                Chuyên gia của chúng tôi sẽ xem xét thông tin dự án của bạn
-              </li>
-              <li>Chúng tôi sẽ liên hệ với bạn trong vòng 3-5 ngày làm việc</li>
-              <li>
-                Bạn sẽ được hướng dẫn các bước tiếp theo để triển khai dự án
-              </li>
+              {projectRegistrationTranslations.successScreen.nextStepsList.map(
+                (item, index) => (
+                  <li key={index}>{item[language]}</li>
+                ),
+              )}
             </ul>
           </div>
           {showLoginPrompt && (
             <div className="bg-green-50 border border-green-200 p-4 rounded-lg mb-6">
               <h4 className="font-semibold flex items-center text-green-800 mb-2">
                 <LogIn className="h-5 w-5 mr-2" />
-                Theo dõi dự án của bạn
+                {
+                  projectRegistrationTranslations.successScreen.loginPrompt
+                    .title[language]
+                }
               </h4>
               <p className="text-sm text-green-700 mb-3">
-                {`Chúng tôi đã sử dụng email ${formData.email} của bạn. Đăng nhập để theo dõi trạng thái dự án và cập nhật thông tin.`}
+                {projectRegistrationTranslations.successScreen.loginPrompt.message[
+                  language
+                ](formData.email)}
               </p>
               <Button
                 onClick={handleGoToLogin}
                 className="w-full bg-green-600 hover:bg-green-700"
               >
                 <LogIn className="mr-2 h-4 w-4" />
-                Đăng nhập ngay
+                {
+                  projectRegistrationTranslations.successScreen.loginPrompt
+                    .loginButton[language]
+                }
               </Button>
             </div>
           )}
@@ -685,7 +700,10 @@ export default function ProjectRegistrationForm() {
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
             >
-              Đăng ký dự án khác
+              {
+                projectRegistrationTranslations.successScreen
+                  .registerAnotherProjectButton[language]
+              }
             </Button>
             <Button
               type="button"
@@ -698,7 +716,11 @@ export default function ProjectRegistrationForm() {
                 }
               }}
             >
-              {isAuthenticated ? "Quản lý tài khoản" : "Về trang chủ"}
+              {isAuthenticated
+                ? projectRegistrationTranslations.successScreen
+                    .manageAccountButton[language]
+                : projectRegistrationTranslations.successScreen
+                    .backToHomeButton[language]}
             </Button>
           </div>
         </div>

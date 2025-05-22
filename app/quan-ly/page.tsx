@@ -29,6 +29,8 @@ import { useAuth } from "@/context/auth-context";
 import { formatDateUtil } from "../utils/common";
 import { getUserFromLocalStorage } from "../utils/common"; // Giữ lại nếu cần cho user context
 import apiAuth from "../fetch/fetch.auth"; // Giữ lại nếu bạn thực sự dùng apiAuth để fetch user info
+import { useLanguage } from "@/context/language-context"; // Import useLanguage hook
+import dashboardPageTranslations from "./language-quanly";
 
 // Định nghĩa lại các interface dựa trên dữ liệu API mới
 interface IOrder {
@@ -97,6 +99,7 @@ interface Activity {
 export default function DashboardPage() {
   const router = useRouter();
   const { user, isAuthenticated, setUser } = useAuth(); // Thêm setUser nếu muốn cập nhật user object
+  const { language } = useLanguage(); // Lấy ngôn ngữ hiện tại
   const [activeTab, setActiveTab] = useState<
     "overview" | "products" | "projects"
   >("overview");
@@ -130,7 +133,7 @@ export default function DashboardPage() {
               id: order._id, // Use order._id as activity id
               type: "product_purchase",
               date: order.createdAt,
-              description: `Đã mua sản phẩm "${order.productId.name}"`,
+              description: `${dashboardPageTranslations.myProductsCard.title[language]}: "${order.productId.name}"`, // Dịch mô tả hoạt động
               relatedId: order.productId._id,
               status: order.status,
             });
@@ -140,7 +143,7 @@ export default function DashboardPage() {
               id: project._id, // Use project._id as activity id
               type: "project_registration",
               date: project.registrationDate,
-              description: `Đăng ký dự án "${project.name}"`,
+              description: `${dashboardPageTranslations.myProjectsCard.title[language]}: "${project.name}"`, // Dịch mô tả hoạt động
               relatedId: project._id,
               status: project.status,
             });
@@ -179,76 +182,72 @@ export default function DashboardPage() {
       }
     }
     fetchUserData();
-  }, [isAuthenticated, user?.userId]); // Dependency: isAuthenticated và user.userId
+  }, [isAuthenticated, user?.userId, language]); // Dependency: isAuthenticated, user.userId, và language
 
   type CombinedStatus = IOrder["status"] | IProject["status"] | ActivityStatus;
 
   const getStatusBadge = (status: CombinedStatus | string): JSX.Element => {
+    const statusText =
+      dashboardPageTranslations.statusBadges[
+        status as keyof typeof dashboardPageTranslations.statusBadges
+      ]?.[language] ||
+      `${dashboardPageTranslations.statusBadges.unknown[language]} (${status})`;
+
+    let bgColorClass: string;
+    let textColorClass: string;
+    let Icon: typeof CheckCircle2 | typeof Clock | typeof AlertCircle =
+      CheckCircle2;
+
     switch (status) {
       case "active":
-      case "success": // Thêm 'success' vào trạng thái tích cực
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            <CheckCircle2 className="w-3 h-3 mr-1" />
-            Đang hoạt động
-          </span>
-        );
-      case "pending":
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-            <Clock className="w-3 h-3 mr-1" />
-            Đang xử lý
-          </span>
-        );
-      case "expired":
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-            <AlertCircle className="w-3 h-3 mr-1" />
-            Hết hạn
-          </span>
-        );
-      case "approved":
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            <CheckCircle2 className="w-3 h-3 mr-1" />
-            Đã phê duyệt
-          </span>
-        );
-      case "in_progress":
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-            <Clock className="w-3 h-3 mr-1" />
-            Đang thực hiện
-          </span>
-        );
+      case "success":
       case "completed":
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            <CheckCircle2 className="w-3 h-3 mr-1" />
-            Hoàn thành
-          </span>
-        );
+        bgColorClass = "bg-green-100";
+        textColorClass = "text-green-800";
+        Icon = CheckCircle2;
+        break;
+      case "pending":
+        bgColorClass = "bg-yellow-100";
+        textColorClass = "text-yellow-800";
+        Icon = Clock;
+        break;
+      case "expired":
       case "rejected":
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-            <AlertCircle className="w-3 h-3 mr-1" />
-            Bị từ chối
-          </span>
-        );
+        bgColorClass = "bg-red-100";
+        textColorClass = "text-red-800";
+        Icon = AlertCircle;
+        break;
+      case "approved":
+        bgColorClass = "bg-blue-100";
+        textColorClass = "text-blue-800";
+        Icon = CheckCircle2;
+        break;
+      case "in_progress":
+        bgColorClass = "bg-indigo-100";
+        textColorClass = "text-indigo-800";
+        Icon = Clock;
+        break;
       default:
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-            Không xác định ({status})
-          </span>
-        );
+        bgColorClass = "bg-gray-100";
+        textColorClass = "text-gray-800";
+        Icon = AlertCircle; // Default icon for unknown status
     }
+
+    return (
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${bgColorClass} ${textColorClass}`}
+      >
+        <Icon className="w-3 h-3 mr-1" />
+        {statusText}
+      </span>
+    );
   };
 
   const typeLabelMap: Record<IProject["type"], string> = {
-    forestry: "Lâm nghiệp",
-    rice: "Lúa",
-    biochar: "Biochar",
-    other: "Khác",
+    forestry: dashboardPageTranslations.projectTypes.forestry[language],
+    rice: dashboardPageTranslations.projectTypes.rice[language],
+    biochar: dashboardPageTranslations.projectTypes.biochar[language],
+    other: dashboardPageTranslations.projectTypes.other[language],
   };
 
   const getProjectIcon = (type: IProject["type"]): JSX.Element => {
@@ -282,7 +281,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="container mx-auto py-10 px-4 text-center">
-        <p>Đang tải dữ liệu tài khoản...</p>
+        <p>{dashboardPageTranslations.loadingMessage[language]}</p>
       </div>
     );
   }
@@ -290,9 +289,11 @@ export default function DashboardPage() {
   if (!isAuthenticated || !user) {
     return (
       <div className="container mx-auto py-10 px-4 text-center">
-        <p className="text-red-500">Bạn cần đăng nhập để xem trang này.</p>
+        <p className="text-red-500">
+          {dashboardPageTranslations.loginRequired.message[language]}
+        </p>
         <Button onClick={() => router.push("/dang-nhap")} className="mt-4">
-          Đăng nhập
+          {dashboardPageTranslations.loginRequired.button[language]}
         </Button>
       </div>
     );
@@ -300,30 +301,64 @@ export default function DashboardPage() {
 
   return (
     <div className="container mx-auto py-10 px-4">
-      <h1 className="text-3xl font-bold mb-6">Quản lý tài khoản</h1>
+      <h1 className="text-3xl font-bold mb-6">
+        {dashboardPageTranslations.pageTitle[language]}
+      </h1>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {/* Personal Information Card */}
         <Card className="flex flex-col">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Thông tin cá nhân</CardTitle>
+            <CardTitle className="text-lg">
+              {dashboardPageTranslations.personalInfoCard.title[language]}
+            </CardTitle>
           </CardHeader>
           <CardContent className="flex-grow">
             <div className="space-y-2">
-              <p className="text-sm text-gray-500">Họ tên</p>
+              <p className="text-sm text-gray-500">
+                {
+                  dashboardPageTranslations.personalInfoCard.labels.name[
+                    language
+                  ]
+                }
+              </p>
               <p className="font-medium break-words">{user?.name ?? "N/A"}</p>
-              <p className="text-sm text-gray-500">Email</p>
+              <p className="text-sm text-gray-500">
+                {
+                  dashboardPageTranslations.personalInfoCard.labels.email[
+                    language
+                  ]
+                }
+              </p>
               <p className="font-medium break-words">{user?.email ?? "N/A"}</p>
               {user?.phone && (
                 <>
-                  <p className="text-sm text-gray-500">Số điện thoại</p>
+                  <p className="text-sm text-gray-500">
+                    {
+                      dashboardPageTranslations.personalInfoCard.labels.phone[
+                        language
+                      ]
+                    }
+                  </p>
                   <p className="font-medium break-words">{user.phone}</p>
                 </>
               )}
-              <p className="text-sm text-gray-500">Vai trò</p>
+              <p className="text-sm text-gray-500">
+                {
+                  dashboardPageTranslations.personalInfoCard.labels.role[
+                    language
+                  ]
+                }
+              </p>
               <p className="font-medium break-words">
-                {user?.role === "admin" ? "Quản trị viên" : "Người dùng"}
+                {user?.role === "admin"
+                  ? dashboardPageTranslations.personalInfoCard.roles.admin[
+                      language
+                    ]
+                  : dashboardPageTranslations.personalInfoCard.roles.user[
+                      language
+                    ]}
               </p>
             </div>
           </CardContent>
@@ -331,7 +366,11 @@ export default function DashboardPage() {
             <Link href="/quan-ly/cai-dat" className="w-full">
               <Button variant="outline" size="sm" className="w-full">
                 <Settings className="w-4 h-4 mr-2" />
-                Cập nhật thông tin
+                {
+                  dashboardPageTranslations.personalInfoCard.updateButton[
+                    language
+                  ]
+                }
               </Button>
             </Link>
           </CardFooter>
@@ -340,21 +379,41 @@ export default function DashboardPage() {
         {/* My Products Card */}
         <Card className="flex flex-col">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Sản phẩm của tôi</CardTitle>
+            <CardTitle className="text-lg">
+              {dashboardPageTranslations.myProductsCard.title[language]}
+            </CardTitle>
           </CardHeader>
           <CardContent className="flex-grow">
             <div className="space-y-1">
               <p className="text-3xl font-bold">{userOrders.length}</p>
-              <p className="text-sm text-gray-500">Sản phẩm đã đăng ký</p>
+              <p className="text-sm text-gray-500">
+                {
+                  dashboardPageTranslations.myProductsCard.registeredCount[
+                    language
+                  ]
+                }
+              </p>
               <div className="mt-2 pt-2 border-t border-gray-100">
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500">Đang hoạt động</span>
+                  <span className="text-gray-500">
+                    {
+                      dashboardPageTranslations.myProductsCard.activeStatus[
+                        language
+                      ]
+                    }
+                  </span>
                   <span className="font-medium">
                     {userOrders.filter((p) => p.status === "active").length}
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-sm mt-1">
-                  <span className="text-gray-500">Đang xử lý</span>
+                  <span className="text-gray-500">
+                    {
+                      dashboardPageTranslations.myProductsCard.pendingStatus[
+                        language
+                      ]
+                    }
+                  </span>
                   <span className="font-medium">
                     {userOrders.filter((p) => p.status === "pending").length}
                   </span>
@@ -366,7 +425,11 @@ export default function DashboardPage() {
             <Link href="/quan-ly/san-pham" className="w-full">
               <Button variant="outline" size="sm" className="w-full">
                 <ShoppingCart className="w-4 h-4 mr-2" />
-                Xem sản phẩm
+                {
+                  dashboardPageTranslations.myProductsCard.viewProductsButton[
+                    language
+                  ]
+                }
               </Button>
             </Link>
           </CardFooter>
@@ -375,21 +438,41 @@ export default function DashboardPage() {
         {/* My Projects Card */}
         <Card className="flex flex-col">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Dự án của tôi</CardTitle>
+            <CardTitle className="text-lg">
+              {dashboardPageTranslations.myProjectsCard.title[language]}
+            </CardTitle>
           </CardHeader>
           <CardContent className="flex-grow">
             <div className="space-y-1">
               <p className="text-3xl font-bold">{userProjects.length}</p>
-              <p className="text-sm text-gray-500">Dự án đã đăng ký</p>
+              <p className="text-sm text-gray-500">
+                {
+                  dashboardPageTranslations.myProjectsCard.registeredCount[
+                    language
+                  ]
+                }
+              </p>
               <div className="mt-2 pt-2 border-t border-gray-100">
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500">Đã phê duyệt</span>
+                  <span className="text-gray-500">
+                    {
+                      dashboardPageTranslations.myProjectsCard.approvedStatus[
+                        language
+                      ]
+                    }
+                  </span>
                   <span className="font-medium">
                     {userProjects.filter((p) => p.status === "approved").length}
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-sm mt-1">
-                  <span className="text-gray-500">Đang thực hiện</span>
+                  <span className="text-gray-500">
+                    {
+                      dashboardPageTranslations.myProjectsCard.inProgressStatus[
+                        language
+                      ]
+                    }
+                  </span>
                   <span className="font-medium">
                     {
                       userProjects.filter((p) => p.status === "in_progress")
@@ -408,7 +491,11 @@ export default function DashboardPage() {
               onClick={() => setActiveTab("projects")}
             >
               <FileText className="w-4 h-4 mr-2" />
-              Xem dự án
+              {
+                dashboardPageTranslations.myProjectsCard.viewProjectsButton[
+                  language
+                ]
+              }
             </Button>
           </CardFooter>
         </Card>

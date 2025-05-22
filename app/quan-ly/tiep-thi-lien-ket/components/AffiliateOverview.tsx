@@ -1,3 +1,5 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +11,10 @@ import {
   Copy,
   Share2,
 } from "lucide-react";
+import { useLanguage } from "@/context/language-context";
+// Import tệp ngôn ngữ riêng cho AffiliateOverview
+import affiliateOverviewTranslations from "./affiliate-overview-language";
+import affiliateDashboardTranslations from "./affiliate-dashboard-language"; // Vẫn cần cho `toast`
 
 interface AffiliateOverviewProps {
   affiliateData: any;
@@ -21,6 +27,8 @@ export default function AffiliateOverview({
   copyToClipboard,
   setActiveTab,
 }: AffiliateOverviewProps) {
+  const { language } = useLanguage();
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -29,10 +37,11 @@ export default function AffiliateOverview({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-500">
-                  Tổng hoa hồng
+                  {affiliateOverviewTranslations.totalCommission[language]}
                 </p>
                 <h3 className="text-2xl font-bold mt-1">
-                  {affiliateData?.stats?.earnings ?? 0} đ
+                  {affiliateData?.stats?.earnings ?? 0}{" "}
+                  {affiliateOverviewTranslations.currencyUnit[language]}
                 </h3>
               </div>
               <div className="bg-green-100 p-3 rounded-full">
@@ -47,10 +56,11 @@ export default function AffiliateOverview({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-500">
-                  Hoa hồng chờ xử lý
+                  {affiliateOverviewTranslations.pendingCommission[language]}
                 </p>
                 <h3 className="text-2xl font-bold mt-1">
-                  {affiliateData?.stats?.pendingEarnings ?? 0} đ
+                  {affiliateData?.stats?.pendingEarnings ?? 0}{" "}
+                  {affiliateOverviewTranslations.currencyUnit[language]}
                 </h3>
               </div>
               <div className="bg-blue-100 p-3 rounded-full">
@@ -64,7 +74,9 @@ export default function AffiliateOverview({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">Lượt nhấp</p>
+                <p className="text-sm font-medium text-gray-500">
+                  {affiliateOverviewTranslations.clicks[language]}
+                </p>
                 <h3 className="text-2xl font-bold mt-1">
                   {affiliateData?.stats?.clicks ?? 0}
                 </h3>
@@ -80,7 +92,9 @@ export default function AffiliateOverview({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">Chuyển đổi</p>
+                <p className="text-sm font-medium text-gray-500">
+                  {affiliateOverviewTranslations.conversions[language]}
+                </p>
                 <h3 className="text-2xl font-bold mt-1">
                   {affiliateData?.stats?.conversions ?? 0} (
                   {affiliateData?.stats?.conversionRate ?? 0}%)
@@ -97,13 +111,15 @@ export default function AffiliateOverview({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Liên kết giới thiệu của bạn</CardTitle>
+            <CardTitle>
+              {affiliateOverviewTranslations.yourReferralLinks[language]}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-2">
-                  Liên kết giới thiệu
+                  {affiliateOverviewTranslations.referralLink[language]}
                 </p>
                 <div className="flex">
                   <Input
@@ -117,7 +133,7 @@ export default function AffiliateOverview({
                     onClick={() =>
                       copyToClipboard(
                         affiliateData.referralLink,
-                        "Liên kết giới thiệu",
+                        affiliateOverviewTranslations.referralLink[language],
                       )
                     }
                   >
@@ -128,7 +144,7 @@ export default function AffiliateOverview({
 
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-2">
-                  Mã giới thiệu
+                  {affiliateOverviewTranslations.referralCode[language]}
                 </p>
                 <div className="flex">
                   <Input
@@ -142,7 +158,7 @@ export default function AffiliateOverview({
                     onClick={() =>
                       copyToClipboard(
                         affiliateData.referralCode,
-                        "Mã giới thiệu",
+                        affiliateOverviewTranslations.referralCode[language],
                       )
                     }
                   >
@@ -158,10 +174,12 @@ export default function AffiliateOverview({
                     window.open(
                       "https://www.facebook.com/sharer/sharer.php?u=" +
                         encodeURIComponent(affiliateData.referralLink),
+                      "_blank",
                     )
                   }
                 >
-                  <Share2 className="h-4 w-4 mr-2" /> Chia sẻ liên kết
+                  <Share2 className="h-4 w-4 mr-2" />{" "}
+                  {affiliateOverviewTranslations.shareLink[language]}
                 </Button>
               </div>
             </div>
@@ -170,7 +188,9 @@ export default function AffiliateOverview({
 
         <Card>
           <CardHeader>
-            <CardTitle>Giao dịch gần đây</CardTitle>
+            <CardTitle>
+              {affiliateOverviewTranslations.recentTransactions[language]}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -190,7 +210,8 @@ export default function AffiliateOverview({
                       </div>
                       <div className="text-right">
                         <p className="font-medium text-green-600">
-                          {transaction.commission} đ
+                          {transaction.commission}{" "}
+                          {affiliateOverviewTranslations.currencyUnit[language]}
                         </p>
                         <p className="text-sm text-gray-500">
                           {transaction.status}
@@ -203,7 +224,7 @@ export default function AffiliateOverview({
                 className="w-full"
                 onClick={() => setActiveTab("transactions")}
               >
-                Xem tất cả giao dịch
+                {affiliateOverviewTranslations.viewAllTransactions[language]}
               </Button>
             </div>
           </CardContent>

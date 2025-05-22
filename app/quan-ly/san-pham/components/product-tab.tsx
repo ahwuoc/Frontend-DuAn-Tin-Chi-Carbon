@@ -21,6 +21,8 @@ import {
   Trash2,
 } from "lucide-react";
 import { Product } from "./type";
+import { useLanguage } from "@/context/language-context"; // Import useLanguage hook
+import productTabsTranslations from "./langauge-product-tab";
 
 export const getManagementLink = (type?: string, id?: string) => {
   if (!type || !id) {
@@ -62,9 +64,11 @@ export function ProductTabs({
   getFeatureIcon,
   renderAdditionalInfo,
 }: ProductTabsProps) {
+  const { language } = useLanguage(); // Get current language
+
   const renderGridView = () => {
     if (!products || products.length === 0) {
-      return <div>Không có sản phẩm nào để hiển thị.</div>;
+      return <div>{productTabsTranslations.noProductsMessage[language]}</div>;
     }
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -76,7 +80,10 @@ export function ProductTabs({
             <div className="relative h-48 w-full">
               <Image
                 src={product.image ?? "/placeholder.svg?height=200&width=400"}
-                alt={product.name ?? "Sản phẩm không tên"}
+                alt={
+                  product.name ??
+                  productTabsTranslations.card.unknownProduct[language]
+                }
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -89,11 +96,12 @@ export function ProductTabs({
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-lg line-clamp-2">
-                    {product.name ?? "Không có tiêu đề"}
+                    {product.name ??
+                      productTabsTranslations.card.noTitle[language]}
                   </CardTitle>
                   <CardDescription className="flex items-center text-sm text-gray-500 mt-1">
                     <Calendar className="h-4 w-4 mr-1 flex-shrink-0" />
-                    Ngày mua:{" "}
+                    {productTabsTranslations.card.purchaseDate[language]}{" "}
                     {formatDate(
                       product.purchaseDate ?? new Date().toISOString(),
                     )}
@@ -109,19 +117,21 @@ export function ProductTabs({
             </CardHeader>
             <CardContent className="flex-grow">
               <p className="text-sm text-gray-600 line-clamp-3">
-                {product.description ?? "Không có mô tả"}
+                {product.description ??
+                  productTabsTranslations.card.noDescription[language]}
               </p>
 
               {renderAdditionalInfo(product)}
 
               {(product.features ?? []).slice(0, 3).map((feature: any) => (
                 <div
-                  key={feature.id ?? feature.title ?? Math.random().toString()} // Xử lý khi feature.id hoặc feature.title là undefined
+                  key={feature.id ?? feature.title ?? Math.random().toString()}
                   className="flex items-center bg-gray-100 rounded-full px-3 py-1 text-xs text-gray-700"
                 >
                   {getFeatureIcon(feature.title ?? "unknown")}
                   <span className="ml-1">
-                    {feature.title ?? "Tính năng không xác định"}
+                    {feature.title ??
+                      productTabsTranslations.card.unknownFeature[language]}
                   </span>
                 </div>
               ))}
@@ -129,7 +139,8 @@ export function ProductTabs({
               {product.expiryDate && (
                 <p className="text-sm text-gray-500 mt-3 flex items-center">
                   <Clock className="h-4 w-4 mr-1 flex-shrink-0" />
-                  Hết hạn: {formatDate(product.expiryDate)}
+                  {productTabsTranslations.card.expires[language]}{" "}
+                  {formatDate(product.expiryDate)}
                 </p>
               )}
             </CardContent>
@@ -146,18 +157,22 @@ export function ProductTabs({
                   size="sm"
                   className="w-full bg-green-600 hover:bg-green-700"
                 >
-                  Quản lý
+                  {productTabsTranslations.card.manageButton[language]}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" className="p-2">
                   <FileText className="h-4 w-4" />
-                  <span className="sr-only">Xem chi tiết</span>
+                  <span className="sr-only">
+                    {productTabsTranslations.card.viewDetailsSrOnly[language]}
+                  </span>
                 </Button>
                 <Button variant="outline" size="sm" className="p-2">
                   <Settings className="h-4 w-4" />
-                  <span className="sr-only">Cài đặt</span>
+                  <span className="sr-only">
+                    {productTabsTranslations.card.settingsSrOnly[language]}
+                  </span>
                 </Button>
                 {product.status !== "active" && (
                   <Button
@@ -166,7 +181,9 @@ export function ProductTabs({
                     className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50"
                   >
                     <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Xóa</span>
+                    <span className="sr-only">
+                      {productTabsTranslations.card.deleteSrOnly[language]}
+                    </span>
                   </Button>
                 )}
               </div>
@@ -179,21 +196,24 @@ export function ProductTabs({
 
   const renderListView = () => {
     if (!products || products.length === 0) {
-      return <div>Không có sản phẩm nào để hiển thị.</div>;
+      return <div>{productTabsTranslations.noProductsMessage[language]}</div>;
     }
 
     return (
       <div className="space-y-4">
         {products.map((product: any) => (
           <Card
-            key={product._id ?? product.id ?? "unknown"} // Xử lý khi _id hoặc id là undefined
+            key={product._id ?? product.id ?? "unknown"}
             className="overflow-hidden hover:shadow-md transition-shadow"
           >
             <div className="flex flex-col md:flex-row">
               <div className="relative h-48 md:h-auto md:w-48 flex-shrink-0">
                 <Image
                   src={product.image ?? "/placeholder.svg?height=200&width=400"}
-                  alt={product.name ?? "Sản phẩm không tên"}
+                  alt={
+                    product.name ??
+                    productTabsTranslations.card.unknownProduct[language]
+                  }
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 200px"
@@ -203,11 +223,12 @@ export function ProductTabs({
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <h3 className="text-lg font-medium">
-                      {product.name ?? "Không có tiêu đề"}
+                      {product.name ??
+                        productTabsTranslations.card.noTitle[language]}
                     </h3>
                     <div className="flex items-center text-sm text-gray-500 mt-1">
                       <Calendar className="h-4 w-4 mr-1 flex-shrink-0" />
-                      Ngày mua:{" "}
+                      {productTabsTranslations.card.purchaseDate[language]}{" "}
                       {formatDate(
                         product.purchaseDate ?? new Date().toISOString(),
                       )}
@@ -225,23 +246,29 @@ export function ProductTabs({
                 </div>
 
                 <p className="text-sm text-gray-600 mb-3">
-                  {product.description ?? "Không có mô tả"}
+                  {product.description ??
+                    productTabsTranslations.card.noDescription[language]}
                 </p>
                 {renderAdditionalInfo(product)}
                 {(product.features ?? []).length > 0 && (
                   <div className="mt-auto pt-3">
                     <div className="flex flex-wrap gap-2">
-                      {(product.features ?? []).map((feature: any, index: number) => (
-                        <div
-                          key={feature.id ?? feature.title ?? index}
-                          className="flex items-center bg-gray-100 rounded-full px-3 py-1 text-xs text-gray-700"
-                        >
-                          {getFeatureIcon(feature.title ?? "unknown")}
-                          <span className="ml-1">
-                            {feature.title ?? "Tính năng không xác định"}
-                          </span>
-                        </div>
-                      ))}
+                      {(product.features ?? []).map(
+                        (feature: any, index: number) => (
+                          <div
+                            key={feature.id ?? feature.title ?? index}
+                            className="flex items-center bg-gray-100 rounded-full px-3 py-1 text-xs text-gray-700"
+                          >
+                            {getFeatureIcon(feature.title ?? "unknown")}
+                            <span className="ml-1">
+                              {feature.title ??
+                                productTabsTranslations.card.unknownFeature[
+                                  language
+                                ]}
+                            </span>
+                          </div>
+                        ),
+                      )}
                     </div>
                   </div>
                 )}
@@ -256,7 +283,8 @@ export function ProductTabs({
                     {product.expiryDate && (
                       <span className="text-sm text-gray-500 ml-4 flex items-center">
                         <Clock className="h-4 w-4 mr-1 flex-shrink-0" />
-                        Hết hạn: {formatDate(product.expiryDate)}
+                        {productTabsTranslations.card.expires[language]}{" "}
+                        {formatDate(product.expiryDate)}
                       </span>
                     )}
                   </div>
@@ -272,13 +300,13 @@ export function ProductTabs({
                         size="sm"
                         className="bg-green-600 hover:bg-green-700"
                       >
-                        Quản lý
+                        {productTabsTranslations.card.manageButton[language]}
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>
                     <Button variant="outline" size="sm">
                       <FileText className="h-4 w-4 mr-2" />
-                      Chi tiết
+                      {productTabsTranslations.card.detailsButton[language]}
                     </Button>
                   </div>
                 </div>
@@ -289,11 +317,14 @@ export function ProductTabs({
       </div>
     );
   };
+
   return (
     <div>
       <Tabs defaultValue="all" className="mb-6">
         <TabsList>
-          <TabsTrigger value="all">Tất cả</TabsTrigger>
+          <TabsTrigger value="all">
+            {productTabsTranslations.tabs.all[language]}
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="all" className="mt-4">
           {viewMode === "grid" ? renderGridView() : renderListView()}

@@ -1,15 +1,35 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import RegistrationForm from "@/components/registration-form"
-import { CheckCircle, ArrowLeft } from "lucide-react"
-import { useLanguage } from "@/context/language-context"
-import AnimatedGradient from "@/components/animated-gradient"
+import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import RegistrationForm from "@/components/registration-form";
+import { CheckCircle, ArrowLeft } from "lucide-react";
+import { useLanguage } from "@/context/language-context";
+import AnimatedGradient from "@/components/animated-gradient";
+import contactPageTranslations from "./language";
 
 export default function ContactPage() {
-  const { t } = useLanguage()
+  const { language } = useLanguage();
+
+  // Helper function to get text based on current language
+  const getText = (key: keyof typeof contactPageTranslations) => {
+    const translation = contactPageTranslations[key];
+    if (
+      typeof translation === "object" &&
+      translation !== null &&
+      "vi" in translation &&
+      "en" in translation
+    ) {
+      return (translation as { vi: string; en: string })[language];
+    }
+    // Fallback for cases where the key might not be directly a simple string object
+    console.warn(
+      `Translation key "${key}" not found or not a simple {vi, en} object.`,
+    );
+    return String(key); // Return key itself or a default if translation structure is unexpected
+  };
+
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
@@ -17,7 +37,7 @@ export default function ContactPage() {
         <div className="absolute inset-0 z-0">
           <Image
             src="/images/vietnam-farmer-639204_1920.jpg"
-            alt="Đăng ký tư vấn"
+            alt={getText("heroTitle")}
             fill
             className="object-cover opacity-30"
           />
@@ -25,14 +45,18 @@ export default function ContactPage() {
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">Đăng Ký Tư Vấn</h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              {getText("heroTitle")}
+            </h1>
             <p className="text-xl text-white/80 mb-8">
-              Điền thông tin của bạn để nhận tư vấn miễn phí về tín chỉ carbon, nông nghiệp, biochar và các sản phẩm về
-              giáo dục
+              {getText("heroSubtitle")}
             </p>
-            <Link href="/" className="inline-flex items-center text-green-400 hover:text-green-300">
+            <Link
+              href="/"
+              className="inline-flex items-center text-green-400 hover:text-green-300"
+            >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Quay lại trang chủ
+              {getText("backToHome")}
             </Link>
           </div>
         </div>
@@ -44,51 +68,35 @@ export default function ContactPage() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
             <div className="md:col-span-5">
               <div className="sticky top-24">
-                <h2 className="text-3xl font-bold text-gray-800 mb-6">Dịch Vụ Tư Vấn Của Chúng Tôi</h2>
+                <h2 className="text-3xl font-bold text-gray-800 mb-6">
+                  {getText("servicesTitle")}
+                </h2>
                 <p className="text-gray-600 mb-8">
-                  Chúng tôi cung cấp dịch vụ tư vấn chuyên nghiệp trong nhiều lĩnh vực khác nhau liên quan đến phát
-                  triển bền vững và giảm phát thải carbon.
+                  {getText("servicesDescription")}
                 </p>
 
                 <div className="space-y-6">
-                  {[
-                    {
-                      title: "Tín chỉ carbon từ rừng",
-                      description: "Tư vấn về dự án tín chỉ carbon từ rừng, quản lý và bảo vệ rừng bền vững.",
-                    },
-                    {
-                      title: "Tín chỉ nông nghiệp",
-                      description:
-                        "Hướng dẫn áp dụng các phương pháp canh tác bền vững để tạo ra tín chỉ carbon từ nông nghiệp.",
-                    },
-                    {
-                      title: "Công nghệ Biochar",
-                      description: "Tư vấn về sản xuất và ứng dụng biochar để cải tạo đất và lưu trữ carbon.",
-                    },
-                    {
-                      title: "Khóa học chứng chỉ quốc tế CSU",
-                      description:
-                        "Thông tin về khóa học và chứng chỉ quốc tế về biến đổi khí hậu và phát triển bền vững.",
-                    },
-                    {
-                      title: "Carbon Toàn Thư 4.0",
-                      description: "Hướng dẫn sử dụng nền tảng Carbon Toàn Thư 4.0 để quản lý dự án carbon hiệu quả.",
-                    },
-                  ].map((service, index) => (
+                  {contactPageTranslations.serviceList.map((service, index) => (
                     <div key={index} className="flex items-start">
                       <div className="bg-green-100 p-2 rounded-full mr-3 flex-shrink-0 mt-1">
                         <CheckCircle className="h-5 w-5 text-green-600" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-gray-800">{service.title}</h3>
-                        <p className="text-gray-600">{service.description}</p>
+                        <h3 className="font-bold text-gray-800">
+                          {service.title[language]}
+                        </h3>
+                        <p className="text-gray-600">
+                          {service.description[language]}
+                        </p>
                       </div>
                     </div>
                   ))}
                 </div>
 
                 <div className="mt-10 p-6 bg-white rounded-lg shadow-md border border-green-100">
-                  <h3 className="text-xl font-bold text-gray-800 mb-4">Thông Tin Liên Hệ</h3>
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">
+                    {getText("contactInfoTitle")}
+                  </h3>
                   <div className="space-y-3">
                     <p className="flex items-center text-gray-600">
                       <svg
@@ -122,7 +130,8 @@ export default function ContactPage() {
                           d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                         />
                       </svg>
-                      minhtq@carboncreditvietnam.vn | phuongmh@carboncreditvietnam.vn
+                      minhtq@carboncreditvietnam.vn |
+                      phuongmh@carboncreditvietnam.vn
                     </p>
                     <p className="flex items-center text-gray-600">
                       <svg
@@ -145,7 +154,7 @@ export default function ContactPage() {
                           d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                         />
                       </svg>
-                      Tầng 2, Toà nhà CT4 - The Pride, Tố Hữu, Hà Đông, Hà Nội, Việt Nam
+                      {getText("address")}
                     </p>
                   </div>
                 </div>
@@ -168,14 +177,16 @@ export default function ContactPage() {
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-6 text-white">Bắt Đầu Hành Trình Phát Triển Bền Vững Ngay Hôm Nay</h2>
+            <h2 className="text-3xl font-bold mb-6 text-white">
+              {getText("ctaTitle")}
+            </h2>
             <p className="text-xl text-white/80 mb-8">
-              Chúng tôi sẽ liên hệ với bạn trong vòng 24 giờ sau khi nhận được thông tin đăng ký
+              {getText("ctaSubtitle")}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link href="/san-pham/du-an-tin-chi-carbon">
                 <Button className="bg-white text-green-600 hover:bg-green-50 px-8 py-3 text-lg font-medium border border-green-600">
-                  Tìm hiểu thêm về dự án
+                  {getText("learnMoreProject")}
                 </Button>
               </Link>
               <Link href="/faq">
@@ -183,7 +194,7 @@ export default function ContactPage() {
                   variant="outline"
                   className="border-green-600 text-green-600 bg-white hover:bg-green-50 px-8 py-3 text-lg font-medium"
                 >
-                  Câu hỏi thường gặp
+                  {getText("faqButton")}
                 </Button>
               </Link>
             </div>
@@ -191,5 +202,5 @@ export default function ContactPage() {
         </div>
       </section>
     </main>
-  )
+  );
 }

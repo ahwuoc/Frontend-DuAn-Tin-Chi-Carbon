@@ -20,7 +20,11 @@ import {
 } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useLanguage } from "@/context/language-context"; // Import useLanguage hook
+import registrationFormTranslations from "./langauge-form/langauge-form";
+
 export default function RegistrationForm() {
+  const { language } = useLanguage(); // Lấy ngôn ngữ hiện tại
   const [formData, setFormData] = useState<TFormData>({
     userId: "",
     name: "",
@@ -124,16 +128,20 @@ export default function RegistrationForm() {
     requiredFields.forEach((field) => {
       const fieldValue = formData[field as keyof TFormData];
       if (typeof fieldValue === "string" && !fieldValue.trim()) {
-        errors[field] = `${getFieldLabel(field)} là bắt buộc`;
+        errors[field] = registrationFormTranslations.requiredField[language](
+          getFieldLabel(field),
+        );
       } else if (typeof fieldValue !== "string" && !fieldValue) {
-        errors[field] = `${getFieldLabel(field)} là bắt buộc`;
+        errors[field] = registrationFormTranslations.requiredField[language](
+          getFieldLabel(field),
+        );
       }
     });
     if (
       formData.email.trim() &&
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
     ) {
-      errors.email = "Định dạng email không hợp lệ";
+      errors.email = registrationFormTranslations.invalidEmail[language];
     }
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -141,27 +149,30 @@ export default function RegistrationForm() {
 
   const getFieldLabel = (fieldName: string): string => {
     const labels: Record<string, string> = {
-      name: "Họ và tên",
-      age: "Tuổi",
-      location: "Địa điểm",
+      name: registrationFormTranslations.nameLabel[language],
+      age: registrationFormTranslations.ageLabel[language],
+      location: registrationFormTranslations.locationLabel[language],
       area:
         formData.consultationType === "forest"
-          ? "Diện tích rừng"
-          : "Diện tích (ha)",
-      phone: "Số điện thoại",
-      email: "Email",
-      message: "Câu hỏi khác",
-      consultationType: "Loại tư vấn",
-      organization: "Tổ chức/Doanh nghiệp",
-      position: "Chức vụ",
-      experience: "Kinh nghiệm",
-      education: "Trình độ học vấn",
-      projectType: "Loại dự án",
-      projectSize: "Quy mô dự án",
-      projectLocation: "Địa điểm dự án",
-      implementationTimeline: "Thời gian triển khai",
-      budget: "Ngân sách dự kiến",
-      carbonGoals: "Mục tiêu giảm phát thải",
+          ? registrationFormTranslations.areaLabelForest[language]
+          : registrationFormTranslations.areaLabelAgriculture[language],
+      phone: registrationFormTranslations.phoneLabel[language],
+      email: registrationFormTranslations.emailLabel[language],
+      message: registrationFormTranslations.messageLabel[language],
+      consultationType:
+        registrationFormTranslations.consultationTypeLabel[language],
+      organization: registrationFormTranslations.organizationLabel[language],
+      position: registrationFormTranslations.positionLabel[language],
+      experience: registrationFormTranslations.experienceLabel[language],
+      education: registrationFormTranslations.educationLabel[language],
+      projectType: registrationFormTranslations.projectTypeLabel[language],
+      projectSize: registrationFormTranslations.projectSizeLabel[language],
+      projectLocation:
+        registrationFormTranslations.projectLocationLabel[language],
+      implementationTimeline:
+        registrationFormTranslations.implementationTimelineLabel[language], // Make sure this key exists in translations
+      budget: registrationFormTranslations.budgetLabel[language], // Make sure this key exists in translations
+      carbonGoals: registrationFormTranslations.carbonGoalsLabel[language],
     };
     return labels[fieldName] || fieldName;
   };
@@ -215,23 +226,25 @@ export default function RegistrationForm() {
           setIsSuccess(false);
           setShowConfetti(false);
           toast({
-            title: "Gửi thành công",
-            description: "Cảm ơn bạn đã đăng ký tư vấn!",
+            title: registrationFormTranslations.successMessage.title[language],
+            description:
+              registrationFormTranslations.successMessage.description[language],
             variant: "default",
           });
         }, 5000);
       } else {
         toast({
-          title: "Gửi thất bại",
+          title: registrationFormTranslations.failureMessage.title[language],
           description:
-            response.payload?.error || "Gửi thất bại, vui lòng thử lại sau!",
+            registrationFormTranslations.failureMessage.description[language],
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Gửi thất bại",
-        description: "Gửi thất bại, vui lòng thử lại sau!",
+        title: registrationFormTranslations.failureMessage.title[language],
+        description:
+          registrationFormTranslations.failureMessage.description[language],
         variant: "destructive",
       });
     } finally {
@@ -247,15 +260,22 @@ export default function RegistrationForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-2">
                 <Label htmlFor="age" className="text-gray-700 font-medium">
-                  Tuổi <span className="text-red-500">*</span>
+                  {registrationFormTranslations.ageLabel[language]}{" "}
+                  <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="age"
                   name="age"
                   value={formData.age}
                   onChange={handleChange}
-                  placeholder="Tuổi"
-                  className={`border-2 py-6 ${formErrors.age ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
+                  placeholder={
+                    registrationFormTranslations.agePlaceholder[language]
+                  }
+                  className={`border-2 py-6 ${
+                    formErrors.age
+                      ? "border-red-300 focus:border-red-500"
+                      : "border-gray-200 focus:border-green-500"
+                  }`}
                 />
                 {formErrors.age && (
                   <p className="text-red-500 text-sm">{formErrors.age}</p>
@@ -263,15 +283,22 @@ export default function RegistrationForm() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="location" className="text-gray-700 font-medium">
-                  Địa điểm <span className="text-red-500">*</span>
+                  {registrationFormTranslations.locationLabel[language]}{" "}
+                  <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="location"
                   name="location"
                   value={formData.location}
                   onChange={handleChange}
-                  placeholder="Địa chỉ"
-                  className={`border-2 py-6 ${formErrors.location ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
+                  placeholder={
+                    registrationFormTranslations.locationPlaceholder[language]
+                  }
+                  className={`border-2 py-6 ${
+                    formErrors.location
+                      ? "border-red-300 focus:border-red-500"
+                      : "border-gray-200 focus:border-green-500"
+                  }`}
                 />
                 {formErrors.location && (
                   <p className="text-red-500 text-sm">{formErrors.location}</p>
@@ -281,15 +308,22 @@ export default function RegistrationForm() {
 
             <div className="space-y-2">
               <Label htmlFor="area" className="text-gray-700 font-medium">
-                Diện tích rừng <span className="text-red-500">*</span>
+                {registrationFormTranslations.areaLabelForest[language]}{" "}
+                <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="area"
                 name="area"
                 value={formData.area}
                 onChange={handleChange}
-                placeholder="Diện tích rừng (ha)"
-                className={`border-2 py-6 ${formErrors.area ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
+                placeholder={
+                  registrationFormTranslations.areaPlaceholderForest[language]
+                }
+                className={`border-2 py-6 ${
+                  formErrors.area
+                    ? "border-red-300 focus:border-red-500"
+                    : "border-gray-200 focus:border-green-500"
+                }`}
               />
               {formErrors.area && (
                 <p className="text-red-500 text-sm">{formErrors.area}</p>
@@ -303,15 +337,22 @@ export default function RegistrationForm() {
           <>
             <div className="space-y-2">
               <Label htmlFor="location" className="text-gray-700 font-medium">
-                Địa điểm <span className="text-red-500">*</span>
+                {registrationFormTranslations.locationLabel[language]}{" "}
+                <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="location"
                 name="location"
                 value={formData.location}
                 onChange={handleChange}
-                placeholder="Địa chỉ"
-                className={`border-2 py-6 ${formErrors.location ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
+                placeholder={
+                  registrationFormTranslations.locationPlaceholder[language]
+                }
+                className={`border-2 py-6 ${
+                  formErrors.location
+                    ? "border-red-300 focus:border-red-500"
+                    : "border-gray-200 focus:border-green-500"
+                }`}
               />
               {formErrors.location && (
                 <p className="text-red-500 text-sm">{formErrors.location}</p>
@@ -320,15 +361,24 @@ export default function RegistrationForm() {
 
             <div className="space-y-2">
               <Label htmlFor="area" className="text-gray-700 font-medium">
-                Diện tích canh tác (ha) <span className="text-red-500">*</span>
+                {registrationFormTranslations.areaLabelAgriculture[language]}{" "}
+                <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="area"
                 name="area"
                 value={formData.area}
                 onChange={handleChange}
-                placeholder="Diện tích canh tác (ha)"
-                className={`border-2 py-6 ${formErrors.area ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
+                placeholder={
+                  registrationFormTranslations.areaPlaceholderAgriculture[
+                    language
+                  ]
+                }
+                className={`border-2 py-6 ${
+                  formErrors.area
+                    ? "border-red-300 focus:border-red-500"
+                    : "border-gray-200 focus:border-green-500"
+                }`}
               />
               {formErrors.area && (
                 <p className="text-red-500 text-sm">{formErrors.area}</p>
@@ -340,15 +390,22 @@ export default function RegistrationForm() {
                 htmlFor="projectType"
                 className="text-gray-700 font-medium"
               >
-                Loại cây trồng/vật nuôi <span className="text-red-500">*</span>
+                {registrationFormTranslations.projectTypeLabel[language]}{" "}
+                <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="projectType"
                 name="projectType"
                 value={formData.projectType}
                 onChange={handleChange}
-                placeholder="Loại cây trồng/vật nuôi"
-                className={`border-2 py-6 ${formErrors.projectType ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
+                placeholder={
+                  registrationFormTranslations.projectTypePlaceholder[language]
+                }
+                className={`border-2 py-6 ${
+                  formErrors.projectType
+                    ? "border-red-300 focus:border-red-500"
+                    : "border-gray-200 focus:border-green-500"
+                }`}
               />
               {formErrors.projectType && (
                 <p className="text-red-500 text-sm">{formErrors.projectType}</p>
@@ -364,15 +421,22 @@ export default function RegistrationForm() {
                 htmlFor="organization"
                 className="text-gray-700 font-medium"
               >
-                Tổ chức/Doanh nghiệp <span className="text-red-500">*</span>
+                {registrationFormTranslations.organizationLabel[language]}{" "}
+                <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="organization"
                 name="organization"
                 value={formData.organization}
                 onChange={handleChange}
-                placeholder="Tổ chức/Doanh nghiệp"
-                className={`border-2 py-6 ${formErrors.organization ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
+                placeholder={
+                  registrationFormTranslations.organizationPlaceholder[language]
+                }
+                className={`border-2 py-6 ${
+                  formErrors.organization
+                    ? "border-red-300 focus:border-red-500"
+                    : "border-gray-200 focus:border-green-500"
+                }`}
               />
               {formErrors.organization && (
                 <p className="text-red-500 text-sm">
@@ -386,15 +450,22 @@ export default function RegistrationForm() {
                 htmlFor="projectSize"
                 className="text-gray-700 font-medium"
               >
-                Quy mô dự án <span className="text-red-500">*</span>
+                {registrationFormTranslations.projectSizeLabel[language]}{" "}
+                <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="projectSize"
                 name="projectSize"
                 value={formData.projectSize}
                 onChange={handleChange}
-                placeholder="Quy mô dự án (tấn biochar/năm)"
-                className={`border-2 py-6 ${formErrors.projectSize ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
+                placeholder={
+                  registrationFormTranslations.projectSizePlaceholder[language]
+                }
+                className={`border-2 py-6 ${
+                  formErrors.projectSize
+                    ? "border-red-300 focus:border-red-500"
+                    : "border-gray-200 focus:border-green-500"
+                }`}
               />
               {formErrors.projectSize && (
                 <p className="text-red-500 text-sm">{formErrors.projectSize}</p>
@@ -406,14 +477,18 @@ export default function RegistrationForm() {
                 htmlFor="projectLocation"
                 className="text-gray-700 font-medium"
               >
-                Địa điểm dự kiến
+                {registrationFormTranslations.projectLocationLabel[language]}
               </Label>
               <Input
                 id="projectLocation"
                 name="projectLocation"
                 value={formData.projectLocation}
                 onChange={handleChange}
-                placeholder="Địa điểm dự kiến"
+                placeholder={
+                  registrationFormTranslations.projectLocationPlaceholder[
+                    language
+                  ]
+                }
                 className="border-2 py-6 border-gray-200 focus:border-green-500"
               />
             </div>
@@ -425,21 +500,54 @@ export default function RegistrationForm() {
           <>
             <div className="space-y-2">
               <Label htmlFor="education" className="text-gray-700 font-medium">
-                Trình độ học vấn <span className="text-red-500">*</span>
+                {registrationFormTranslations.educationLabel[language]}{" "}
+                <span className="text-red-500">*</span>
               </Label>
               <select
                 id="education"
                 name="education"
                 value={formData.education}
                 onChange={handleChange}
-                className={`w-full border-2 py-3 px-4 rounded-md ${formErrors.education ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
+                className={`w-full border-2 py-3 px-4 rounded-md ${
+                  formErrors.education
+                    ? "border-red-300 focus:border-red-500"
+                    : "border-gray-200 focus:border-green-500"
+                }`}
               >
-                <option value="">Trình độ học vấn</option>
-                <option value="high_school">Trung học phổ thông</option>
-                <option value="college">Cao đẳng</option>
-                <option value="bachelor">Đại học</option>
-                <option value="master">Thạc sĩ</option>
-                <option value="phd">Tiến sĩ</option>
+                <option value="">
+                  {registrationFormTranslations.educationLabel[language]}
+                </option>
+                <option value="high_school">
+                  {
+                    registrationFormTranslations.educationOptions.highSchool[
+                      language
+                    ]
+                  }
+                </option>
+                <option value="college">
+                  {
+                    registrationFormTranslations.educationOptions.college[
+                      language
+                    ]
+                  }
+                </option>
+                <option value="bachelor">
+                  {
+                    registrationFormTranslations.educationOptions.bachelor[
+                      language
+                    ]
+                  }
+                </option>
+                <option value="master">
+                  {
+                    registrationFormTranslations.educationOptions.master[
+                      language
+                    ]
+                  }
+                </option>
+                <option value="phd">
+                  {registrationFormTranslations.educationOptions.phd[language]}
+                </option>
               </select>
               {formErrors.education && (
                 <p className="text-red-500 text-sm">{formErrors.education}</p>
@@ -448,7 +556,7 @@ export default function RegistrationForm() {
 
             <div className="space-y-2">
               <Label htmlFor="experience" className="text-gray-700 font-medium">
-                Kinh nghiệm trong lĩnh vực môi trường{" "}
+                {registrationFormTranslations.experienceLabel[language]}{" "}
                 <span className="text-red-500">*</span>
               </Label>
               <select
@@ -456,14 +564,50 @@ export default function RegistrationForm() {
                 name="experience"
                 value={formData.experience}
                 onChange={handleChange}
-                className={`w-full border-2 py-3 px-4 rounded-md ${formErrors.experience ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
+                className={`w-full border-2 py-3 px-4 rounded-md ${
+                  formErrors.experience
+                    ? "border-red-300 focus:border-red-500"
+                    : "border-gray-200 focus:border-green-500"
+                }`}
               >
-                <option value="">Kinh nghiệm trong lĩnh vực môi trường</option>
-                <option value="none">Chưa có kinh nghiệm</option>
-                <option value="less_than_1">Dưới 1 năm</option>
-                <option value="1_to_3">1-3 năm</option>
-                <option value="3_to_5">3-5 năm</option>
-                <option value="more_than_5">Trên 5 năm</option>
+                <option value="">
+                  {registrationFormTranslations.experienceLabel[language]}
+                </option>
+                <option value="none">
+                  {
+                    registrationFormTranslations.experienceOptions.none[
+                      language
+                    ]
+                  }
+                </option>
+                <option value="less_than_1">
+                  {
+                    registrationFormTranslations.experienceOptions.lessThan1[
+                      language
+                    ]
+                  }
+                </option>
+                <option value="1_to_3">
+                  {
+                    registrationFormTranslations.experienceOptions["1To3"][
+                      language
+                    ]
+                  }
+                </option>
+                <option value="3_to_5">
+                  {
+                    registrationFormTranslations.experienceOptions["3To5"][
+                      language
+                    ]
+                  }
+                </option>
+                <option value="more_than_5">
+                  {
+                    registrationFormTranslations.experienceOptions.moreThan5[
+                      language
+                    ]
+                  }
+                </option>
               </select>
               {formErrors.experience && (
                 <p className="text-red-500 text-sm">{formErrors.experience}</p>
@@ -475,14 +619,16 @@ export default function RegistrationForm() {
                 htmlFor="organization"
                 className="text-gray-700 font-medium"
               >
-                Tổ chức/Doanh nghiệp
+                {registrationFormTranslations.organizationLabel[language]}
               </Label>
               <Input
                 id="organization"
                 name="organization"
                 value={formData.organization}
                 onChange={handleChange}
-                placeholder="Tổ chức/Doanh nghiệp"
+                placeholder={
+                  registrationFormTranslations.organizationPlaceholder[language]
+                }
                 className="border-2 py-6 border-gray-200 focus:border-green-500"
               />
             </div>
@@ -497,15 +643,22 @@ export default function RegistrationForm() {
                 htmlFor="organization"
                 className="text-gray-700 font-medium"
               >
-                Tổ chức/Doanh nghiệp <span className="text-red-500">*</span>
+                {registrationFormTranslations.organizationLabel[language]}{" "}
+                <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="organization"
                 name="organization"
                 value={formData.organization}
                 onChange={handleChange}
-                placeholder="Tổ chức/Doanh nghiệp"
-                className={`border-2 py-6 ${formErrors.organization ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
+                placeholder={
+                  registrationFormTranslations.organizationPlaceholder[language]
+                }
+                className={`border-2 py-6 ${
+                  formErrors.organization
+                    ? "border-red-300 focus:border-red-500"
+                    : "border-gray-200 focus:border-green-500"
+                }`}
               />
               {formErrors.organization && (
                 <p className="text-red-500 text-sm">
@@ -516,15 +669,22 @@ export default function RegistrationForm() {
 
             <div className="space-y-2">
               <Label htmlFor="position" className="text-gray-700 font-medium">
-                Chức vụ <span className="text-red-500">*</span>
+                {registrationFormTranslations.positionLabel[language]}{" "}
+                <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="position"
                 name="position"
                 value={formData.position}
                 onChange={handleChange}
-                placeholder="Chức vụ"
-                className={`border-2 py-6 ${formErrors.position ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
+                placeholder={
+                  registrationFormTranslations.positionPlaceholder[language]
+                }
+                className={`border-2 py-6 ${
+                  formErrors.position
+                    ? "border-red-300 focus:border-red-500"
+                    : "border-gray-200 focus:border-green-500"
+                }`}
               />
               {formErrors.position && (
                 <p className="text-red-500 text-sm">{formErrors.position}</p>
@@ -536,14 +696,16 @@ export default function RegistrationForm() {
                 htmlFor="carbonGoals"
                 className="text-gray-700 font-medium"
               >
-                Mục tiêu sử dụng Carbon Toàn Thư 4.0
+                {registrationFormTranslations.carbonGoalsLabel[language]}
               </Label>
               <Textarea
                 id="carbonGoals"
                 name="carbonGoals"
                 value={formData.carbonGoals}
                 onChange={handleChange}
-                placeholder="Mục tiêu sử dụng Carbon Toàn Thư 4.0"
+                placeholder={
+                  registrationFormTranslations.carbonGoalsPlaceholder[language]
+                }
                 rows={3}
                 className="border-2 border-gray-200 focus:border-green-500 resize-none"
               />
@@ -555,16 +717,23 @@ export default function RegistrationForm() {
         return (
           <div className="space-y-2">
             <Label htmlFor="message" className="text-gray-700 font-medium">
-              Nội dung tư vấn <span className="text-red-500">*</span>
+              {registrationFormTranslations.messageLabel[language]}{" "}
+              <span className="text-red-500">*</span>
             </Label>
             <Textarea
               id="message"
               name="message"
               value={formData.message}
               onChange={handleChange}
-              placeholder="Câu hỏi hoặc yêu cầu bổ sung"
+              placeholder={
+                registrationFormTranslations.messagePlaceholder[language]
+              }
               rows={5}
-              className={`border-2 ${formErrors.message ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"} resize-none`}
+              className={`border-2 ${
+                formErrors.message
+                  ? "border-red-300 focus:border-red-500"
+                  : "border-gray-200 focus:border-green-500"
+              } resize-none`}
             />
             {formErrors.message && (
               <p className="text-red-500 text-sm">{formErrors.message}</p>
@@ -580,14 +749,16 @@ export default function RegistrationForm() {
     <>
       <form onSubmit={handleSubmit} className="space-y-5 ">
         <h3 className="text-2xl font-bold text-gray-800 mb-6">
-          Đăng ký tư vấn
+          {registrationFormTranslations.formTitle[language]}
         </h3>
         <div className="flex">
           <Link
             href="/san-pham/du-an-tin-chi-carbon#dang-ky-du-an"
             className="flex items-start justify-center space-x-1"
           >
-            <p className="text-sm  text-gray-600">HOẶC ĐĂNG KÝ DỰ ÁN NGAY</p>
+            <p className="text-sm text-gray-600">
+              {registrationFormTranslations.orRegisterProject[language]}
+            </p>
           </Link>
         </div>
 
@@ -596,21 +767,61 @@ export default function RegistrationForm() {
             htmlFor="consultationType"
             className="text-gray-700 font-medium"
           >
-            Loại tư vấn <span className="text-red-500">*</span>
+            {registrationFormTranslations.consultationTypeLabel[language]}{" "}
+            <span className="text-red-500">*</span>
           </Label>
           <select
             id="consultationType"
             name="consultationType"
             value={formData.consultationType}
             onChange={handleChange}
-            className={`w-full border-2 py-3 px-4 rounded-md ${formErrors.consultationType ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
+            className={`w-full border-2 py-3 px-4 rounded-md ${
+              formErrors.consultationType
+                ? "border-red-300 focus:border-red-500"
+                : "border-gray-200 focus:border-green-500"
+            }`}
           >
-            <option value="forest">Tín chỉ carbon từ rừng</option>
-            <option value="agriculture">Tín chỉ nông nghiệp</option>
-            <option value="biochar">Công nghệ Biochar</option>
-            <option value="csu">Khóa học chứng chỉ quốc tế CSU</option>
-            <option value="carbonbook">Carbon Toàn Thư 4.0</option>
-            <option value="other">Khác</option>
+            <option value="forest">
+              {
+                registrationFormTranslations.consultationTypeOptions.forest[
+                  language
+                ]
+              }
+            </option>
+            <option value="agriculture">
+              {
+                registrationFormTranslations.consultationTypeOptions
+                  .agriculture[language]
+              }
+            </option>
+            <option value="biochar">
+              {
+                registrationFormTranslations.consultationTypeOptions.biochar[
+                  language
+                ]
+              }
+            </option>
+            <option value="csu">
+              {
+                registrationFormTranslations.consultationTypeOptions.csu[
+                  language
+                ]
+              }
+            </option>
+            <option value="carbonbook">
+              {
+                registrationFormTranslations.consultationTypeOptions.carbonbook[
+                  language
+                ]
+              }
+            </option>
+            <option value="other">
+              {
+                registrationFormTranslations.consultationTypeOptions.other[
+                  language
+                ]
+              }
+            </option>
           </select>
           {formErrors.consultationType && (
             <p className="text-red-500 text-sm">
@@ -621,15 +832,20 @@ export default function RegistrationForm() {
 
         <div className="space-y-2">
           <Label htmlFor="name" className="text-gray-700 font-medium">
-            Họ và tên <span className="text-red-500">*</span>
+            {registrationFormTranslations.nameLabel[language]}{" "}
+            <span className="text-red-500">*</span>
           </Label>
           <Input
             id="name"
             name="name"
             value={formData.name}
             onChange={handleChange}
-            placeholder="Họ và tên"
-            className={`border-2 py-6 ${formErrors.name ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
+            placeholder={registrationFormTranslations.namePlaceholder[language]}
+            className={`border-2 py-6 ${
+              formErrors.name
+                ? "border-red-300 focus:border-red-500"
+                : "border-gray-200 focus:border-green-500"
+            }`}
           />
           {formErrors.name && (
             <p className="text-red-500 text-sm">{formErrors.name}</p>
@@ -641,15 +857,22 @@ export default function RegistrationForm() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="space-y-2">
             <Label htmlFor="phone" className="text-gray-700 font-medium">
-              Số điện thoại <span className="text-red-500">*</span>
+              {registrationFormTranslations.phoneLabel[language]}{" "}
+              <span className="text-red-500">*</span>
             </Label>
             <Input
               id="phone"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              placeholder="Số điện thoại"
-              className={`border-2 py-6 ${formErrors.phone ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
+              placeholder={
+                registrationFormTranslations.phonePlaceholder[language]
+              }
+              className={`border-2 py-6 ${
+                formErrors.phone
+                  ? "border-red-300 focus:border-red-500"
+                  : "border-gray-200 focus:border-green-500"
+              }`}
             />
             {formErrors.phone && (
               <p className="text-red-500 text-sm">{formErrors.phone}</p>
@@ -657,7 +880,8 @@ export default function RegistrationForm() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="email" className="text-gray-700 font-medium">
-              Email <span className="text-red-500">*</span>
+              {registrationFormTranslations.emailLabel[language]}{" "}
+              <span className="text-red-500">*</span>
             </Label>
             <Input
               id="email"
@@ -665,8 +889,14 @@ export default function RegistrationForm() {
               type="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Email"
-              className={`border-2 py-6 ${formErrors.email ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
+              placeholder={
+                registrationFormTranslations.emailPlaceholder[language]
+              }
+              className={`border-2 py-6 ${
+                formErrors.email
+                  ? "border-red-300 focus:border-red-500"
+                  : "border-gray-200 focus:border-green-500"
+              }`}
             />
             {formErrors.email && (
               <p className="text-red-500 text-sm">{formErrors.email}</p>
@@ -677,14 +907,16 @@ export default function RegistrationForm() {
         {formData.consultationType !== "other" && (
           <div className="space-y-2">
             <Label htmlFor="message" className="text-gray-700 font-medium">
-              Câu hỏi khác
+              {registrationFormTranslations.messageLabel[language]}
             </Label>
             <Textarea
               id="message"
               name="message"
               value={formData.message}
               onChange={handleChange}
-              placeholder="Câu hỏi hoặc yêu cầu bổ sung"
+              placeholder={
+                registrationFormTranslations.messagePlaceholder[language]
+              }
               rows={4}
               className="border-2 border-gray-200 focus:border-green-500 resize-none"
             />
@@ -697,7 +929,7 @@ export default function RegistrationForm() {
               <CheckCircle className="h-4 w-4 text-green-600" />
             </div>
             <p className="text-sm text-gray-600">
-              Cam kết bảo mật thông tin cá nhân
+              {registrationFormTranslations.privacyCommitment[language]}
             </p>
           </div>
         </div>
@@ -709,22 +941,81 @@ export default function RegistrationForm() {
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Đang gửi...
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />{" "}
+              {registrationFormTranslations.submittingButton[language]}
             </>
           ) : (
-            "Gửi đăng ký"
+            registrationFormTranslations.submitButton[language]
           )}
         </Button>
 
         {isSuccess && (
           <div className="p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-center">
             <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
-            <p>Cảm ơn bạn đã đăng ký tư vấn!</p>
+            <p>
+              {
+                registrationFormTranslations.successMessage.description[
+                  language
+                ]
+              }
+            </p>
           </div>
         )}
 
         <ConfettiEffect isActive={showConfetti} />
       </form>
+
+      {/* Modal for unauthenticated users */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[425px] p-6">
+          <DialogHeader>
+            <DialogTitle>
+              {registrationFormTranslations.modal.title[language]}
+            </DialogTitle>
+            <DialogDescription>
+              {registrationFormTranslations.modal.description[language]}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-col gap-4 mt-4">
+            <Button
+              onClick={() => {
+                router.push("/dang-nhap"); // Replace with your actual login route
+              }}
+              className="w-full bg-green-600 hover:bg-green-700"
+            >
+              {registrationFormTranslations.modal.loginButton[language]}
+            </Button>
+            <Button
+              onClick={() => {
+                router.push("/dang-ky"); // Replace with your actual register route
+              }}
+              variant="outline"
+              className="w-full border-green-600 text-green-600 hover:bg-green-50"
+            >
+              {registrationFormTranslations.modal.registerButton[language]}
+            </Button>
+            <Button
+              onClick={() => {
+                setIsModalOpen(false);
+                // Optionally allow submission without auth, but note it won't be tracked
+                handleSubmit(
+                  new Event(
+                    "submit",
+                  ) as unknown as React.FormEvent<HTMLFormElement>,
+                ); // Trigger submit again, but skip auth check
+              }}
+              variant="ghost"
+              className="w-full text-gray-500 hover:text-gray-700"
+            >
+              {
+                registrationFormTranslations.modal.continueWithoutLogin[
+                  language
+                ]
+              }
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

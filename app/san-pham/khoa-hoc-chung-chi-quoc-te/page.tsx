@@ -18,28 +18,42 @@ import { useLanguage } from "@/context/language-context";
 import Head from "next/head";
 import { generateProductSchema, generateFAQSchema } from "@/lib/schema";
 import { PricingSection } from "./card.components";
-import translations from "@/app/mockup/translate.mockup";
+// Import file dịch thuật mới thay vì mockup
+import internationalCertificateTranslations from "./language";
 import { useRef } from "react";
+
 export default function InternationalCertificateCoursesPage() {
   const { language } = useLanguage();
   const handleScroll = () => {
     targetRef.current?.scrollIntoView({ behavior: "smooth" });
   };
   const targetRef = useRef<HTMLDivElement>(null);
-  const getText = (key: keyof (typeof translations)["vi"]) => {
-    const langData = translations[language] as (typeof translations)["vi"];
-    return langData[key] || translations["vi"][key];
+
+  // Helper function to get text based on current language
+  const getText = (key: keyof typeof internationalCertificateTranslations) => {
+    const translation = internationalCertificateTranslations[key];
+    if (
+      typeof translation === "object" &&
+      translation !== null &&
+      "vi" in translation &&
+      "en" in translation
+    ) {
+      return (translation as { vi: string; en: string })[language];
+    }
+    // Fallback for cases where the key might not be directly a simple string object
+    // This could happen if a key points to an object with more complex structure
+    console.warn(
+      `Translation key "${key}" not found or not a simple {vi, en} object.`,
+    );
+    return String(key); // Return key itself or a default if translation structure is unexpected
   };
 
   const courseSchema = generateProductSchema({
-    name:
-      language === "vi"
-        ? "Khóa học chứng chỉ quốc tế về thị trường tín chỉ carbon"
-        : "International Certificate Course on Carbon Credit Markets",
+    name: internationalCertificateTranslations.courseName[language],
     description:
-      language === "vi"
-        ? getText("courseDescription1") + " " + getText("courseDescription2")
-        : getText("courseDescription1") + " " + getText("courseDescription2"),
+      internationalCertificateTranslations.courseDescription1[language] +
+      " " +
+      internationalCertificateTranslations.courseDescription2[language],
     url: "https://tinchicarbonvietnam.vn/san-pham/khoa-hoc-chung-chi-quoc-te",
     imageUrl: "https://tinchicarbonvietnam.vn/images/certificate-sample.png",
     price: 9900000,
@@ -49,36 +63,36 @@ export default function InternationalCertificateCoursesPage() {
   // Tạo schema.org cho FAQ
   const faqSchema = generateFAQSchema([
     {
-      question: getText("faq1"),
-      answer: getText("faqAnswer1"),
+      question: internationalCertificateTranslations.faq1[language],
+      answer: internationalCertificateTranslations.faqAnswer1[language],
     },
     {
-      question: getText("faq2"),
-      answer: getText("faqAnswer2"),
+      question: internationalCertificateTranslations.faq2[language],
+      answer: internationalCertificateTranslations.faqAnswer2[language],
     },
     {
-      question: getText("faq3"),
-      answer: getText("faqAnswer3"),
+      question: internationalCertificateTranslations.faq3[language],
+      answer: internationalCertificateTranslations.faqAnswer3[language],
     },
     {
-      question: getText("faq4"),
-      answer: getText("faqAnswer4"),
+      question: internationalCertificateTranslations.faq4[language],
+      answer: internationalCertificateTranslations.faqAnswer4[language],
     },
     {
-      question: getText("faq5"),
-      answer: getText("faqAnswer5"),
+      question: internationalCertificateTranslations.faq5[language],
+      answer: internationalCertificateTranslations.faqAnswer5[language],
     },
     {
-      question: getText("faq6"),
-      answer: getText("faqAnswer6"),
+      question: internationalCertificateTranslations.faq6[language],
+      answer: internationalCertificateTranslations.faqAnswer6[language],
     },
     {
-      question: getText("faq7"),
-      answer: getText("faqAnswer7"),
+      question: internationalCertificateTranslations.faq7[language],
+      answer: internationalCertificateTranslations.faqAnswer7[language],
     },
     {
-      question: getText("faq8"),
-      answer: getText("faqAnswer8"),
+      question: internationalCertificateTranslations.faq8[language],
+      answer: internationalCertificateTranslations.faqAnswer8[language],
     },
   ]);
 
@@ -86,40 +100,28 @@ export default function InternationalCertificateCoursesPage() {
     <>
       <Head>
         <title>
-          {language === "vi"
-            ? "Khóa học chứng chỉ quốc tế về thị trường tín chỉ carbon"
-            : "International Certificate Course on Carbon Credit Markets"}
+          {internationalCertificateTranslations.courseName[language]}
         </title>
         <meta
           name="description"
           content={
-            language === "vi"
-              ? getText("courseDescription1")
-              : getText("courseDescription1")
+            internationalCertificateTranslations.courseDescription1[language]
           }
         />
         <meta
           name="keywords"
           content={
-            language === "vi"
-              ? "chứng chỉ quốc tế, tín chỉ carbon, khóa học, ESG, Columbia Southern University"
-              : "international certificate, carbon credits, course, ESG, Columbia Southern University"
+            internationalCertificateTranslations.courseKeywords[language]
           }
         />
         <meta
           property="og:title"
-          content={
-            language === "vi"
-              ? "Khóa học chứng chỉ quốc tế về thị trường tín chỉ carbon"
-              : "International Certificate Course on Carbon Credit Markets"
-          }
+          content={internationalCertificateTranslations.courseName[language]}
         />
         <meta
           property="og:description"
           content={
-            language === "vi"
-              ? getText("courseDescription1")
-              : getText("courseDescription1")
+            internationalCertificateTranslations.courseDescription1[language]
           }
         />
         <meta
@@ -149,7 +151,7 @@ export default function InternationalCertificateCoursesPage() {
           <div className="absolute inset-0 z-0" aria-hidden="true">
             <Image
               src="https://hrn4pkuebnmvy1ev.public.blob.vercel-storage.com/CSU/Field%20of%20Knowledge%20fixed-5EKBWRBwl9HSxazRMrqpFSy1KttxmO.png"
-              alt={getText("courseTitle")}
+              alt={internationalCertificateTranslations.courseTitle[language]}
               fill
               className="object-cover opacity-60"
               priority
@@ -158,7 +160,11 @@ export default function InternationalCertificateCoursesPage() {
           <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center items-start">
             <div className="flex items-center gap-4 mb-6">
               <span className="inline-block py-1 px-3 bg-green-600 text-white text-sm font-medium rounded-full">
-                {getText("exclusivePartner")}
+                {
+                  internationalCertificateTranslations.exclusivePartner[
+                    language
+                  ]
+                }
               </span>
               <div className="bg-white p-2 rounded-lg">
                 <Image
@@ -174,10 +180,10 @@ export default function InternationalCertificateCoursesPage() {
               id="hero-heading"
               className="text-5xl md:text-7xl font-bold text-white mb-6"
             >
-              {getText("courseTitle")}
+              {internationalCertificateTranslations.courseTitle[language]}
             </h1>
             <p className="text-white text-xl max-w-2xl mb-8">
-              {getText("courseSubtitle")}
+              {internationalCertificateTranslations.courseSubtitle[language]}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
@@ -185,7 +191,7 @@ export default function InternationalCertificateCoursesPage() {
                 onClick={handleScroll}
                 className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg"
               >
-                {getText("registerCourse")}
+                {internationalCertificateTranslations.registerCourse[language]}
               </Button>
               <Button
                 onClick={handleScroll}
@@ -193,7 +199,11 @@ export default function InternationalCertificateCoursesPage() {
                 size="lg"
                 className="border-white text-white bg-green-600/20 hover:bg-white hover:text-green-600 px-8 py-6 text-lg"
               >
-                {getText("downloadSchedule")}
+                {
+                  internationalCertificateTranslations.downloadSchedule[
+                    language
+                  ]
+                }
               </Button>
             </div>
           </div>
@@ -227,22 +237,28 @@ export default function InternationalCertificateCoursesPage() {
                     />
                   </div>
                   <p className="text-white font-medium text-base md:text-lg">
-                    {language === "vi"
-                      ? "Video giới thiệu khóa học chứng chỉ quốc tế"
-                      : "International Certificate Course Introduction"}
+                    {
+                      internationalCertificateTranslations.videoIntroTitle[
+                        language
+                      ]
+                    }
                   </p>
                 </div>
               </div>
               <div className="text-center mt-8">
                 <h2 className="text-2xl md:text-4xl font-bold text-gray-800 mb-4">
-                  {language === "vi"
-                    ? "Khám phá khóa học chứng chỉ quốc tế"
-                    : "Explore the International Certificate Course"}
+                  {
+                    internationalCertificateTranslations.exploreCourseTitle[
+                      language
+                    ]
+                  }
                 </h2>
                 <p className="text-gray-600 text-lg max-w-4xl mx-auto">
-                  {language === "vi"
-                    ? "Xem video giới thiệu để hiểu rõ hơn về khóa học chứng chỉ quốc tế và những lợi ích mà nó mang lại cho sự nghiệp của bạn."
-                    : "Watch the introduction video to learn more about the international certificate course and the benefits it brings to your career."}
+                  {
+                    internationalCertificateTranslations.exploreCourseDesc[
+                      language
+                    ]
+                  }
                 </p>
               </div>
             </div>
@@ -257,26 +273,24 @@ export default function InternationalCertificateCoursesPage() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
-                {language === "vi"
-                  ? "ĐỐI TÁC GIÁO DỤC HÀNG ĐẦU"
-                  : "PREMIER EDUCATIONAL PARTNER"}
+                {
+                  internationalCertificateTranslations.educationPartnerBadge[
+                    language
+                  ]
+                }
               </span>
               <h2
                 id="about-csu-heading"
                 className="text-4xl md:text-5xl font-bold mb-4 text-gray-800 tracking-tight"
               >
-                {language === "vi"
-                  ? "Đại học Nam Columbia (CSU)"
-                  : "Columbia Southern University (CSU)"}
+                {internationalCertificateTranslations.csuTitle[language]}
               </h2>
               <div
                 className="h-1 w-24 bg-green-600 mx-auto mb-6"
                 aria-hidden="true"
               ></div>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                {language === "vi"
-                  ? "Đối tác độc quyền cung cấp chứng chỉ quốc tế về thị trường tín chỉ carbon tại Việt Nam"
-                  : "Exclusive partner providing international certificates in carbon credit markets in Vietnam"}
+                {internationalCertificateTranslations.csuSubtitle[language]}
               </p>
             </div>
 
@@ -287,12 +301,14 @@ export default function InternationalCertificateCoursesPage() {
                   30,000+
                 </div>
                 <div className="text-xl font-medium text-gray-800">
-                  {language === "vi" ? "Học viên đang học" : "Active Students"}
+                  {internationalCertificateTranslations.studentsCount[language]}
                 </div>
                 <p className="text-gray-600 mt-2">
-                  {language === "vi"
-                    ? "Từ hơn 60 quốc gia trên toàn thế giới"
-                    : "From over 60 countries worldwide"}
+                  {
+                    internationalCertificateTranslations.studentsGlobalDesc[
+                      language
+                    ]
+                  }
                 </p>
               </div>
               <div className="bg-white p-8 rounded-xl text-center shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border-t-4 border-green-600">
@@ -300,14 +316,10 @@ export default function InternationalCertificateCoursesPage() {
                   1,000+
                 </div>
                 <div className="text-xl font-medium text-gray-800">
-                  {language === "vi"
-                    ? "Giảng viên và nhân viên"
-                    : "Faculty and Staff"}
+                  {internationalCertificateTranslations.facultyCount[language]}
                 </div>
                 <p className="text-gray-600 mt-2">
-                  {language === "vi"
-                    ? "Chuyên gia hàng đầu trong lĩnh vực"
-                    : "Leading experts in their fields"}
+                  {internationalCertificateTranslations.facultyDesc[language]}
                 </p>
               </div>
               <div className="bg-white p-8 rounded-xl text-center shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border-t-4 border-green-600">
@@ -315,14 +327,18 @@ export default function InternationalCertificateCoursesPage() {
                   2,000+
                 </div>
                 <div className="text-xl font-medium text-gray-800">
-                  {language === "vi"
-                    ? "Học viên tại Việt Nam"
-                    : "Students in Vietnam"}
+                  {
+                    internationalCertificateTranslations.vietnamStudentsCount[
+                      language
+                    ]
+                  }
                 </div>
                 <p className="text-gray-600 mt-2">
-                  {language === "vi"
-                    ? "Đang theo học các chương trình đào tạo"
-                    : "Currently enrolled in training programs"}
+                  {
+                    internationalCertificateTranslations.vietnamStudentsDesc[
+                      language
+                    ]
+                  }
                 </p>
               </div>
             </div>
@@ -331,7 +347,11 @@ export default function InternationalCertificateCoursesPage() {
               <div className="relative h-[500px] rounded-xl overflow-hidden shadow-2xl transform hover:scale-[1.02] transition-all duration-500">
                 <Image
                   src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CSU.jpg-0LuxLd7fwKUAiNvVjsUFzuVPYz6qEc.jpeg"
-                  alt="Columbia Southern University Graduates"
+                  alt={
+                    internationalCertificateTranslations.graduationCeremony[
+                      language
+                    ]
+                  }
                   fill
                   className="object-cover"
                 />
@@ -347,9 +367,11 @@ export default function InternationalCertificateCoursesPage() {
                       />
                     </div>
                     <p className="text-white font-medium">
-                      {language === "vi"
-                        ? "Lễ tốt nghiệp tại CSU"
-                        : "Graduation ceremony at CSU"}
+                      {
+                        internationalCertificateTranslations.graduationCeremony[
+                          language
+                        ]
+                      }
                     </p>
                   </div>
                 </div>
@@ -359,25 +381,29 @@ export default function InternationalCertificateCoursesPage() {
                   <div className="flex items-center gap-2 mb-4">
                     <div className="h-10 w-1 bg-green-600 rounded-full"></div>
                     <h3 className="text-2xl font-bold text-gray-800 m-0">
-                      {language === "vi"
-                        ? "Uy tín toàn cầu"
-                        : "Global Reputation"}
+                      {
+                        internationalCertificateTranslations
+                          .globalReputationTitle[language]
+                      }
                     </h3>
                   </div>
                   <p className="text-gray-700 text-lg leading-relaxed mb-4">
-                    {language === "vi"
-                      ? "Đại học Nam Columbia (CSU) – trực thuộc Tập đoàn Giáo dục Nam Columbia (CSEG) – với hơn 30 năm đào tạo các bậc học từ Cao đẳng, Cử nhân đại học, Thạc sĩ và Tiến sĩ tại Hoa Kỳ và quốc tế."
-                      : "Columbia Southern University (CSU) – part of Columbia Southern Education Group (CSEG) – has over 30 years of experience providing Associate, Bachelor's, Master's, and Doctoral education in the United States and internationally."}
+                    {
+                      internationalCertificateTranslations
+                        .globalReputationDesc1[language]
+                    }
                   </p>
                   <p className="text-gray-700 text-lg leading-relaxed mb-4">
-                    {language === "vi"
-                      ? "Trường Đại học Nam Columbia tự hào nằm trong top 14% những trường đại học, cao đẳng trên toàn thế giới. CSU cung cấp những khóa học chất lượng cao với phương pháp giảng dạy hiện đại và sát sao với nhu cầu thực tế của thị trường lao động toàn cầu."
-                      : "Columbia Southern University proudly ranks in the top 14% of universities and colleges worldwide. CSU provides high-quality courses with modern teaching methods that closely align with the practical needs of the global labor market."}
+                    {
+                      internationalCertificateTranslations
+                        .globalReputationDesc2[language]
+                    }
                   </p>
                   <p className="text-gray-700 text-lg leading-relaxed">
-                    {language === "vi"
-                      ? "CSU là trường đại học nằm trong top 10 về số lượng sinh viên nhập học bang Alabama. Hiện nay, CSU có trên 3.000 đối tác học tập là các cơ quan chính phủ, tập đoàn và doanh nghiệp Hoa Kỳ."
-                      : "CSU is among the top 10 universities in Alabama for student enrollment. Currently, CSU has over 3,000 learning partners including US government agencies, corporations, and businesses."}
+                    {
+                      internationalCertificateTranslations
+                        .globalReputationDesc3[language]
+                    }
                   </p>
                 </div>
                 <div className="mt-8">
@@ -387,9 +413,11 @@ export default function InternationalCertificateCoursesPage() {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
                   >
-                    {language === "vi"
-                      ? "Tìm hiểu thêm về CSU"
-                      : "Learn more about CSU"}
+                    {
+                      internationalCertificateTranslations.learnMoreCSU[
+                        language
+                      ]
+                    }
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
@@ -417,43 +445,70 @@ export default function InternationalCertificateCoursesPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
               <div>
                 <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
-                  {getText("overview")}
+                  {internationalCertificateTranslations.overviewBadge[language]}
                 </span>
                 <h2
                   id="overview-heading"
                   className="text-4xl font-bold mb-6 text-gray-800"
                 >
-                  {getText("aboutCourse")}
+                  {
+                    internationalCertificateTranslations.aboutCourseTitle[
+                      language
+                    ]
+                  }
                 </h2>
                 <p className="text-lg text-gray-600 mb-6">
-                  {getText("courseDescription1")}
+                  {
+                    internationalCertificateTranslations.courseDescription1[
+                      language
+                    ]
+                  }
                 </p>
                 <p className="text-lg text-gray-600 mb-8">
-                  {getText("courseDescription2")}
+                  {
+                    internationalCertificateTranslations.courseDescription2[
+                      language
+                    ]
+                  }
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
                     <span className="text-gray-700">
-                      {getText("internationalCertificate")}
+                      {
+                        internationalCertificateTranslations
+                          .internationalCertificate[language]
+                      }
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
                     <span className="text-gray-700">
-                      {getText("usInstructors")}
+                      {
+                        internationalCertificateTranslations.usInstructors[
+                          language
+                        ]
+                      }
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
                     <span className="text-gray-700">
-                      {getText("onlineOrOffline")}
+                      {
+                        internationalCertificateTranslations.onlineOrOffline[
+                          language
+                        ]
+                      }
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
                     <span className="text-gray-700">
-                      {getText("practicalProjects")}
+                      {
+                        internationalCertificateTranslations.practicalProjects[
+                          language
+                        ]
+                      }
                     </span>
                   </div>
                 </div>
@@ -462,30 +517,42 @@ export default function InternationalCertificateCoursesPage() {
                 <div className="relative h-[250px] rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all">
                   <Image
                     src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/H%E1%BB%8Dc%20t%E1%BA%A1i%20Vi%E1%BB%87t%20Nam.jpg-ZUqQvwNI021iu77SGSudXhhRqr7IQS.jpeg"
-                    alt="Học viên tham gia khóa học tại Việt Nam"
+                    alt={
+                      internationalCertificateTranslations.vietnamClassroom[
+                        language
+                      ]
+                    }
                     fill
                     className="object-cover"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
                     <p className="text-white text-sm font-medium">
-                      {language === "vi"
-                        ? "Lớp học trực tiếp tại Việt Nam"
-                        : "In-person class in Vietnam"}
+                      {
+                        internationalCertificateTranslations.vietnamClassroom[
+                          language
+                        ]
+                      }
                     </p>
                   </div>
                 </div>
                 <div className="relative h-[250px] rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all">
                   <Image
                     src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/H%E1%BB%8Dc%20t%E1%BA%A1i%20Vi%E1%BB%87t%20Nam%202.jpg-lcsiofkLTfbf3u0dzzqaR2P2cTwpWv.jpeg"
-                    alt="Học viên tham gia khóa học chuyên sâu"
+                    alt={
+                      internationalCertificateTranslations.inDepthStudy[
+                        language
+                      ]
+                    }
                     fill
                     className="object-cover"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
                     <p className="text-white text-sm font-medium">
-                      {language === "vi"
-                        ? "Học viên tập trung nghiên cứu chuyên sâu"
-                        : "Students focusing on in-depth studies"}
+                      {
+                        internationalCertificateTranslations.inDepthStudy[
+                          language
+                        ]
+                      }
                     </p>
                   </div>
                 </div>
@@ -494,7 +561,6 @@ export default function InternationalCertificateCoursesPage() {
           </div>
         </section>
 
-        {/* Giữ nguyên các phần còn lại của trang */}
         {/* Course Benefits Section */}
         <section
           className="py-20 bg-gray-50"
@@ -503,49 +569,81 @@ export default function InternationalCertificateCoursesPage() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
-                {getText("careerSolution")}
+                {internationalCertificateTranslations.careerSolution[language]}
               </span>
               <h2
                 id="benefits-heading"
                 className="text-4xl font-bold mb-4 text-gray-800"
               >
-                {getText("whyNeedCertificate")}
+                {
+                  internationalCertificateTranslations.whyNeedCertificate[
+                    language
+                  ]
+                }
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                {getText("competitiveMarket")}
+                {
+                  internationalCertificateTranslations.competitiveMarket[
+                    language
+                  ]
+                }
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
                 {
-                  title: getText("standOutTitle"),
-                  description: getText("standOutDesc"),
+                  title:
+                    internationalCertificateTranslations.standOutTitle[
+                      language
+                    ],
+                  description:
+                    internationalCertificateTranslations.standOutDesc[language],
                   icon: <Award className="h-12 w-12 text-green-600" />,
                 },
                 {
-                  title: getText("knowledgeTitle"),
-                  description: getText("knowledgeDesc"),
+                  title:
+                    internationalCertificateTranslations.knowledgeTitle[
+                      language
+                    ],
+                  description:
+                    internationalCertificateTranslations.knowledgeDesc[
+                      language
+                    ],
                   icon: <BookOpen className="h-12 w-12 text-green-600" />,
                 },
                 {
-                  title: getText("expertTitle"),
-                  description: getText("expertDesc"),
+                  title:
+                    internationalCertificateTranslations.expertTitle[language],
+                  description:
+                    internationalCertificateTranslations.expertDesc[language],
                   icon: <Users className="h-12 w-12 text-green-600" />,
                 },
                 {
-                  title: getText("incomeTitle"),
-                  description: getText("incomeDesc"),
+                  title:
+                    internationalCertificateTranslations.incomeTitle[language],
+                  description:
+                    internationalCertificateTranslations.incomeDesc[language],
                   icon: <CheckCircle className="h-12 w-12 text-green-600" />,
                 },
                 {
-                  title: getText("opportunityTitle"),
-                  description: getText("opportunityDesc"),
+                  title:
+                    internationalCertificateTranslations.opportunityTitle[
+                      language
+                    ],
+                  description:
+                    internationalCertificateTranslations.opportunityDesc[
+                      language
+                    ],
                   icon: <Globe className="h-12 w-12 text-green-600" />,
                 },
                 {
-                  title: getText("flexibleTitle"),
-                  description: getText("flexibleDesc"),
+                  title:
+                    internationalCertificateTranslations.flexibleTitle[
+                      language
+                    ],
+                  description:
+                    internationalCertificateTranslations.flexibleDesc[language],
                   icon: <Award className="h-12 w-12 text-green-600" />,
                 },
               ].map((benefit, index) => (
@@ -568,7 +666,6 @@ export default function InternationalCertificateCoursesPage() {
           </div>
         </section>
 
-        {/* Giữ nguyên các phần còn lại của trang */}
         {/* Course Structure Section */}
         <section
           className="py-20 bg-white"
@@ -577,16 +674,20 @@ export default function InternationalCertificateCoursesPage() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
-                {getText("courseProgram")}
+                {internationalCertificateTranslations.courseProgram[language]}
               </span>
               <h2
                 id="course-structure-heading"
                 className="text-4xl font-bold mb-4 text-gray-800"
               >
-                {getText("courseStructure")}
+                {internationalCertificateTranslations.courseStructure[language]}
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                {getText("comprehensiveContent")}
+                {
+                  internationalCertificateTranslations.comprehensiveContent[
+                    language
+                  ]
+                }
               </p>
             </div>
 
@@ -595,12 +696,14 @@ export default function InternationalCertificateCoursesPage() {
                 className="grid grid-cols-3 mb-8"
                 aria-label="Course content levels"
               >
-                <TabsTrigger value="basic">{getText("basic")}</TabsTrigger>
+                <TabsTrigger value="basic">
+                  {internationalCertificateTranslations.basic[language]}
+                </TabsTrigger>
                 <TabsTrigger value="intermediate">
-                  {getText("intermediate")}
+                  {internationalCertificateTranslations.intermediate[language]}
                 </TabsTrigger>
                 <TabsTrigger value="advanced">
-                  {getText("advanced")}
+                  {internationalCertificateTranslations.advanced[language]}
                 </TabsTrigger>
               </TabsList>
               <TabsContent
@@ -608,25 +711,48 @@ export default function InternationalCertificateCoursesPage() {
                 className="bg-white p-6 rounded-lg shadow-md"
               >
                 <h3 className="text-2xl font-bold mb-4 text-gray-800">
-                  {getText("basicTitle")}
+                  {internationalCertificateTranslations.basicTitle[language]}
                 </h3>
-                <p className="text-gray-600 mb-6">{getText("basicDesc")}</p>
+                <p className="text-gray-600 mb-6">
+                  {internationalCertificateTranslations.basicDesc[language]}
+                </p>
                 <div className="space-y-4">
                   {[
                     {
-                      title: getText("intro"),
-                      duration: getText("introHours"),
-                      description: getText("introDesc"),
+                      title:
+                        internationalCertificateTranslations.intro[language],
+                      duration:
+                        internationalCertificateTranslations.introHours[
+                          language
+                        ],
+                      description:
+                        internationalCertificateTranslations.introDesc[
+                          language
+                        ],
                     },
                     {
-                      title: getText("concepts"),
-                      duration: getText("conceptsHours"),
-                      description: getText("conceptsDesc"),
+                      title:
+                        internationalCertificateTranslations.concepts[language],
+                      duration:
+                        internationalCertificateTranslations.conceptsHours[
+                          language
+                        ],
+                      description:
+                        internationalCertificateTranslations.conceptsDesc[
+                          language
+                        ],
                     },
                     {
-                      title: getText("history"),
-                      duration: getText("historyHours"),
-                      description: getText("historyDesc"),
+                      title:
+                        internationalCertificateTranslations.history[language],
+                      duration:
+                        internationalCertificateTranslations.historyHours[
+                          language
+                        ],
+                      description:
+                        internationalCertificateTranslations.historyDesc[
+                          language
+                        ],
                     },
                   ].map((module, index) => (
                     <div key={index} className="border-b border-gray-200 pb-4">
@@ -650,27 +776,56 @@ export default function InternationalCertificateCoursesPage() {
                 className="bg-white p-6 rounded-lg shadow-md"
               >
                 <h3 className="text-2xl font-bold mb-4 text-gray-800">
-                  {getText("intermediateTitle")}
+                  {
+                    internationalCertificateTranslations.intermediateTitle[
+                      language
+                    ]
+                  }
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  {getText("intermediateDesc")}
+                  {
+                    internationalCertificateTranslations.intermediateDesc[
+                      language
+                    ]
+                  }
                 </p>
                 <div className="space-y-4">
                   {[
                     {
-                      title: getText("systems"),
-                      duration: getText("systemsHours"),
-                      description: getText("systemsDesc"),
+                      title:
+                        internationalCertificateTranslations.systems[language],
+                      duration:
+                        internationalCertificateTranslations.systemsHours[
+                          language
+                        ],
+                      description:
+                        internationalCertificateTranslations.systemsDesc[
+                          language
+                        ],
                     },
                     {
-                      title: getText("gases"),
-                      duration: getText("gasesHours"),
-                      description: getText("gasesDesc"),
+                      title:
+                        internationalCertificateTranslations.gases[language],
+                      duration:
+                        internationalCertificateTranslations.gasesHours[
+                          language
+                        ],
+                      description:
+                        internationalCertificateTranslations.gasesDesc[
+                          language
+                        ],
                     },
                     {
-                      title: getText("markets"),
-                      duration: getText("marketsHours"),
-                      description: getText("marketsDesc"),
+                      title:
+                        internationalCertificateTranslations.markets[language],
+                      duration:
+                        internationalCertificateTranslations.marketsHours[
+                          language
+                        ],
+                      description:
+                        internationalCertificateTranslations.marketsDesc[
+                          language
+                        ],
                     },
                   ].map((module, index) => (
                     <div key={index} className="border-b border-gray-200 pb-4">
@@ -694,25 +849,52 @@ export default function InternationalCertificateCoursesPage() {
                 className="bg-white p-6 rounded-lg shadow-md"
               >
                 <h3 className="text-2xl font-bold mb-4 text-gray-800">
-                  {getText("advancedTitle")}
+                  {internationalCertificateTranslations.advancedTitle[language]}
                 </h3>
-                <p className="text-gray-600 mb-6">{getText("advancedDesc")}</p>
+                <p className="text-gray-600 mb-6">
+                  {internationalCertificateTranslations.advancedDesc[language]}
+                </p>
                 <div className="space-y-4">
                   {[
                     {
-                      title: getText("projectTypes"),
-                      duration: getText("projectTypesHours"),
-                      description: getText("projectTypesDesc"),
+                      title:
+                        internationalCertificateTranslations.projectTypes[
+                          language
+                        ],
+                      duration:
+                        internationalCertificateTranslations.projectTypesHours[
+                          language
+                        ],
+                      description:
+                        internationalCertificateTranslations.projectTypesDesc[
+                          language
+                        ],
                     },
                     {
-                      title: getText("certifiers"),
-                      duration: getText("certifiersHours"),
-                      description: getText("certifiersDesc"),
+                      title:
+                        internationalCertificateTranslations.certifiers[
+                          language
+                        ],
+                      duration:
+                        internationalCertificateTranslations.certifiersHours[
+                          language
+                        ],
+                      description:
+                        internationalCertificateTranslations.certifiersDesc[
+                          language
+                        ],
                     },
                     {
-                      title: getText("practicalProjects"),
-                      duration: getText("practicalProjectsHours"),
-                      description: getText("practicalProjectsDesc"),
+                      title:
+                        internationalCertificateTranslations.practicalProjects[
+                          language
+                        ],
+                      duration:
+                        internationalCertificateTranslations
+                          .practicalProjectsHours[language],
+                      description:
+                        internationalCertificateTranslations
+                          .practicalProjectsDesc[language],
                     },
                   ].map((module, index) => (
                     <div key={index} className="border-b border-gray-200 pb-4">
@@ -739,41 +921,80 @@ export default function InternationalCertificateCoursesPage() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
-                {getText("uniqueFeatures")}
+                {internationalCertificateTranslations.uniqueFeatures[language]}
               </span>
               <h2 className="text-4xl font-bold mb-4 text-gray-800">
-                {getText("onlyInOurCourse")}
+                {internationalCertificateTranslations.onlyInOurCourse[language]}
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                {getText("uniqueFeaturesDesc")}
+                {
+                  internationalCertificateTranslations.uniqueFeaturesDesc[
+                    language
+                  ]
+                }
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
               {[
                 {
-                  title: getText("marketAnalysisTitle"),
-                  description: getText("marketAnalysisDesc"),
+                  title:
+                    internationalCertificateTranslations.marketAnalysisTitle[
+                      language
+                    ],
+                  description:
+                    internationalCertificateTranslations.marketAnalysisDesc[
+                      language
+                    ],
                 },
                 {
-                  title: getText("unlimitedTestsTitle"),
-                  description: getText("unlimitedTestsDesc"),
+                  title:
+                    internationalCertificateTranslations.unlimitedTestsTitle[
+                      language
+                    ],
+                  description:
+                    internationalCertificateTranslations.unlimitedTestsDesc[
+                      language
+                    ],
                 },
                 {
-                  title: getText("bothMarketsTitle"),
-                  description: getText("bothMarketsDesc"),
+                  title:
+                    internationalCertificateTranslations.bothMarketsTitle[
+                      language
+                    ],
+                  description:
+                    internationalCertificateTranslations.bothMarketsDesc[
+                      language
+                    ],
                 },
                 {
-                  title: getText("calculationSkillsTitle"),
-                  description: getText("calculationSkillsDesc"),
+                  title:
+                    internationalCertificateTranslations.calculationSkillsTitle[
+                      language
+                    ],
+                  description:
+                    internationalCertificateTranslations.calculationSkillsDesc[
+                      language
+                    ],
                 },
                 {
-                  title: getText("noPrerequisitesTitle"),
-                  description: getText("noPrerequisitesDesc"),
+                  title:
+                    internationalCertificateTranslations.noPrerequisitesTitle[
+                      language
+                    ],
+                  description:
+                    internationalCertificateTranslations.noPrerequisitesDesc[
+                      language
+                    ],
                 },
                 {
-                  title: getText("transferableCreditTitle"),
-                  description: getText("transferableCreditDesc"),
+                  title:
+                    internationalCertificateTranslations
+                      .transferableCreditTitle[language],
+                  description:
+                    internationalCertificateTranslations.transferableCreditDesc[
+                      language
+                    ],
                 },
               ].map((feature, index) => (
                 <div
@@ -796,13 +1017,13 @@ export default function InternationalCertificateCoursesPage() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
-                {getText("certificate")}
+                {internationalCertificateTranslations.certificate[language]}
               </span>
               <h2 className="text-4xl font-bold mb-4 text-gray-800">
-                {getText("investOnce")}
+                {internationalCertificateTranslations.investOnce[language]}
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                {getText("certificateDesc")}
+                {internationalCertificateTranslations.certificateDesc[language]}
               </p>
             </div>
 
@@ -819,17 +1040,27 @@ export default function InternationalCertificateCoursesPage() {
                 </div>
                 <div className="bg-green-50 p-6 rounded-lg border border-green-100">
                   <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                    {getText("certificateValue")}
+                    {
+                      internationalCertificateTranslations.certificateValue[
+                        language
+                      ]
+                    }
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
                     <div className="flex items-start">
                       <CheckCircle className="h-5 w-5 text-green-600 mr-2 mt-1 flex-shrink-0" />
                       <div>
                         <p className="font-semibold text-gray-800">
-                          {getText("globalRecognition")}
+                          {
+                            internationalCertificateTranslations
+                              .globalRecognition[language]
+                          }
                         </p>
                         <p className="text-gray-600 text-sm">
-                          {getText("globalRecognitionDesc")}
+                          {
+                            internationalCertificateTranslations
+                              .globalRecognitionDesc[language]
+                          }
                         </p>
                       </div>
                     </div>
@@ -837,10 +1068,17 @@ export default function InternationalCertificateCoursesPage() {
                       <CheckCircle className="h-5 w-5 text-green-600 mr-2 mt-1 flex-shrink-0" />
                       <div>
                         <p className="font-semibold text-gray-800">
-                          {getText("officialCEUs")}
+                          {
+                            internationalCertificateTranslations.officialCEUs[
+                              language
+                            ]
+                          }
                         </p>
                         <p className="text-gray-600 text-sm">
-                          {getText("officialCEUsDesc")}
+                          {
+                            internationalCertificateTranslations
+                              .officialCEUsDesc[language]
+                          }
                         </p>
                       </div>
                     </div>
@@ -848,10 +1086,17 @@ export default function InternationalCertificateCoursesPage() {
                       <CheckCircle className="h-5 w-5 text-green-600 mr-2 mt-1 flex-shrink-0" />
                       <div>
                         <p className="font-semibold text-gray-800">
-                          {getText("creditTransfer")}
+                          {
+                            internationalCertificateTranslations.creditTransfer[
+                              language
+                            ]
+                          }
                         </p>
                         <p className="text-gray-600 text-sm">
-                          {getText("creditTransferDesc")}
+                          {
+                            internationalCertificateTranslations
+                              .creditTransferDesc[language]
+                          }
                         </p>
                       </div>
                     </div>
@@ -859,17 +1104,28 @@ export default function InternationalCertificateCoursesPage() {
                       <CheckCircle className="h-5 w-5 text-green-600 mr-2 mt-1 flex-shrink-0" />
                       <div>
                         <p className="font-semibold text-gray-800">
-                          {getText("enhanceProfile")}
+                          {
+                            internationalCertificateTranslations.enhanceProfile[
+                              language
+                            ]
+                          }
                         </p>
                         <p className="text-gray-600 text-sm">
-                          {getText("enhanceProfileDesc")}
+                          {
+                            internationalCertificateTranslations
+                              .enhanceProfileDesc[language]
+                          }
                         </p>
                       </div>
                     </div>
                   </div>
                   <div className="mt-6 bg-green-100 p-4 rounded-lg">
                     <p className="text-green-800 font-medium">
-                      {getText("certificateQuote")}
+                      {
+                        internationalCertificateTranslations.certificateQuote[
+                          language
+                        ]
+                      }
                     </p>
                   </div>
                 </div>
@@ -882,13 +1138,13 @@ export default function InternationalCertificateCoursesPage() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
-                {getText("instructors")}
+                {internationalCertificateTranslations.instructors[language]}
               </span>
               <h2 className="text-4xl font-bold mb-4 text-gray-800">
-                {getText("meetExperts")}
+                {internationalCertificateTranslations.meetExperts[language]}
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                {getText("instructorsDesc")}
+                {internationalCertificateTranslations.instructorsDesc[language]}
               </p>
             </div>
 
@@ -901,7 +1157,11 @@ export default function InternationalCertificateCoursesPage() {
                       <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-green-600">
                         <Image
                           src="/images/charles-davis.jpeg"
-                          alt="Charles Davis"
+                          alt={
+                            internationalCertificateTranslations.charlesDavis[
+                              language
+                            ]
+                          }
                           fill
                           className="object-cover"
                         />
@@ -918,21 +1178,59 @@ export default function InternationalCertificateCoursesPage() {
                     </div>
                     <div>
                       <div className="uppercase tracking-wide text-sm text-green-600 font-semibold">
-                        {getText("instructor")}
+                        {
+                          internationalCertificateTranslations.instructor[
+                            language
+                          ]
+                        }
                       </div>
                       <h3 className="block mt-1 text-2xl leading-tight font-bold text-gray-900">
-                        {getText("charlesDavis")}
+                        {
+                          internationalCertificateTranslations.charlesDavis[
+                            language
+                          ]
+                        }
                       </h3>
                       <p className="mt-2 text-gray-600">
-                        {getText("charlesEducation")}
+                        {
+                          internationalCertificateTranslations.charlesEducation[
+                            language
+                          ]
+                        }
                       </p>
                       <div className="mt-4 text-gray-600">
-                        <p className="mb-2">{getText("charlesDesc")}</p>
+                        <p className="mb-2">
+                          {
+                            internationalCertificateTranslations.charlesDesc[
+                              language
+                            ]
+                          }
+                        </p>
                         <ul className="list-disc pl-5 space-y-1">
-                          <li>{getText("charlesAchievement1")}</li>
-                          <li>{getText("charlesAchievement2")}</li>
-                          <li>{getText("charlesAchievement3")}</li>
-                          <li>{getText("charlesAchievement4")}</li>
+                          <li>
+                            {
+                              internationalCertificateTranslations
+                                .charlesAchievement1[language]
+                            }
+                          </li>
+                          <li>
+                            {
+                              internationalCertificateTranslations
+                                .charlesAchievement2[language]
+                            }
+                          </li>
+                          <li>
+                            {
+                              internationalCertificateTranslations
+                                .charlesAchievement3[language]
+                            }
+                          </li>
+                          <li>
+                            {
+                              internationalCertificateTranslations
+                                .charlesAchievement4[language]
+                            }
+                          </li>
                         </ul>
                       </div>
                     </div>
@@ -948,7 +1246,11 @@ export default function InternationalCertificateCoursesPage() {
                       <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-green-600">
                         <Image
                           src="/images/elwin-jones.jpeg"
-                          alt="Elwin Jones"
+                          alt={
+                            internationalCertificateTranslations.elwinJones[
+                              language
+                            ]
+                          }
                           fill
                           className="object-cover"
                         />
@@ -965,20 +1267,53 @@ export default function InternationalCertificateCoursesPage() {
                     </div>
                     <div>
                       <div className="uppercase tracking-wide text-sm text-green-600 font-semibold">
-                        {getText("instructor")}
+                        {
+                          internationalCertificateTranslations.instructor[
+                            language
+                          ]
+                        }
                       </div>
                       <h3 className="block mt-1 text-2xl leading-tight font-bold text-gray-900">
-                        {getText("elwinJones")}
+                        {
+                          internationalCertificateTranslations.elwinJones[
+                            language
+                          ]
+                        }
                       </h3>
                       <p className="mt-2 text-gray-600">
-                        {getText("elwinEducation")}
+                        {
+                          internationalCertificateTranslations.elwinEducation[
+                            language
+                          ]
+                        }
                       </p>
                       <div className="mt-4 text-gray-600">
-                        <p className="mb-2">{getText("elwinDesc")}</p>
+                        <p className="mb-2">
+                          {
+                            internationalCertificateTranslations.elwinDesc[
+                              language
+                            ]
+                          }
+                        </p>
                         <ul className="list-disc pl-5 space-y-1">
-                          <li>{getText("elwinAchievement1")}</li>
-                          <li>{getText("elwinAchievement2")}</li>
-                          <li>{getText("elwinAchievement3")}</li>
+                          <li>
+                            {
+                              internationalCertificateTranslations
+                                .elwinAchievement1[language]
+                            }
+                          </li>
+                          <li>
+                            {
+                              internationalCertificateTranslations
+                                .elwinAchievement2[language]
+                            }
+                          </li>
+                          <li>
+                            {
+                              internationalCertificateTranslations
+                                .elwinAchievement3[language]
+                            }
+                          </li>
                         </ul>
                       </div>
                     </div>
@@ -995,7 +1330,11 @@ export default function InternationalCertificateCoursesPage() {
                     <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-green-600">
                       <Image
                         src="/images/tran-thi-nhu-phuong.png"
-                        alt="Trần Thị Như Phương"
+                        alt={
+                          internationalCertificateTranslations.tranThiNhuPhuong[
+                            language
+                          ]
+                        }
                         fill
                         className="object-cover"
                       />
@@ -1012,41 +1351,81 @@ export default function InternationalCertificateCoursesPage() {
                   </div>
                   <div>
                     <div className="uppercase tracking-wide text-sm text-green-600 font-semibold">
-                      Giảng viên tiếng Việt
+                      {
+                        internationalCertificateTranslations
+                          .vietnameseInstructorTitle[language]
+                      }
                     </div>
                     <h3 className="block mt-1 text-2xl leading-tight font-bold text-gray-900">
-                      Trần Thị Như Phượng
+                      {
+                        internationalCertificateTranslations.tranThiNhuPhuong[
+                          language
+                        ]
+                      }
                     </h3>
                     <p className="mt-2 text-gray-600">
-                      Tiến sĩ Giáo dục học, Đại học Sư phạm TP. Hồ Chí Minh
+                      {
+                        internationalCertificateTranslations.phuongEducation[
+                          language
+                        ]
+                      }
                     </p>
                     <div className="mt-2 text-gray-600">
                       <p className="font-medium">
-                        Trưởng bộ môn Phương pháp giảng dạy tiếng Việt
+                        {
+                          internationalCertificateTranslations.phuongRole1[
+                            language
+                          ]
+                        }
                       </p>
                       <p className="font-medium">
-                        Chuyên môn: Ngôn ngữ học, Giáo dục học
+                        {
+                          internationalCertificateTranslations.phuongRole2[
+                            language
+                          ]
+                        }
                       </p>
                       <p className="font-medium">
-                        Vai trò: Giảng viên, Nghiên cứu viên
+                        {
+                          internationalCertificateTranslations.phuongRole3[
+                            language
+                          ]
+                        }
                       </p>
                     </div>
                     <div className="mt-4 text-gray-600">
                       <p className="mb-2">
-                        Giảng viên có hơn 20 năm kinh nghiệm trong đào tạo giáo
-                        viên tiểu học và nghiên cứu về phương pháp giảng dạy
-                        tiếng Việt.
+                        {
+                          internationalCertificateTranslations.phuongDesc[
+                            language
+                          ]
+                        }
                       </p>
                       <ul className="list-disc pl-5 space-y-1">
                         <li>
-                          Tham gia biên soạn chương trình giáo dục phổ thông mới
+                          {
+                            internationalCertificateTranslations
+                              .phuongAchievement1[language]
+                          }
                         </li>
                         <li>
-                          Tác giả nhiều công trình nghiên cứu khoa học cấp quốc
-                          gia
+                          {
+                            internationalCertificateTranslations
+                              .phuongAchievement2[language]
+                          }
                         </li>
-                        <li>Giải thưởng giảng viên xuất sắc năm 2020</li>
-                        <li>Thành viên hội đồng chuyên môn Bộ Giáo dục</li>
+                        <li>
+                          {
+                            internationalCertificateTranslations
+                              .phuongAchievement3[language]
+                          }
+                        </li>
+                        <li>
+                          {
+                            internationalCertificateTranslations
+                              .phuongAchievement4[language]
+                          }
+                        </li>
                       </ul>
                     </div>
                   </div>
@@ -1056,12 +1435,18 @@ export default function InternationalCertificateCoursesPage() {
 
             <div className="max-w-3xl mx-auto mt-12 bg-green-50 p-6 rounded-lg border border-green-100">
               <h3 className="text-xl font-bold text-center text-gray-800 mb-4">
-                {getText("facultyTeam")}
+                {
+                  internationalCertificateTranslations.facultyTeamTitle[
+                    language
+                  ]
+                }
               </h3>
-              <p className="text-gray-700 mb-4">{getText("facultyDesc1")}</p>
+              <p className="text-gray-700 mb-4">
+                {internationalCertificateTranslations.facultyDesc1[language]}
+              </p>
               <p className="text-gray-700">
                 <strong>{language === "vi" ? "Đặc biệt:" : "Special:"}</strong>{" "}
-                {getText("facultyDesc2")}
+                {internationalCertificateTranslations.facultyDesc2[language]}
               </p>
             </div>
           </div>
@@ -1074,17 +1459,19 @@ export default function InternationalCertificateCoursesPage() {
               <div className="relative h-[500px] rounded-xl overflow-hidden shadow-2xl">
                 <Image
                   src="/images/grandmother-4992686_1920.jpg"
-                  alt={getText("courseDetails")}
+                  alt={
+                    internationalCertificateTranslations.courseDetails[language]
+                  }
                   fill
                   className="object-cover"
                 />
               </div>
               <div>
                 <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
-                  {getText("courseDetails")}
+                  {internationalCertificateTranslations.courseDetails[language]}
                 </span>
                 <h2 className="text-4xl font-bold mb-6 text-gray-800">
-                  {getText("detailedInfo")}
+                  {internationalCertificateTranslations.detailedInfo[language]}
                 </h2>
                 <div className="space-y-6">
                   <div className="flex items-start">
@@ -1093,9 +1480,15 @@ export default function InternationalCertificateCoursesPage() {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold mb-1 text-gray-800">
-                        {getText("time")}
+                        {internationalCertificateTranslations.time[language]}
                       </h3>
-                      <p className="text-gray-600">{getText("timeDesc")}</p>
+                      <p className="text-gray-600">
+                        {
+                          internationalCertificateTranslations.timeDesc[
+                            language
+                          ]
+                        }
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start">
@@ -1104,10 +1497,17 @@ export default function InternationalCertificateCoursesPage() {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold mb-1 text-gray-800">
-                        {getText("targetAudience")}
+                        {
+                          internationalCertificateTranslations.targetAudience[
+                            language
+                          ]
+                        }
                       </h3>
                       <p className="text-gray-600">
-                        {getText("targetAudienceDesc")}
+                        {
+                          internationalCertificateTranslations
+                            .targetAudienceDesc[language]
+                        }
                       </p>
                     </div>
                   </div>
@@ -1117,10 +1517,17 @@ export default function InternationalCertificateCoursesPage() {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold mb-1 text-gray-800">
-                        {getText("learningFormat")}
+                        {
+                          internationalCertificateTranslations.learningFormat[
+                            language
+                          ]
+                        }
                       </h3>
                       <p className="text-gray-600">
-                        {getText("learningFormatDesc")}
+                        {
+                          internationalCertificateTranslations
+                            .learningFormatDesc[language]
+                        }
                       </p>
                     </div>
                   </div>
@@ -1130,10 +1537,16 @@ export default function InternationalCertificateCoursesPage() {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold mb-1 text-gray-800">
-                        {getText("certificateDetail")}
+                        {
+                          internationalCertificateTranslations
+                            .certificateDetail[language]
+                        }
                       </h3>
                       <p className="text-gray-600">
-                        {getText("certificateDetailDesc")}
+                        {
+                          internationalCertificateTranslations
+                            .certificateDetailDesc[language]
+                        }
                       </p>
                     </div>
                   </div>
@@ -1148,20 +1561,19 @@ export default function InternationalCertificateCoursesPage() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
-                {getText("tuition")}
+                {internationalCertificateTranslations.tuition[language]}
               </span>
               <h2 className="text-4xl font-bold mb-4 text-gray-800">
-                {getText("investInFuture")}
+                {internationalCertificateTranslations.investInFuture[language]}
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                {getText("choosePlan")}
+                {internationalCertificateTranslations.choosePlan[language]}
               </p>
             </div>
 
             <div
-              // sao ko scoll tới đây
               ref={targetRef}
-              className="flex  w-full  md:grid-cols-3 gap-8 max-w-5xl mx-auto"
+              className="flex w-full md:grid-cols-3 gap-8 max-w-5xl mx-auto"
             >
               {/* Show product */}
               <PricingSection />
@@ -1174,80 +1586,98 @@ export default function InternationalCertificateCoursesPage() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
-                {getText("reviews")}
+                {internationalCertificateTranslations.reviews[language]}
               </span>
               <h2 className="text-4xl font-bold mb-4 text-gray-800">
-                {getText("studentsFeedback")}
+                {
+                  internationalCertificateTranslations.studentsFeedback[
+                    language
+                  ]
+                }
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                {getText("testimonialDesc")}
+                {internationalCertificateTranslations.testimonialDesc[language]}
               </p>
             </div>
 
-            {[
-              {
-                content: getText("testimonial1"),
-                author:
-                  language === "vi"
-                    ? getText("testimonialAuthor1")
-                    : getText("testimonialAuthor1"),
-                position: getText("testimonialPosition1"),
-                avatar:
-                  "https://res.cloudinary.com/dyticflm3/image/upload/v1744662839/A_Trung_ngufm5.png",
-              },
-              {
-                content: getText("testimonial2"),
-                author:
-                  language === "vi"
-                    ? getText("testimonialAuthor2")
-                    : getText("testimonialAuthor2"),
-                position: getText("testimonialPosition2"),
-                avatar:
-                  "https://res.cloudinary.com/dyticflm3/image/upload/v1744662809/Anh_%C4%90%E1%BB%A9c_Anh_qqdwoc.jpg",
-              },
-              {
-                content: getText("testimonial3"),
-                author:
-                  language === "vi"
-                    ? getText("testimonialAuthor3")
-                    : getText("testimonialAuthor3"),
-                position: getText("testimonialPosition3"),
-                avatar:
-                  "https://res.cloudinary.com/dyticflm3/image/upload/v1744662809/B%C3%A1c_D%C5%A9ng_flp9iq.jpg",
-              },
-            ].map((testimonial, index) => (
-              <Card
-                key={index}
-                className="hover:shadow-xl transition-all duration-300"
-              >
-                <CardContent className="p-8">
-                  <div className="mb-6 text-gray-600 italic">
-                    {testimonial.content}
-                  </div>
-                  <div className="flex items-center">
-                    <div
-                      className="relative h-16 w-16 rounded-full overflow-hidden mr-4 border-2 border-green-600"
-                      aria-hidden="true"
-                    >
-                      <Image
-                        src={testimonial.avatar || "/placeholder.svg"}
-                        alt={testimonial.author}
-                        fill
-                        className="object-cover"
-                      />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                {
+                  content:
+                    internationalCertificateTranslations.testimonial1[language],
+                  author:
+                    internationalCertificateTranslations.testimonialAuthor1[
+                      language
+                    ],
+                  position:
+                    internationalCertificateTranslations.testimonialPosition1[
+                      language
+                    ],
+                  avatar:
+                    "https://res.cloudinary.com/dyticflm3/image/upload/v1744662839/A_Trung_ngufm5.png",
+                },
+                {
+                  content:
+                    internationalCertificateTranslations.testimonial2[language],
+                  author:
+                    internationalCertificateTranslations.testimonialAuthor2[
+                      language
+                    ],
+                  position:
+                    internationalCertificateTranslations.testimonialPosition2[
+                      language
+                    ],
+                  avatar:
+                    "https://res.cloudinary.com/dyticflm3/image/upload/v1744662809/Anh_%C4%90%E1%BB%A9c_Anh_qqdwoc.jpg",
+                },
+                {
+                  content:
+                    internationalCertificateTranslations.testimonial3[language],
+                  author:
+                    internationalCertificateTranslations.testimonialAuthor3[
+                      language
+                    ],
+                  position:
+                    internationalCertificateTranslations.testimonialPosition3[
+                      language
+                    ],
+                  avatar:
+                    "https://res.cloudinary.com/dyticflm3/image/upload/v1744662809/B%C3%A1c_D%C5%A9ng_flp9iq.jpg",
+                },
+              ].map((testimonial, index) => (
+                <Card
+                  key={index}
+                  className="hover:shadow-xl transition-all duration-300"
+                >
+                  <CardContent className="p-8">
+                    <div className="mb-6 text-gray-600 italic">
+                      {testimonial.content}
                     </div>
-                    <div>
-                      <h4 className="font-bold text-gray-800">
-                        {testimonial.author}
-                      </h4>
-                      <p className="text-gray-500 text-sm">
-                        {testimonial.position}
-                      </p>
+                    <div className="flex items-center">
+                      <div
+                        className="relative h-16 w-16 rounded-full overflow-hidden mr-4 border-2 border-green-600"
+                        aria-hidden="true"
+                      >
+                        <Image
+                          src={testimonial.avatar || "/placeholder.svg"}
+                          alt={testimonial.author}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-800">
+                          {testimonial.author}
+                        </h4>
+                        <p className="text-gray-500 text-sm">
+                          {testimonial.position}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -1256,49 +1686,57 @@ export default function InternationalCertificateCoursesPage() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
-                {getText("faq")}
+                {internationalCertificateTranslations.faq[language]}
               </span>
               <h2 className="text-4xl font-bold mb-4 text-gray-800">
-                {getText("answerQuestions")}
+                {internationalCertificateTranslations.answerQuestions[language]}
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                {getText("faqDesc")}
+                {internationalCertificateTranslations.faqDesc[language]}
               </p>
             </div>
 
             <div className="max-w-3xl mx-auto">
               {[
                 {
-                  question: getText("faq1"),
-                  answer: getText("faqAnswer1"),
+                  question: internationalCertificateTranslations.faq1[language],
+                  answer:
+                    internationalCertificateTranslations.faqAnswer1[language],
                 },
                 {
-                  question: getText("faq2"),
-                  answer: getText("faqAnswer2"),
+                  question: internationalCertificateTranslations.faq2[language],
+                  answer:
+                    internationalCertificateTranslations.faqAnswer2[language],
                 },
                 {
-                  question: getText("faq3"),
-                  answer: getText("faqAnswer3"),
+                  question: internationalCertificateTranslations.faq3[language],
+                  answer:
+                    internationalCertificateTranslations.faqAnswer3[language],
                 },
                 {
-                  question: getText("faq4"),
-                  answer: getText("faqAnswer4"),
+                  question: internationalCertificateTranslations.faq4[language],
+                  answer:
+                    internationalCertificateTranslations.faqAnswer4[language],
                 },
                 {
-                  question: getText("faq5"),
-                  answer: getText("faqAnswer5"),
+                  question: internationalCertificateTranslations.faq5[language],
+                  answer:
+                    internationalCertificateTranslations.faqAnswer5[language],
                 },
                 {
-                  question: getText("faq6"),
-                  answer: getText("faqAnswer6"),
+                  question: internationalCertificateTranslations.faq6[language],
+                  answer:
+                    internationalCertificateTranslations.faqAnswer6[language],
                 },
                 {
-                  question: getText("faq7"),
-                  answer: getText("faqAnswer7"),
+                  question: internationalCertificateTranslations.faq7[language],
+                  answer:
+                    internationalCertificateTranslations.faqAnswer7[language],
                 },
                 {
-                  question: getText("faq8"),
-                  answer: getText("faqAnswer8"),
+                  question: internationalCertificateTranslations.faq8[language],
+                  answer:
+                    internationalCertificateTranslations.faqAnswer8[language],
                 },
               ].map((faq, index) => (
                 <div key={index} className="mb-4">
@@ -1357,16 +1795,24 @@ export default function InternationalCertificateCoursesPage() {
                 </div>
                 <div>
                   <h2 className="text-3xl font-bold mb-2">
-                    {getText("exclusivePartnerCSU")}
+                    {
+                      internationalCertificateTranslations.exclusivePartnerCSU[
+                        language
+                      ]
+                    }
                   </h2>
                   <p className="text-white/80 text-lg">
-                    {getText("registerNowLimited")}
+                    {
+                      internationalCertificateTranslations.registerNowLimited[
+                        language
+                      ]
+                    }
                   </p>
                 </div>
               </div>
               <Link href="/thanh-toan?product=khoa-hoc-chung-chi-chuyen-gia">
                 <Button className="bg-white text-green-600 hover:bg-green-50 px-8 py-3 text-lg font-medium">
-                  {getText("registerNow")}
+                  {internationalCertificateTranslations.registerNow[language]}
                 </Button>
               </Link>
             </div>

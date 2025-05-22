@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/context/language-context"; // Import hook ngôn ngữ
 
 import AffiliateOverview from "./AffiliateOverview";
 import AffiliateMarketingMaterials from "./AffiliateMarketingMaterials";
 import AffiliatePayouts from "./AffiliatePayouts";
 import AffiliateTransactions from "./AffiliateTransactions";
-import { useToast } from "@/hooks/use-toast";
+
+import affiliateDashboardTranslations from "./affiliate-dashboard-language";
 
 interface AffiliateDashboardProps {
   affiliateData: any;
@@ -18,12 +21,15 @@ export default function AffiliateDashboard({
 }: AffiliateDashboardProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
+  const { language } = useLanguage(); // Lấy ngôn ngữ hiện tại từ context
 
   const copyToClipboard = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: "Đã sao chép!",
-      description: `${type} đã được sao chép vào clipboard.`,
+      title: affiliateDashboardTranslations.toast.copiedTitle[language], // Sử dụng chuỗi dịch thuật
+      description: affiliateDashboardTranslations.toast.copiedDescription[
+        language
+      ].replace("{{type}}", type), // Sử dụng chuỗi dịch thuật và thay thế placeholder
     });
   };
 
@@ -31,11 +37,12 @@ export default function AffiliateDashboard({
     <div className="py-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">
-          Quản lý tiếp thị liên kết
+          {affiliateDashboardTranslations.header.title[language]}{" "}
+          {/* Sử dụng chuỗi dịch thuật */}
         </h1>
         <p className="text-gray-600 mt-2">
-          Quản lý hoạt động tiếp thị liên kết, theo dõi hoa hồng và truy cập
-          công cụ tiếp thị
+          {affiliateDashboardTranslations.header.description[language]}{" "}
+          {/* Sử dụng chuỗi dịch thuật */}
         </p>
       </div>
 
@@ -46,10 +53,22 @@ export default function AffiliateDashboard({
         className="space-y-6"
       >
         <TabsList className="grid grid-cols-4 md:w-[600px]">
-          <TabsTrigger value="overview">Tổng quan</TabsTrigger>
-          <TabsTrigger value="transactions">Giao dịch</TabsTrigger>
-          <TabsTrigger value="payouts">Thanh toán</TabsTrigger>
-          <TabsTrigger value="marketing">Công cụ tiếp thị</TabsTrigger>
+          <TabsTrigger value="overview">
+            {affiliateDashboardTranslations.tabs.overview[language]}{" "}
+            {/* Sử dụng chuỗi dịch thuật */}
+          </TabsTrigger>
+          <TabsTrigger value="transactions">
+            {affiliateDashboardTranslations.tabs.transactions[language]}{" "}
+            {/* Sử dụng chuỗi dịch thuật */}
+          </TabsTrigger>
+          <TabsTrigger value="payouts">
+            {affiliateDashboardTranslations.tabs.payouts[language]}{" "}
+            {/* Sử dụng chuỗi dịch thuật */}
+          </TabsTrigger>
+          <TabsTrigger value="marketing">
+            {affiliateDashboardTranslations.tabs.marketing[language]}{" "}
+            {/* Sử dụng chuỗi dịch thuật */}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">

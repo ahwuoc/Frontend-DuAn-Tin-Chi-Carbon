@@ -8,6 +8,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useLanguage } from "@/context/language-context"; // Import useLanguage hook
+import controlPanelTranslations from "../language-gopcay/control-panel-language";
 
 interface ControlPanelProps {
   minimizePanel: boolean;
@@ -20,6 +22,7 @@ export function ControlPanel({
   setMinimizePanel,
   setShowUI,
 }: ControlPanelProps) {
+  const { language } = useLanguage(); // Lấy ngôn ngữ hiện tại
   const [keyboardControlsOpen, setKeyboardControlsOpen] = useState(false);
 
   return (
@@ -29,7 +32,9 @@ export function ControlPanel({
       } bg-white/90 backdrop-blur-md rounded-xl shadow-xl overflow-hidden transition-all duration-300 border border-emerald-100 z-10`}
     >
       <div className="flex justify-between items-center p-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white">
-        <h3 className="font-semibold">Hướng dẫn di chuyển</h3>
+        <h3 className="font-semibold">
+          {controlPanelTranslations.panelTitle[language]}
+        </h3>
         <div className="flex gap-1">
           <Button
             variant="ghost"
@@ -65,7 +70,7 @@ export function ControlPanel({
                 <div className="flex items-center gap-2">
                   <Keyboard size={16} className="text-emerald-600" />
                   <span className="font-medium text-emerald-800">
-                    Điều khiển bàn phím
+                    {controlPanelTranslations.keyboardControls.title[language]}
                   </span>
                 </div>
                 {keyboardControlsOpen ? (
@@ -80,7 +85,10 @@ export function ControlPanel({
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-emerald-50 p-2 rounded-lg">
                       <p className="font-semibold text-emerald-800 mb-1">
-                        Di chuyển:
+                        {
+                          controlPanelTranslations.keyboardControls.movement
+                            .title[language]
+                        }
                       </p>
                       <ul className="space-y-1 text-gray-700">
                         <li className="flex items-center gap-1">
@@ -91,7 +99,11 @@ export function ControlPanel({
                           <span className="bg-white px-1.5 py-0.5 rounded border border-emerald-200 text-xs font-medium">
                             ↑
                           </span>
-                          - Tiến
+                          -{" "}
+                          {
+                            controlPanelTranslations.keyboardControls.movement
+                              .forward[language]
+                          }
                         </li>
                         <li className="flex items-center gap-1">
                           <span className="bg-white px-1.5 py-0.5 rounded border border-emerald-200 text-xs font-medium">
@@ -101,7 +113,11 @@ export function ControlPanel({
                           <span className="bg-white px-1.5 py-0.5 rounded border border-emerald-200 text-xs font-medium">
                             ↓
                           </span>
-                          - Lùi
+                          -{" "}
+                          {
+                            controlPanelTranslations.keyboardControls.movement
+                              .backward[language]
+                          }
                         </li>
                         <li className="flex items-center gap-1">
                           <span className="bg-white px-1.5 py-0.5 rounded border border-emerald-200 text-xs font-medium">
@@ -111,7 +127,11 @@ export function ControlPanel({
                           <span className="bg-white px-1.5 py-0.5 rounded border border-emerald-200 text-xs font-medium">
                             ←
                           </span>
-                          - Trái
+                          -{" "}
+                          {
+                            controlPanelTranslations.keyboardControls.movement
+                              .left[language]
+                          }
                         </li>
                         <li className="flex items-center gap-1">
                           <span className="bg-white px-1.5 py-0.5 rounded border border-emerald-200 text-xs font-medium">
@@ -121,37 +141,62 @@ export function ControlPanel({
                           <span className="bg-white px-1.5 py-0.5 rounded border border-emerald-200 text-xs font-medium">
                             →
                           </span>
-                          - Phải
+                          -{" "}
+                          {
+                            controlPanelTranslations.keyboardControls.movement
+                              .right[language]
+                          }
                         </li>
                       </ul>
                     </div>
                     <div className="bg-emerald-50 p-2 rounded-lg">
                       <p className="font-semibold text-emerald-800 mb-1">
-                        Độ cao:
+                        {
+                          controlPanelTranslations.keyboardControls.height
+                            .title[language]
+                        }
                       </p>
                       <ul className="space-y-1 text-gray-700">
                         <li className="flex items-center gap-1">
                           <span className="bg-white px-1.5 py-0.5 rounded border border-emerald-200 text-xs font-medium">
                             E
                           </span>
-                          - Lên
+                          -{" "}
+                          {
+                            controlPanelTranslations.keyboardControls.height.up[
+                              language
+                            ]
+                          }
                         </li>
                         <li className="flex items-center gap-1">
                           <span className="bg-white px-1.5 py-0.5 rounded border border-emerald-200 text-xs font-medium">
                             Q
                           </span>
-                          - Xuống
+                          -{" "}
+                          {
+                            controlPanelTranslations.keyboardControls.height
+                              .down[language]
+                          }
                         </li>
                       </ul>
                       <p className="font-semibold text-emerald-800 mt-2 mb-1">
-                        Tốc độ:
+                        {
+                          controlPanelTranslations.keyboardControls.speed.title[
+                            language
+                          ]
+                        }
                       </p>
                       <ul className="space-y-1 text-gray-700">
                         <li className="flex items-center gap-1">
                           <span className="bg-white px-1.5 py-0.5 rounded border border-emerald-200 text-xs font-medium">
                             Shift
                           </span>
-                          - Chạy
+                          -{" "}
+                          {
+                            controlPanelTranslations.keyboardControls.speed.run[
+                              language
+                            ]
+                          }
                         </li>
                       </ul>
                     </div>
@@ -162,12 +207,18 @@ export function ControlPanel({
 
             <div className="bg-emerald-50 p-3 rounded-lg">
               <p className="font-semibold text-emerald-800 mb-1">
-                Điều khiển chuột:
+                {controlPanelTranslations.mouseControls.title[language]}
               </p>
               <ul className="space-y-1 text-gray-700">
-                <li>Kéo chuột - Nhìn xung quanh</li>
-                <li>Giữ chuột phải - Phóng to</li>
-                <li>Cuộn chuột - Phóng to/thu nhỏ</li>
+                <li>
+                  {controlPanelTranslations.mouseControls.lookAround[language]}
+                </li>
+                <li>
+                  {controlPanelTranslations.mouseControls.zoomIn[language]}
+                </li>
+                <li>
+                  {controlPanelTranslations.mouseControls.zoomInOut[language]}
+                </li>
               </ul>
             </div>
           </div>
