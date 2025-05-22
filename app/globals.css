@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
@@ -29,6 +30,14 @@
     --chart-5: 249 76.2% 36.3%;
 }
 
+.image-center-wrapper {
+    @apply text-center my-4;
+}
+
+.image-center-wrapper img {
+    @apply inline-block max-w-full h-auto rounded-lg;
+}
+
 .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -55,10 +64,12 @@
     * {
         @apply border-border;
     }
+
     body {
         @apply bg-background text-foreground;
         font-family: var(--font-montserrat);
     }
+
     h1,
     h2,
     h3,
@@ -71,11 +82,9 @@
 
 @layer components {
     .hero-gradient {
-        background: linear-gradient(
-            to right,
-            rgba(0, 0, 0, 0.8),
-            rgba(0, 0, 0, 0.4)
-        );
+        background: linear-gradient(to right,
+                rgba(0, 0, 0, 0.8),
+                rgba(0, 0, 0, 0.4));
     }
 
     .section-title {
@@ -106,19 +115,23 @@
 
     /* Update existing animation classes */
     .animate-fade-in {
-        animation: fadeIn 0.4s ease-out; /* Reduced from 0.8s */
+        animation: fadeIn 0.4s ease-out;
+        /* Reduced from 0.8s */
     }
 
     .animate-slide-up {
-        animation: slideUp 0.4s ease-out; /* Reduced from 0.8s */
+        animation: slideUp 0.4s ease-out;
+        /* Reduced from 0.8s */
     }
 
     .animate-slide-in-right {
-        animation: slideInRight 0.4s ease-out; /* Reduced from 0.8s */
+        animation: slideInRight 0.4s ease-out;
+        /* Reduced from 0.8s */
     }
 
     .animate-slide-in-left {
-        animation: slideInLeft 0.4s ease-out; /* Reduced from 0.8s */
+        animation: slideInLeft 0.4s ease-out;
+        /* Reduced from 0.8s */
     }
 
     /* Update interactive classes */
@@ -136,16 +149,19 @@
 
     /* Update pulse animation to be faster */
     .pulse-on-hover:hover {
-        animation: pulse 1s infinite; /* Reduced from 1.5s */
+        animation: pulse 1s infinite;
+        /* Reduced from 1.5s */
     }
 
     @keyframes pulse {
         0% {
             transform: scale(1);
         }
+
         50% {
             transform: scale(1.05);
         }
+
         100% {
             transform: scale(1);
         }
@@ -153,7 +169,8 @@
 
     /* Update shake animation to be faster */
     .shake-on-click:active {
-        animation: shake 0.3s; /* Reduced from 0.5s */
+        animation: shake 0.3s;
+        /* Reduced from 0.5s */
     }
 }
 
@@ -163,6 +180,7 @@
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -171,11 +189,11 @@
 
 @keyframes slideUp {
     from {
-        transform: translateY(
-            30px
-        ); /* Reduced from 50px for shorter distance */
+        transform: translateY(30px);
+        /* Reduced from 50px for shorter distance */
         opacity: 0;
     }
+
     to {
         transform: translateY(0);
         opacity: 1;
@@ -184,11 +202,11 @@
 
 @keyframes slideInRight {
     from {
-        transform: translateX(
-            30px
-        ); /* Reduced from 50px for shorter distance */
+        transform: translateX(30px);
+        /* Reduced from 50px for shorter distance */
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
@@ -197,11 +215,11 @@
 
 @keyframes slideInLeft {
     from {
-        transform: translateX(
-            -30px
-        ); /* Reduced from -50px for shorter distance */
+        transform: translateX(-30px);
+        /* Reduced from -50px for shorter distance */
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
@@ -212,10 +230,11 @@
     animation: fadeIn 0.3s ease-out;
 }
 
-details > summary {
+details>summary {
     list-style: none;
 }
-details > summary::-webkit-details-marker {
+
+details>summary::-webkit-details-marker {
     display: none;
 }
 
@@ -254,6 +273,7 @@ details > summary::-webkit-details-marker {
     0% {
         transform: translateX(0);
     }
+
     100% {
         transform: translateX(-50%);
     }
