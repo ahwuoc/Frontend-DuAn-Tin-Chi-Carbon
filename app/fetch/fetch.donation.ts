@@ -31,16 +31,14 @@ export interface saveResponse {
 import HTTP from "../common/http";
 
 const apiDonation = {
-  addDonate: (body: any) => HTTP.POST<saveResponse>("/donation", { body }),
-
+  addDonate: (body: any) => HTTP.POST<any>("/donation", { body }),
   getDonations: () => HTTP.GET("/donations"),
-
   getDonationById: (id: string) => HTTP.GET(`/donation/${id}`),
-
+  getDonationByorderCodeAndUpdateStatus: (orderCode: string) =>
+    HTTP.GET<any>(`/donation/orderCode/${orderCode}`),
   getInfor: () => HTTP.GET<DonationResponse>("/donation/infor"),
   updateDonation: (id: string, body: any) =>
     HTTP.PUT(`/donation/${id}`, { body }),
-
   deleteDonation: (id: string) => HTTP.DELETE(`/donation/${id}`),
 };
 export { apiDonation };

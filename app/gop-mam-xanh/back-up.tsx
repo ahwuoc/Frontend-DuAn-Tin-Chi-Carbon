@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 import Image from "next/image";
 import DonationForm from "@/components/donation-form";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,8 @@ import ForestExplorer from "@/components/forest/ForestExplorer";
 import StaticCertificate from "@/components/static-certificate";
 import CertificateGenerator from "@/components/certificate-generator";
 import { apiDonation } from "../fetch/fetch.donation";
-// Removed 'dynamic' import as it was unused
-import translations from "./language"; // Đảm bảo đường dẫn đúng đến file language.js
-import { useLanguage } from "@/context/language-context"; // Đảm bảo hook useLanguage có sẵn
+import translations from "./language";
+import { useLanguage } from "@/context/language-context";
 
 export default function GopMamXanhPage() {
   const [donorName, setDonorName] = useState<string>("");
@@ -19,8 +18,8 @@ export default function GopMamXanhPage() {
   const [treeCount, setTreeCount] = useState<number>(1);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [showCertificate, setShowCertificate] = useState<boolean>(false);
-  // Sử dụng hook useLanguage để lấy ngôn ngữ hiện tại
   const { language } = useLanguage();
+
   const [forestStats, setForestStats] = useState<{
     treeCount: number;
     contributorCount: number;
@@ -32,8 +31,27 @@ export default function GopMamXanhPage() {
     co2Reduction: 0,
     isLoading: true,
   });
+
   const [activeTab, setActiveTab] = useState<"video" | "image">("video");
 
+  //==== Quản lý trạng thái giao dịch ====
+  const [transactionStatus, setTransactionStatus] = useState<
+    "idle" | "paid" | "cancelled" | "error"
+  >("idle");
+
+  //==== Cuộn trang đến phần trồng cây khi có hash URL ====
+  useLayoutEffect(() => {
+    if (window.location.hash === "#plant-tree-section") {
+      const el = document.getElementById("plant-tree-section");
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+    }
+  }, []);
+
+  //==== Fetch dữ liệu thống kê rừng ====
   const fetchDonation = async () => {
     setForestStats((prev) => ({ ...prev, isLoading: true }));
     try {
@@ -54,10 +72,46 @@ export default function GopMamXanhPage() {
     }
   };
 
+  //==== Xử lý tham số URL và cập nhật trạng thái giao dịch ====
   useEffect(() => {
     fetchDonation();
+
+    const queryParams = new URLSearchParams(window.location.search);
+    const status = queryParams.get("status");
+    const orderId = queryParams.get("id");
+    const orderCode = queryParams.get("orderCode");
+
+    if (status) {
+      if (status === "PAID") {
+        const nameFromUrl = "Người đóng góp từ URL";
+        const quantityFromUrl = 1;
+        const treeIdFromUrl =
+          orderCode ||
+          `TC-${Math.floor(Math.random() * 10000)
+            .toString()
+            .padStart(4, "0")}`;
+
+        setDonorName(nameFromUrl);
+        setTreeCount(quantityFromUrl);
+        setTreeId(treeIdFromUrl);
+        setTransactionStatus("paid");
+        setShowCertificate(true);
+        fetchDonation();
+      } else if (status === "CANCELLED") {
+        setTransactionStatus("cancelled");
+      } else {
+        setTransactionStatus("error");
+      }
+
+      const newUrl =
+        window.location.origin +
+        window.location.pathname +
+        window.location.hash;
+      window.history.replaceState({}, document.title, newUrl);
+    }
   }, []);
 
+  //==== Xử lý hoàn tất quyên góp từ DonationForm ====
   const handleDonationComplete = (
     name: string,
     note?: string,
@@ -66,16 +120,21 @@ export default function GopMamXanhPage() {
     const newTreeId = `TC-${Math.floor(Math.random() * 10000)
       .toString()
       .padStart(4, "0")}`;
+
     setDonorName(name || "");
     setDonorNote(note || "");
     setTreeId(newTreeId);
     setTreeCount(quantity || 1);
+
+    setTransactionStatus("paid");
     setShowCertificate(true);
+
     fetchDonation();
   };
 
   return (
     <main className="min-h-screen">
+      {/* Hero Section */}
       <section className="relative h-[50vh] min-h-[400px]">
         <div className="absolute inset-0 z-0">
           <video
@@ -170,14 +229,15 @@ export default function GopMamXanhPage() {
                 fill
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-6">
-                <h2 className="text-3xl font-bold text-white mb-2">
-                  {translations.projectDetails.title[language]}
-                </h2>
-                <p className="text-white max-w-2xl">
-                  {translations.projectDetails.subtitle[language]}
-                </p>
-              </div>
+              <div className="absolute inset-0 bg-black/50"></div>
+            </div>
+            <div className="relative inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-6">
+              <h2 className="text-3xl font-bold text-white mb-2">
+                {translations.projectDetails.title[language]}
+              </h2>
+              <p className="text-white max-w-2xl">
+                {translations.projectDetails.subtitle[language]}
+              </p>
             </div>
 
             <div className="p-6">
@@ -546,7 +606,6 @@ export default function GopMamXanhPage() {
         </div>
       </section>
 
-      {/* Main content - Moved below the Forest section */}
       <section id="plant-tree-section" className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
@@ -559,11 +618,33 @@ export default function GopMamXanhPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Left column - Donation form or tree display */}
+            {/* Cột bên trái: Hiển thị form hoặc thông báo/chứng nhận */}
             <div>
-              {donorName ? (
+              {/*==== Hiển thị thông báo hủy giao dịch ====*/}
+              {transactionStatus === "cancelled" ? (
+                <div className="bg-red-50 p-6 rounded-lg border border-red-200 text-center shadow-md">
+                  <h3 className="text-xl font-semibold text-red-800 mb-4">
+                    Đơn quyên góp đã bị hủy.
+                  </h3>
+                  <p className="text-red-700 mb-6">
+                    Rất tiếc, giao dịch của bạn đã bị hủy hoặc không thành công.
+                    Vui lòng thử lại sau.
+                  </p>
+                  <Button
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-sm"
+                    onClick={() => {
+                      setTransactionStatus("idle");
+                      setDonorName("");
+                    }}
+                  >
+                    Thử lại
+                  </Button>
+                </div>
+              ) : /*==== Hiển thị thông báo thành công và chứng nhận hoặc form quyên góp ====*/
+              transactionStatus === "paid" && donorName ? (
                 <div className="space-y-8">
-                  <div className="bg-green-50 p-6 rounded-lg border border-green-200">
+                  {/* Phần thông báo thành công */}
+                  <div className="bg-green-50 p-6 rounded-lg border border-green-200 shadow-md">
                     <div className="flex items-center mb-4">
                       <div className="bg-green-500 rounded-full p-2 mr-3">
                         <svg
@@ -597,7 +678,7 @@ export default function GopMamXanhPage() {
 
                     <div className="flex justify-center">
                       <Button
-                        className="bg-green-600 hover:bg-green-700 text-white"
+                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-sm"
                         onClick={() => {
                           const certificateSection = document.getElementById(
                             "certificate-section",
@@ -617,6 +698,7 @@ export default function GopMamXanhPage() {
                     </div>
                   </div>
 
+                  {/* Phần chứng nhận */}
                   <div
                     id="certificate-section"
                     className="bg-white p-6 rounded-lg border border-gray-200 shadow-md"
@@ -748,7 +830,7 @@ export default function GopMamXanhPage() {
               )}
             </div>
 
-            {/* Right column - Project information */}
+            {/* Cột bên phải: Thông tin dự án (giữ nguyên) */}
             <div>
               <h3 className="text-2xl font-bold mb-6">
                 {translations.plantTreeSection.aboutProject.title[language]}
@@ -811,7 +893,7 @@ export default function GopMamXanhPage() {
                 <div className="relative h-[200px] rounded-lg overflow-hidden">
                   <Image
                     src="https://res.cloudinary.com/dyticflm3/image/upload/v1744836233/20240915_093409_lknqhd.jpg"
-                    alt="Hoạt động trồng cây" // Đây là alt text của ảnh, có thể cũng nên dịch.
+                    alt="Hoạt động trồng cây"
                     fill
                     className="object-cover"
                   />

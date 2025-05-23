@@ -137,6 +137,12 @@ const donationFormTranslations = {
       vi: "Lỗi!",
       en: "Error!",
     },
+    noCheckoutUrl: {
+      noCheckoutUrl: {
+        vi: "Có lỗi xảy ra, thử lại sau nhé!",
+        en: "An error occurred, please try again later!",
+      },
+    },
     errorMessage: {
       vi: "Có lỗi xảy ra, thử lại sau nhé!",
       en: "An error occurred, please try again later!",

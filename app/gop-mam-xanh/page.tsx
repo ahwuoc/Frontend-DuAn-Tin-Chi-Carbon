@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import GopMamXanhPage from "./page_client";
+import GopMamXanhPage from "./page-client";
 
 export default function Page() {
   return (
