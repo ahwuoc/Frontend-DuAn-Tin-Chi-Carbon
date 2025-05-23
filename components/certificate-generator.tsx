@@ -37,7 +37,7 @@ export default function CertificateGenerator({
   const [useImageFallback, setUseImageFallback] = useState(false);
   const [activeTab, setActiveTab] = useState("video");
 
-  const certificateVideoPath = "/videos/Certification-forest-planting.mp4";
+  const certificateVideoPath = "/videos/Certification.mp4";
   const certificateImagePath = "/images/certificate-sample.png";
 
   const formattedDate = new Intl.DateTimeFormat("vi-VN", {
