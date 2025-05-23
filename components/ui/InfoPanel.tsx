@@ -90,24 +90,25 @@ export function InfoPanel({
           <CollapsibleContent className="mt-2">
             <ScrollArea className="h-60 rounded-md border border-emerald-100 p-2">
               <div className="space-y-2">
-                {contributors.map((contributor) => (
-                  <div
-                    key={contributor.id}
-                    className="p-2 bg-emerald-50 rounded-md flex justify-between items-center"
-                  >
-                    <span className="font-medium text-emerald-800 truncate">
-                      {contributor.name}
-                    </span>
-                    <span className="text-sm bg-emerald-100 px-2 py-1 rounded-full text-emerald-700">
-                      {contributor.trees}{" "}
-                      {
-                        infoPanelTranslations.contributorsList.treeUnit[
-                          language
-                        ]
-                      }
-                    </span>
-                  </div>
-                ))}
+                {Array.isArray(contributors) &&
+                  contributors.map((contributor) => (
+                    <div
+                      key={contributor.id}
+                      className="p-2 bg-emerald-50 rounded-md flex justify-between items-center"
+                    >
+                      <span className="font-medium text-emerald-800 truncate">
+                        {contributor.name}
+                      </span>
+                      <span className="text-sm bg-emerald-100 px-2 py-1 rounded-full text-emerald-700">
+                        {contributor.trees}{" "}
+                        {
+                          infoPanelTranslations.contributorsList.treeUnit[
+                            language
+                          ]
+                        }
+                      </span>
+                    </div>
+                  ))}
               </div>
             </ScrollArea>
           </CollapsibleContent>
