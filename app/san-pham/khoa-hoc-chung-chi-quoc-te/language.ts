@@ -555,50 +555,52 @@ const internationalCertificateTranslations = {
     en: "Over 10 years of experience in building carbon credit valuation models",
   },
   // Tran Thi Nhu Phuong (Vietnamese Instructor)
-  vietnameseInstructorTitle: {
-    vi: "Giảng viên tiếng Việt",
-    en: "Vietnamese Instructor",
-  },
-  tranThiNhuPhuong: {
-    vi: "Trần Thị Như Phương",
-    en: "Tran Thi Nhu Phuong",
-  },
-  phuongEducation: {
-    vi: "Tiến sĩ Giáo dục học, Đại học Sư phạm TP. Hồ Chí Minh",
-    en: "PhD in Education, Ho Chi Minh City University of Education",
-  },
-  phuongRole1: {
-    vi: "Trưởng bộ môn Phương pháp giảng dạy tiếng Việt",
-    en: "Head of Vietnamese Language Teaching Methodology Department",
-  },
-  phuongRole2: {
-    vi: "Chuyên môn: Ngôn ngữ học, Giáo dục học",
-    en: "Specialization: Linguistics, Education",
-  },
-  phuongRole3: {
-    vi: "Vai trò: Giảng viên, Nghiên cứu viên",
-    en: "Role: Lecturer, Researcher",
-  },
-  phuongDesc: {
-    vi: "Giảng viên có hơn 20 năm kinh nghiệm trong đào tạo giáo viên tiểu học và nghiên cứu về phương pháp giảng dạy tiếng Việt.",
-    en: "Lecturer with over 20 years of experience in training primary school teachers and researching Vietnamese language teaching methods.",
-  },
-  phuongAchievement1: {
-    vi: "Tham gia biên soạn chương trình giáo dục phổ thông mới",
-    en: "Participated in compiling the new general education curriculum",
-  },
-  phuongAchievement2: {
-    vi: "Tác giả nhiều công trình nghiên cứu khoa học cấp quốc gia",
-    en: "Author of numerous national-level scientific research works",
-  },
-  phuongAchievement3: {
-    vi: "Giải thưởng giảng viên xuất sắc năm 2020",
-    en: "Excellent Lecturer Award in 2020",
-  },
-  phuongAchievement4: {
-    vi: "Thành viên hội đồng chuyên môn Bộ Giáo dục",
-    en: "Member of the Ministry of Education's expert council",
-  },
+
+vietnameseInstructorTitle: {
+  vi: "Giám đốc & Diễn giả chuyên về chuyển đổi xanh",
+  en: "Director & Keynote Speaker in Green Transformation",
+},
+tranThiNhuPhuong: {
+  vi: "Trần Thị Như Phương",
+  en: "Tran Thi Nhu Phuong",
+},
+phuongEducation: {
+  vi: "Thạc sĩ Quản trị Kinh doanh, Cử nhân Luật và Kinh tế Ngoại thương",
+  en: "Master of Business Administration, Bachelor of Law and Foreign Trade",
+},
+phuongRole1: {
+  vi: "Giám đốc Công ty GPI & Waka Pacific",
+  en: "Director - GPI Company & Waka Pacific",
+},
+phuongRole2: {
+  vi: "Chuyên môn: Chuyển đổi Xanh, Tư vấn ESG/Carbon",
+  en: "Specialization: Green Transformation & ESG/Carbon Consulting",
+},
+phuongRole3: {
+  vi: "Vai trò: Tư vấn viên, Giảng viên, Diễn giả",
+  en: "Role: Consultant, Trainer, Keynote Speaker",
+},
+phuongDesc: {
+  vi: "Bà Phương có hơn 15 năm kinh nghiệm trong chuyển đổi xanh, phát triển chiến lược ESG và triển khai dự án năng lượng tái tạo.",
+  en: "Ms. Phuong has over 15 years of experience in green transformation, ESG strategy development, and renewable energy project implementation.",
+},
+phuongAchievement1: {
+  vi: "Hợp tác kinh doanh với Đức (BWMK & GIZ)",
+  en: "Business cooperation with Germany (BWMK & GIZ)",
+},
+phuongAchievement2: {
+  vi: "Chuyên gia tư vấn cho các tổ chức quốc tế (GIZ, UNDP, WEVN)",
+  en: "Expert consultant for international organizations (GIZ, UNDP, WEVN)",
+},
+phuongAchievement3: {
+  vi: "Diễn giả được công nhận tại hội nghị Women in Energy Vietnam (WEVN)",
+  en: "Recognized speaker at Women in Energy Vietnam (WEVN) conferences",
+},
+phuongAchievement4: {
+  vi: "Chuyên gia về khung chính sách hydrogen Việt Nam và chiến lược thị trường carbon",
+  en: "Specialist in Vietnam's hydrogen policy framework and carbon market strategies",
+},
+
   facultyTeamTitle: {
     vi: "Đội ngũ giảng viên hỗ trợ",
     en: "Supportive Faculty Team",
