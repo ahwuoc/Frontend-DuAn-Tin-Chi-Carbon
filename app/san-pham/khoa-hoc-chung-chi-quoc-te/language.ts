@@ -554,53 +554,113 @@ const internationalCertificateTranslations = {
     vi: "Hơn 10 năm kinh nghiệm trong việc xây dựng các mô hình định giá tín chỉ carbon",
     en: "Over 10 years of experience in building carbon credit valuation models",
   },
-  // Tran Thi Nhu Phuong (Vietnamese Instructor)
-
-vietnameseInstructorTitle: {
-  vi: "Giám đốc & Diễn giả chuyên về chuyển đổi xanh",
-  en: "Director & Keynote Speaker in Green Transformation",
-},
-tranThiNhuPhuong: {
-  vi: "Trần Thị Như Phương",
-  en: "Tran Thi Nhu Phuong",
-},
-phuongEducation: {
-  vi: "Thạc sĩ Quản trị Kinh doanh, Cử nhân Luật và Kinh tế Ngoại thương",
-  en: "Master of Business Administration, Bachelor of Law and Foreign Trade",
-},
-phuongRole1: {
-  vi: "Giám đốc Công ty GPI & Waka Pacific",
-  en: "Director - GPI Company & Waka Pacific",
-},
-phuongRole2: {
-  vi: "Chuyên môn: Chuyển đổi Xanh, Tư vấn ESG/Carbon",
-  en: "Specialization: Green Transformation & ESG/Carbon Consulting",
-},
-phuongRole3: {
-  vi: "Vai trò: Tư vấn viên, Giảng viên, Diễn giả",
-  en: "Role: Consultant, Trainer, Keynote Speaker",
-},
-phuongDesc: {
-  vi: "Bà Phương có hơn 15 năm kinh nghiệm trong chuyển đổi xanh, phát triển chiến lược ESG và triển khai dự án năng lượng tái tạo.",
-  en: "Ms. Phuong has over 15 years of experience in green transformation, ESG strategy development, and renewable energy project implementation.",
-},
-phuongAchievement1: {
-  vi: "Hợp tác kinh doanh với Đức (BWMK & GIZ)",
-  en: "Business cooperation with Germany (BWMK & GIZ)",
-},
-phuongAchievement2: {
-  vi: "Chuyên gia tư vấn cho các tổ chức quốc tế (GIZ, UNDP, WEVN)",
-  en: "Expert consultant for international organizations (GIZ, UNDP, WEVN)",
-},
-phuongAchievement3: {
-  vi: "Diễn giả được công nhận tại hội nghị Women in Energy Vietnam (WEVN)",
-  en: "Recognized speaker at Women in Energy Vietnam (WEVN) conferences",
-},
-phuongAchievement4: {
-  vi: "Chuyên gia về khung chính sách hydrogen Việt Nam và chiến lược thị trường carbon",
-  en: "Specialist in Vietnam's hydrogen policy framework and carbon market strategies",
-},
-
+  // --- BẮT ĐẦU CẬP NHẬT CHO TRẦN THỊ NHƯ PHƯỢNG ---
+  vietnameseInstructorTitle: {
+    // Key này được dùng cho tiêu đề mục của bà Phượng trong component
+    vi: "Giảng viên Việt Nam & Chuyên gia",
+    en: "Vietnamese Instructor & Expert",
+  },
+  tranThiNhuPhuong: {
+    vi: "Bà Trần Thị Như Phượng",
+    en: "Ms. Tran Thi Nhu Phuong",
+  },
+  phuongEducation: {
+    vi: "Thạc sĩ Quản trị Kinh doanh, Cử nhân Luật và Kinh tế Ngoại thương",
+    en: "Master of Business Administration, Bachelor of Law and Foreign Trade",
+  },
+  phuongCurrentRoles: {
+    vi: "Giám đốc - Công ty GPI & Waka Pacific. Chuyên môn: Chuyển đổi Xanh & Tư vấn ESG/Carbon.",
+    en: "Director - GPI Company & Waka Pacific. Specialization: Green Transformation & ESG/Carbon Consulting.",
+  },
+  phuongGeneralRole: {
+    vi: "Vai trò chính: Tư vấn viên, Giảng viên, Diễn giả.",
+    en: "Key Roles: Consultant, Trainer, Keynote Speaker.",
+  },
+  phuongDesc: {
+    vi: "Bà Như Phượng có hơn 15 năm kinh nghiệm trong lĩnh vực chuyển đổi xanh, phát triển chiến lược ESG và triển khai các dự án năng lượng tái tạo qua nhiều ngành công nghiệp và sáng kiến hợp tác quốc tế.",
+    en: "Ms. Phuong has over 15 years of experience in green transformation, ESG strategy development, and renewable energy project implementation across various industries and international cooperation initiatives.",
+  },
+  phuongCertificationsTitle: {
+    vi: "Chứng chỉ & Đào tạo Chuyên môn:",
+    en: "Professional Certifications & Training:",
+  },
+  phuongCertifications: [
+    {
+      vi: "Hợp tác kinh doanh với Đức (BWMK & GIZ)",
+      en: "Business cooperation with Germany (BWMK & GIZ)",
+    },
+    {
+      vi: "Mạng lưới Tư vấn viên ESG (Bộ Kế hoạch & Đầu tư)",
+      en: "ESG Advisory Network (Ministry of Planning and Investment)",
+    },
+    {
+      vi: "Hydrogen và Năng lượng tái tạo (GIZ & WEVN)",
+      en: "Hydrogen & Renewable Energy (GIZ & WEVN)",
+    },
+    {
+      vi: "Kinh tế Tài chính và Dự án AMUSE (GIZ & AIT)",
+      en: "Financial Economics & AMUSE Project (GIZ & AIT)",
+    },
+    {
+      vi: "Chiến lược Thị trường Carbon (BOCPS)",
+      en: "Carbon Market Strategy (BOCPS)",
+    },
+    { vi: "ESG/Thẩm định (UNDP & VCCI)", en: "ESG Assessment (UNDP & VCCI)" },
+    {
+      vi: "Lãnh đạo Thị trường Carbon (LEDS Partnership)",
+      en: "Carbon Market Leadership (LEDS Partnership)",
+    },
+    { vi: "Chuyển đổi Năng lượng (ANJ)", en: "Energy Transition (ANJ)" },
+    {
+      vi: "Phát triển Thị trường Năng lượng Sinh khối tại Việt Nam (GIZ)",
+      en: "Renewable Energy Market Development Vietnam (GIZ)",
+    },
+    {
+      vi: "Tính toán Dấu chân Carbon (FCPF)",
+      en: "Carbon Footprint Calculation (FCPF)",
+    },
+  ],
+  phuongProjectsTitle: {
+    vi: "Dự án Tiêu biểu:",
+    en: "Notable Projects:",
+  },
+  phuongProjects: [
+    {
+      vi: "Chương trình Giảm phát thải từ việc mất rừng và suy thoái rừng (REDD+), Vùng ven biển phía Bắc Việt Nam",
+      en: "REDD+ Deforestation and Forest Degradation Reduction Program in Northern Coastal Vietnam",
+    },
+    {
+      vi: "Dự án Blue Carbon tại New Zealand và Kiribati",
+      en: "Blue Carbon Project in New Zealand and Kiribati",
+    },
+    {
+      vi: "Xây dựng chiến lược ESG cho Doanh nghiệp Vừa và Nhỏ (SMEs) Việt Nam",
+      en: "ESG Strategy Development for Vietnamese SMEs",
+    },
+  ],
+  phuongRecognitionTitle: {
+    vi: "Công nhận trong Ngành:",
+    en: "Industry Recognition:",
+  },
+  phuongRecognition: [
+    {
+      vi: "Chuyên gia tư vấn cho nhiều tổ chức quốc tế (GIZ, UNDP, WEVN)",
+      en: "Expert consultant for multiple international organizations (GIZ, UNDP, WEVN)",
+    },
+    {
+      vi: "Diễn giả được công nhận tại các hội nghị Women in Energy Vietnam (WEVN)",
+      en: "Recognized speaker at Women in Energy Vietnam (WEVN) conferences",
+    },
+    {
+      vi: "Chuyên gia về khung chính sách hydrogen Việt Nam và chiến lược thị trường carbon",
+      en: "Specialist in Vietnam's hydrogen policy framework and carbon market strategies",
+    },
+    {
+      vi: "Thuyết trình về Khung Chính sách Hydrogen Việt Nam tại các hội thảo trực tuyến (webinar) quốc tế",
+      en: "Presenter on Vietnam's Hydrogen Policy Framework at international webinars",
+    },
+  ],
+  // --- KẾT THÚC CẬP NHẬT CHO TRẦN THỊ NHƯ PHƯỢNG ---
   facultyTeamTitle: {
     vi: "Đội ngũ giảng viên hỗ trợ",
     en: "Supportive Faculty Team",

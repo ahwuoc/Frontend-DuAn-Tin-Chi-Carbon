@@ -1323,13 +1323,14 @@ export default function InternationalCertificateCoursesPage() {
             </div>
 
             {/* Tran Thi Nhu Phuong */}
+            {/* Tran Thi Nhu Phuong - UPDATED SECTION */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden mt-8">
               <div className="p-6">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
                   <div className="shrink-0">
                     <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-green-600">
                       <Image
-                        src="/images/tran-thi-nhu-phuong.png"
+                        src="/images/tran-thi-nhu-phuong.png" // Đảm bảo đường dẫn ảnh chính xác
                         alt={
                           internationalCertificateTranslations.tranThiNhuPhuong[
                             language
@@ -1337,8 +1338,10 @@ export default function InternationalCertificateCoursesPage() {
                         }
                         fill
                         className="object-cover"
+                        priority // Cân nhắc thêm priority nếu ảnh này quan trọng ở màn hình đầu
                       />
                     </div>
+                    {/* Logo WEVN vẫn đang bị ẩn theo code gốc, bạn có thể bỏ class 'hidden' nếu muốn hiển thị */}
                     <div className="bg-white p-2 rounded-lg mt-4 mx-auto w-24 hidden">
                       <Image
                         src="/images/wevn-logo.png"
@@ -1349,11 +1352,13 @@ export default function InternationalCertificateCoursesPage() {
                       />
                     </div>
                   </div>
-                  <div>
+                  <div className="flex-grow">
+                    {" "}
+                    {/* Thêm flex-grow để nội dung chiếm không gian còn lại */}
                     <div className="uppercase tracking-wide text-sm text-green-600 font-semibold">
                       {
                         internationalCertificateTranslations
-                          .vietnameseInstructorTitle[language]
+                          .vietnameseInstructorTitle[language] // Tiêu đề cho mục giảng viên này
                       }
                     </div>
                     <h3 className="block mt-1 text-2xl leading-tight font-bold text-gray-900">
@@ -1363,76 +1368,123 @@ export default function InternationalCertificateCoursesPage() {
                         ]
                       }
                     </h3>
-                    <p className="mt-2 text-gray-600">
+                    <p className="mt-2 text-gray-600 text-base">
+                      {" "}
+                      {/* Cân nhắc kích thước font */}
                       {
                         internationalCertificateTranslations.phuongEducation[
                           language
                         ]
                       }
                     </p>
-                    <div className="mt-2 text-gray-600">
-                      <p className="font-medium">
-                        {
-                          internationalCertificateTranslations.phuongRole1[
-                            language
-                          ]
-                        }
-                      </p>
-                      <p className="font-medium">
-                        {
-                          internationalCertificateTranslations.phuongRole2[
-                            language
-                          ]
-                        }
-                      </p>
-                      <p className="font-medium">
-                        {
-                          internationalCertificateTranslations.phuongRole3[
-                            language
-                          ]
-                        }
-                      </p>
-                    </div>
-                    <div className="mt-4 text-gray-600">
-                      <p className="mb-2">
+                    <p className="mt-2 text-gray-700 font-medium text-base">
+                      {
+                        internationalCertificateTranslations.phuongCurrentRoles[
+                          language
+                        ]
+                      }
+                    </p>
+                    <p className="mt-1 text-gray-700 text-base">
+                      {
+                        internationalCertificateTranslations.phuongGeneralRole[
+                          language
+                        ]
+                      }
+                    </p>
+                    <div className="mt-4 text-gray-600 text-base leading-relaxed">
+                      <p className="mb-3">
                         {
                           internationalCertificateTranslations.phuongDesc[
                             language
                           ]
                         }
                       </p>
-                      <ul className="list-disc pl-5 space-y-1">
-                        <li>
-                          {
-                            internationalCertificateTranslations
-                              .phuongAchievement1[language]
-                          }
-                        </li>
-                        <li>
-                          {
-                            internationalCertificateTranslations
-                              .phuongAchievement2[language]
-                          }
-                        </li>
-                        <li>
-                          {
-                            internationalCertificateTranslations
-                              .phuongAchievement3[language]
-                          }
-                        </li>
-                        <li>
-                          {
-                            internationalCertificateTranslations
-                              .phuongAchievement4[language]
-                          }
-                        </li>
-                      </ul>
+
+                      {/* Professional Certifications & Training */}
+                      {internationalCertificateTranslations.phuongCertifications &&
+                        internationalCertificateTranslations
+                          .phuongCertifications.length > 0 && (
+                          <>
+                            <h4 className="font-semibold mt-4 mb-2 text-gray-700">
+                              {
+                                internationalCertificateTranslations
+                                  .phuongCertificationsTitle[language]
+                              }
+                            </h4>
+                            <ul className="list-disc pl-5 space-y-1 text-sm">
+                              {internationalCertificateTranslations.phuongCertifications.map(
+                                (item, index) => (
+                                  <li key={`phuong-cert-${index}`}>
+                                    {typeof item === "object" &&
+                                    item !== null &&
+                                    item[language as "vi" | "en"]
+                                      ? item[language as "vi" | "en"]
+                                      : String(item)}
+                                  </li>
+                                ),
+                              )}
+                            </ul>
+                          </>
+                        )}
+
+                      {/* Notable Projects */}
+                      {internationalCertificateTranslations.phuongProjects &&
+                        internationalCertificateTranslations.phuongProjects
+                          .length > 0 && (
+                          <>
+                            <h4 className="font-semibold mt-4 mb-2 text-gray-700">
+                              {
+                                internationalCertificateTranslations
+                                  .phuongProjectsTitle[language]
+                              }
+                            </h4>
+                            <ul className="list-disc pl-5 space-y-1 text-sm">
+                              {internationalCertificateTranslations.phuongProjects.map(
+                                (item, index) => (
+                                  <li key={`phuong-proj-${index}`}>
+                                    {typeof item === "object" &&
+                                    item !== null &&
+                                    item[language as "vi" | "en"]
+                                      ? item[language as "vi" | "en"]
+                                      : String(item)}
+                                  </li>
+                                ),
+                              )}
+                            </ul>
+                          </>
+                        )}
+
+                      {/* Industry Recognition */}
+                      {internationalCertificateTranslations.phuongRecognition &&
+                        internationalCertificateTranslations.phuongRecognition
+                          .length > 0 && (
+                          <>
+                            <h4 className="font-semibold mt-4 mb-2 text-gray-700">
+                              {
+                                internationalCertificateTranslations
+                                  .phuongRecognitionTitle[language]
+                              }
+                            </h4>
+                            <ul className="list-disc pl-5 space-y-1 text-sm">
+                              {internationalCertificateTranslations.phuongRecognition.map(
+                                (item, index) => (
+                                  <li key={`phuong-recog-${index}`}>
+                                    {typeof item === "object" &&
+                                    item !== null &&
+                                    item[language as "vi" | "en"]
+                                      ? item[language as "vi" | "en"]
+                                      : String(item)}
+                                  </li>
+                                ),
+                              )}
+                            </ul>
+                          </>
+                        )}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-
             <div className="max-w-3xl mx-auto mt-12 bg-green-50 p-6 rounded-lg border border-green-100">
               <h3 className="text-xl font-bold text-center text-gray-800 mb-4">
                 {
