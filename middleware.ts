@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { jwtVerify, JWTPayload } from "jose";
+import { jwtVerify, JWTPayload, decodeJwt } from "jose";
 import { Buffer } from "buffer"; // cần để encode base64
 
 // =======================
@@ -29,19 +29,14 @@ interface DecodedUserPayload extends JWTPayload {
   name: string;
 }
 
-async function checkAuthLogic(
-  request: NextRequest,
-): Promise<{ isAuthenticated: boolean; userPayload?: DecodedUserPayload }> {
+export function checkAuthLogicNoVerify(request: NextRequest): {
+  isAuthenticated: boolean;
+  userPayload?: DecodedUserPayload;
+} {
   const token = request.cookies.get("token")?.value;
-  const secretKey = process.env.JWT_SECRET;
-
-  if (!token || !secretKey) return { isAuthenticated: false };
-
+  if (!token) return { isAuthenticated: false };
   try {
-    const secret = new TextEncoder().encode(secretKey);
-    const { payload } = await jwtVerify(token, secret, {
-      algorithms: ["HS256"],
-    });
+    const payload = decodeJwt(token);
     return {
       isAuthenticated: true,
       userPayload: payload as DecodedUserPayload,
@@ -55,9 +50,9 @@ async function checkAuthLogic(
 // =======================
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const { isAuthenticated, userPayload } = await checkAuthLogic(request);
+  const { isAuthenticated, userPayload } =
+    await checkAuthLogicNoVerify(request);
 
-  // 1. Nếu là trang chỉ cho guest (chưa đăng nhập) nhưng đã login -> redirect
   if (GUEST_ONLY_PATHS.includes(pathname)) {
     if (isAuthenticated) {
       return NextResponse.redirect(

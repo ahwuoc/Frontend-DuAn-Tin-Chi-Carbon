@@ -69,11 +69,12 @@ export default function LoginPage() {
 
   // This is Handler Login With Google
   const handleGoogleSignIn = () => {
+    const redirecturl = window.location.origin + "/api/auth/callback/google";
+    console.log("redirecturl", redirecturl);
     setIsLoading(true);
-
     const params = new URLSearchParams({
       client_id: public_url_google,
-      redirect_uri: window.location.origin + "/api/auth/google/callback",
+      redirect_uri: redirecturl,
       response_type: "code",
       scope: "openid email profile",
       access_type: "offline",

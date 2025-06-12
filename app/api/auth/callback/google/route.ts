@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serialize } from "cookie";
 
-const googleClientId = process.env.GOOGLE_CLIENT_ID!;
+const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET!;
-const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI!;
 const backendApiUrl = process.env.NEXT_PUBLIC_API_URL!;
-
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const params = new URLSearchParams(url.search);
   const oauthCode = params.get("code");
   const oauthError = params.get("error");
+  const origin = url.origin;
+  const pathname = url.pathname;
+  const googleRedirectUri = origin + pathname;
 
   if (oauthError || !oauthCode) {
     const errorUrl = new URL("/dang-nhap", request.url);
@@ -21,7 +22,6 @@ export async function GET(request: NextRequest) {
     if (oauthError) errorUrl.searchParams.set("message", oauthError);
     return NextResponse.redirect(errorUrl);
   }
-
   try {
     // 1. Đổi code sang access_token từ Google
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
