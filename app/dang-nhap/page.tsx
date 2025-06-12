@@ -22,6 +22,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { signIn } from "next-auth/react";
 import loginTranslations from "./language";
 import { useLanguage } from "@/context/language-context";
+import path from "node:path/win32";
+
 const public_url_google = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 const public_redirect_google =
   process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI ?? "";
@@ -65,12 +67,13 @@ export default function LoginPage() {
     }
   };
 
+  // This is Handler Login With Google
   const handleGoogleSignIn = () => {
     setIsLoading(true);
 
     const params = new URLSearchParams({
       client_id: public_url_google,
-      redirect_uri: public_redirect_google,
+      redirect_uri: window.location.origin + "/api/auth/google/callback",
       response_type: "code",
       scope: "openid email profile",
       access_type: "offline",
