@@ -752,8 +752,8 @@ const internationalCertificateTranslations = {
     en: "Mr. Trung",
   },
   testimonialPosition1: {
-    vi: "Quản lý Dự án Môi trường, Tập đoàn XYZ",
-    en: "Environmental Project Manager, XYZ Group",
+    vi: "Coach/Mentor tại Sở Khoa học Công nghệ Nghệ An",
+    en: "Coach/Mentor at Nghe An Department of Science and Technology",
   },
   testimonial2: {
     vi: "Tôi đánh giá cao tính thực tiễn của khóa học. Các bài tập và dự án thực tế giúp tôi áp dụng ngay kiến thức vào công việc hàng ngày.",
@@ -764,8 +764,8 @@ const internationalCertificateTranslations = {
     en: "Duc Anh",
   },
   testimonialPosition2: {
-    vi: "Chuyên viên tư vấn ESG, Công ty ABC",
-    en: "ESG Consultant, ABC Company",
+    vi: "Chủ tịch hội đồng quản trị công ty Nông nghiệp thực phẩm số 1",
+    en: "Chairman of the Board at No.1 Agro-Food Company",
   },
   testimonial3: {
     vi: "Chứng chỉ này là một lợi thế lớn trong hồ sơ của tôi. Tôi đã nhận được nhiều cơ hội nghề nghiệp tốt hơn sau khi hoàn thành khóa học.",
@@ -776,10 +776,9 @@ const internationalCertificateTranslations = {
     en: "Mr. Dung",
   },
   testimonialPosition3: {
-    vi: "Chủ doanh nghiệp, Dịch vụ Môi trường",
-    en: "Business Owner, Environmental Services",
+    vi: "Chủ tịch hội đồng quản trị công ty SCT Hà Nội",
+    en: "Chairman of the Board at SCT Hanoi Company",
   },
-
   // FAQ Section
   faq: {
     vi: "Câu hỏi thường gặp",
