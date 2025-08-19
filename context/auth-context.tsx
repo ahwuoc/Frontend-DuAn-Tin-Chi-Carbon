@@ -33,6 +33,8 @@ type TokenPayload = {
 };
 import { jwtDecode } from "jwt-decode";
 import { apiOrders, IOrder } from "../app/fetch/fetch.order";
+import { useFieldLogger } from '@/hooks/use-field-logger';
+
 type AuthContextType = {
   setUserFromToken: (token: string) => void;
   user: User | null;
@@ -59,6 +61,8 @@ export const getCookie = (name: string): string | null => {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const { logMultipleFields } = useFieldLogger();
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = getCookie("token");
@@ -87,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
     }
   }, []);
+
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       const response = await apiAuth.login({ email, password });
@@ -97,6 +102,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(`Unexpected status: ${response}`);
       }
     } catch (error: any) {
+      console.error('Login error:', error);
+      if (error.response?.errors && Array.isArray(error.response.errors)) {
+        logMultipleFields(error.response.errors);
+      }
+      if (error.response) {
+        const loginError = new Error(error.response.message || 'Login failed');
+        (loginError as any).response = error.response;
+        throw loginError;
+      }
+      
       setIsAuthenticated(false);
       return false;
     }

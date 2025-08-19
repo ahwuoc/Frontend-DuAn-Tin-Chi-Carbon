@@ -1,4 +1,5 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://backend-du-an-tin-chi-carbon.onrender.com/api";
+import { API_CONFIG, getDefaultHeaders } from '../config/api';
+
 type Method = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 type RequestOptions = Omit<RequestInit, "body" | "headers" | "signal"> & {
   body?: StrictObject;
@@ -38,8 +39,6 @@ class ConfigError extends Error {
   }
 }
 
-const DEFAULT_TIMEOUT = 5000;
-
 async function request<T>(
   method: Method,
   endpoint: string,
@@ -50,8 +49,8 @@ async function request<T>(
   }
 
   const fullPath = endpoint.startsWith("/")
-    ? `${API_URL}${endpoint}`
-    : `${API_URL}/${endpoint}`;
+    ? `${API_CONFIG.BASE_URL}${endpoint}`
+    : `${API_CONFIG.BASE_URL}/${endpoint}`;
 
   console.log(`[HTTP ${method}] → ${fullPath}`);
   if (options?.body) {
@@ -60,31 +59,32 @@ async function request<T>(
 
   const controller = new AbortController();
   const signal = controller.signal;
-  let timeoutId: NodeJS.Timeout | undefined;
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-  const currentTimeout = options?.timeout ?? DEFAULT_TIMEOUT;
+  const currentTimeout = options?.timeout ?? API_CONFIG.TIMEOUT;
 
   timeoutId = setTimeout(() => {
     console.warn(
       `[HTTP ${method}] Request to ${fullPath} timed out after ${currentTimeout}ms`,
     );
-    controller.abort(); // Hủy yêu cầu khi timeout
+    controller.abort();
   }, currentTimeout);
 
   try {
-    const response = await fetch(fullPath, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        ...(options?.headers || {}),
-      },
-      credentials: "include",
-      body:
-        options?.body !== undefined ? JSON.stringify(options.body) : undefined,
-      signal, // Truyền signal vào fetch
-    });
+    const headers = {
+      ...getDefaultHeaders(),
+      ...(options?.headers || {}),
+    };
 
-    // Xóa timeout nếu yêu cầu thành công hoặc không phải lỗi timeout
+    const fetchOptions: RequestInit = {
+      method,
+      headers,
+      body: options?.body !== undefined ? JSON.stringify(options.body) : undefined,
+      signal,
+    };
+
+    const response = await fetch(fullPath, fetchOptions);
+
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
@@ -98,9 +98,16 @@ async function request<T>(
       } catch {
         errorText = "Unable to read error response";
       }
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { message: errorText };
+      }
       
-      // Ném lỗi HTTP với thông tin chi tiết
-      throw new HTTPError(response.status, `HTTP Error ${response.status}: ${errorText}`);
+      const httpError = new HTTPError(response.status, `HTTP Error ${response.status}: ${errorData.message || errorText}`);
+      httpError.response = errorData;
+      throw httpError;
     }
 
     let data: T;
@@ -110,7 +117,7 @@ async function request<T>(
       throw new HTTPError(response.status, "Invalid JSON response");
     }
 
-    console.log(`[HTTP ${method}] ✅ Response:`, data);
+    console.log(`[HTTP ${method}] Response:`, data);
     return {
       status: response.status,
       payload: data,
@@ -120,18 +127,16 @@ async function request<T>(
       clearTimeout(timeoutId);
     }
 
-    // Xử lý các loại lỗi khác nhau
     if (error instanceof HTTPError) {
-      console.error(`[HTTP ${method}] ❌ HTTP Error:`, error.message);
+      console.error(`[HTTP ${method}] HTTP Error:`, error.message);
       throw error;
     } else if (error instanceof Error && error.name === "AbortError") {
       console.error(
-        `[HTTP ${method}] ❌ Request to ${fullPath} aborted due to timeout.`,
+        `[HTTP ${method}] Request to ${fullPath} aborted due to timeout.`,
       );
       throw new TimeoutError(currentTimeout, fullPath);
     } else {
-      // Ném lại các lỗi khác
-      console.error(`[HTTP ${method}] ❌ Failed to fetch ${fullPath}:`, error);
+      console.error(`[HTTP ${method}] Failed to fetch ${fullPath}:`, error);
       throw error;
     }
   }

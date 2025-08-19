@@ -23,6 +23,8 @@ import { signIn } from "next-auth/react";
 import loginTranslations from "./language";
 import { useLanguage } from "@/context/language-context";
 import path from "node:path/win32";
+import { useFieldLogger } from '@/hooks/use-field-logger';
+import { useAutoToast } from '@/hooks/use-auto-toast';
 
 const public_url_google = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 const public_redirect_google =
@@ -37,13 +39,17 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const router = useRouter();
-  const { toast } = useToast();
   const { login } = useAuth();
+  const { showErrorToast } = useAutoToast();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrors({});
+    
     try {
       const success = await login(email, password);
       if (success) {
@@ -52,22 +58,38 @@ export default function LoginPage() {
           description: loginTranslations.welcomeBack[language],
           variant: "success",
         });
-        router.push(redirectPath || "quan-ly"); // Sử dụng redirectPath nếu có, nếu không thì về "quan-ly"
+        router.push(redirectPath || "quan-ly");
       } else {
         throw new Error("Login failed");
       }
-    } catch (error) {
-      toast({
-        title: loginTranslations.loginFailed[language],
-        description: loginTranslations.invalidCredentials[language],
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      console.error('Login error in component:', error);
+      if (error.response && error.response.errors && Array.isArray(error.response.errors)) {
+        const fieldErrors: { [key: string]: string } = {};
+        error.response.errors.forEach((err: any) => {
+          fieldErrors[err.field] = err.message;
+        });
+        setErrors(fieldErrors);
+      }
+      else if (error.message && error.message.includes('errors')) {
+        try {
+          const errorData = JSON.parse(error.message);
+          if (errorData.errors && Array.isArray(errorData.errors)) {
+            const fieldErrors: { [key: string]: string } = {};
+            errorData.errors.forEach((err: any) => {
+              fieldErrors[err.field] = err.message;
+            });
+            setErrors(fieldErrors);
+          }
+        } catch (parseError) {
+          console.error('Error parsing error message:', parseError);
+        }
+      }
+      showErrorToast(error, loginTranslations.loginFailed[language], loginTranslations.invalidCredentials[language]);
     } finally {
       setIsLoading(false);
     }
   };
-
-  // This is Handler Login With Google
   const handleGoogleSignIn = () => {
     const redirecturl = window.location.origin + "/api/auth/callback/google";
     console.log("redirecturl", redirecturl);
@@ -82,7 +104,6 @@ export default function LoginPage() {
     });
     window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
   };
-
   return (
     <div className="relative min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-black overflow-hidden font-montserrat">
       <ParticlesBackground
@@ -169,6 +190,9 @@ export default function LoginPage() {
                       className="appearance-none block w-full px-3 py-2 border border-gray-700 bg-gray-900/60 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm text-white"
                       placeholder="example@email.com"
                     />
+                    {errors.email && (
+                      <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+                    )}
                   </div>
                 </div>
 
@@ -201,6 +225,9 @@ export default function LoginPage() {
                       className="appearance-none block w-full px-3 py-2 border border-gray-700 bg-gray-900/60 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm text-white"
                       placeholder="••••••••"
                     />
+                    {errors.password && (
+                      <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+                    )}
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}

@@ -22,11 +22,13 @@ import ParticlesBackground from "@/components/particles-background";
 import { Eye, EyeOff } from "lucide-react";
 import apiAuth from "../fetch/fetch.auth";
 import { registerLanguage } from "./language";
+import { useAutoToast } from '@/hooks/use-auto-toast';
 
 export default function RegisterPage() {
   const router = useRouter();
   const { t, language } = useLanguage();
   const { toast } = useToast();
+  const { showErrorToast } = useAutoToast();
   const lang = registerLanguage[language];
   
   const [formState, setFormState] = useState({
@@ -41,6 +43,8 @@ export default function RegisterPage() {
     showConfirmPassword: false,
   });
   
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  
   const updateState = (key: string, value: any) => {
     setFormState((prev) => ({
       ...prev,
@@ -51,6 +55,8 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     updateState("isLoading", true);
+    setErrors({});
+    
     try {
       const userData = {
         name: formState.name,
@@ -59,8 +65,8 @@ export default function RegisterPage() {
         email: formState.email,
         password: formState.password,
         status: 1,
-        join: new Date().toISOString(), // Thời gian hiện tại
-        userType: 2, // Giá trị mặc định
+        join: new Date().toISOString(),
+        userType: 2,
       };
       const response = await apiAuth.register(userData);
       if (response?.success) {
@@ -74,11 +80,33 @@ export default function RegisterPage() {
         throw new Error(response?.message || "Registration failed");
       }
     } catch (error: any) {
-      toast({
-        title: lang.toast.error.title,
-        description: error.message || lang.toast.error.description,
-        variant: "destructive",
-      });
+      console.error('Register error in component:', error);
+      
+      // Tự động xử lý field errors
+      if (error.response && error.response.errors && Array.isArray(error.response.errors)) {
+        const fieldErrors: { [key: string]: string } = {};
+        error.response.errors.forEach((err: any) => {
+          fieldErrors[err.field] = err.message;
+        });
+        setErrors(fieldErrors);
+      }
+      else if (error.message && error.message.includes('errors')) {
+        try {
+          const errorData = JSON.parse(error.message);
+          if (errorData.errors && Array.isArray(errorData.errors)) {
+            const fieldErrors: { [key: string]: string } = {};
+            errorData.errors.forEach((err: any) => {
+              fieldErrors[err.field] = err.message;
+            });
+            setErrors(fieldErrors);
+          }
+        } catch (parseError) {
+          console.error('Error parsing error message:', parseError);
+        }
+      }
+      
+      // Tự động hiển thị toast
+      showErrorToast(error, lang.toast.error.title, lang.toast.error.description);
     } finally {
       updateState("isLoading", false);
     }
@@ -172,6 +200,9 @@ export default function RegisterPage() {
                     className="appearance-none block w-full px-3 py-2 border border-gray-700 bg-gray-900/60 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm text-white"
                     placeholder={lang.form.name.placeholder}
                   />
+                  {errors.name && (
+                    <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+                  )}
                 </div>
 
                 {/* Phone */}
@@ -192,6 +223,9 @@ export default function RegisterPage() {
                     className="appearance-none block w-full px-3 py-2 border border-gray-700 bg-gray-900/60 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm text-white"
                     placeholder={lang.form.phone.placeholder}
                   />
+                  {errors.phone && (
+                    <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
+                  )}
                 </div>
 
                 {/* Email */}
@@ -213,6 +247,9 @@ export default function RegisterPage() {
                     className="appearance-none block w-full px-3 py-2 border border-gray-700 bg-gray-900/60 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm text-white"
                     placeholder={lang.form.email.placeholder}
                   />
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+                  )}
                 </div>
 
                 {/* Password */}
@@ -249,6 +286,9 @@ export default function RegisterPage() {
                       )}
                     </button>
                   </div>
+                  {errors.password && (
+                    <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+                  )}
                 </div>
                 
                 {/* Confirm Password */}
