@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://backend-du-an-tin-chi-carbon.onrender.com/api";
 type Method = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 type RequestOptions = Omit<RequestInit, "body" | "headers" | "signal"> & {
   body?: StrictObject;
@@ -45,7 +45,6 @@ async function request<T>(
   endpoint: string,
   options?: RequestOptions,
 ): Promise<TResponse<T>> {
-  // Kiểm tra API_URL khi thực sự thực hiện request
   if (!process.env.NEXT_PUBLIC_API_URL) {
     console.warn("NEXT_PUBLIC_API_URL not defined, using fallback URL");
   }
