@@ -9,8 +9,8 @@ import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Info, Sun, Moon, X, ChevronUp, ChevronDown, Maximize, Minimize } from "lucide-react"
+import { useTropicalForest } from "../hooks"  
 
-// Define types for donors
 interface Donor {
   name: string
   treeCount: number
@@ -21,25 +21,19 @@ interface TropicalForestProps {
   language?: string
 }
 
-// Optimize the TropicalForest component
 export default function TropicalForest({ donors = [], language = "vi" }: TropicalForestProps) {
-  const [showUI, setShowUI] = useState(true)
-  const [isNight, setIsNight] = useState(false)
-  const [showInfo, setShowInfo] = useState(false)
-  const [minimizePanel, setMinimizePanel] = useState(false)
-  const [selectedElement, setSelectedElement] = useState(null)
-
-  // Reduced settings for better performance
-  const treeCount = 15 // Reduced from 20
-  const flowerDensity = 50 // Reduced from 100
+  const { state, actions, performanceSettings, cameraSettings } = useTropicalForest(donors, language)
+  
+  const { showUI, isNight, showInfo, minimizePanel, selectedElement } = state
+  const { toggleUI, toggleNight, toggleInfo, toggleMinimizePanel, setSelectedElement } = actions
 
   return (
     <div className="w-full h-full bg-gradient-to-b from-sky-300 to-sky-500 relative">
       <Canvas
         shadows
-        camera={{ position: [20, 15, 20], fov: 55 }}
-        dpr={[1, 2]} // Limit pixel ratio for better performance
-        performance={{ min: 0.5 }} // Allow ThreeJS to reduce quality for performance
+        camera={cameraSettings}
+        dpr={cameraSettings.dpr}
+        performance={{ min: 0.5 }}
       >
         <Suspense fallback={null}>
           <ambientLight intensity={isNight ? 0.1 : 0.3} />
@@ -47,8 +41,8 @@ export default function TropicalForest({ donors = [], language = "vi" }: Tropica
             position={[10, 10, 5]}
             intensity={isNight ? 0.2 : 1.5}
             castShadow
-            shadow-mapSize-width={512} // Reduce shadow map size from 1024 to 512
-            shadow-mapSize-height={512}
+            shadow-mapSize-width={performanceSettings.shadowMapSize}
+            shadow-mapSize-height={performanceSettings.shadowMapSize}
             shadow-camera-far={50}
             shadow-camera-left={-20}
             shadow-camera-right={20}
@@ -76,10 +70,10 @@ export default function TropicalForest({ donors = [], language = "vi" }: Tropica
           <Ground />
 
           {/* Flowers - replacing grass */}
-          <GroundFlowers count={flowerDensity} />
+          <GroundFlowers count={performanceSettings.flowerDensity} />
 
           {/* Forest elements */}
-          <ForestElements treeCount={treeCount} onSelect={setSelectedElement} donors={donors} language={language} />
+          <ForestElements treeCount={performanceSettings.treeCount} onSelect={setSelectedElement} donors={donors} language={language} />
 
           {/* Atmospheric effects - don't use frustum culling for sparkles */}
           <Sparkles
@@ -129,7 +123,7 @@ export default function TropicalForest({ donors = [], language = "vi" }: Tropica
                 variant="outline"
                 size="sm"
                 className="flex items-center gap-1"
-                onClick={() => setIsNight(!isNight)}
+                onClick={toggleNight}
               >
                 {isNight ? <Moon size={14} /> : <Sun size={14} />}
                 {isNight ? "Night" : "Day"}
@@ -138,7 +132,7 @@ export default function TropicalForest({ donors = [], language = "vi" }: Tropica
                 variant="outline"
                 size="sm"
                 className="flex items-center gap-1"
-                onClick={() => setShowInfo(!showInfo)}
+                onClick={toggleInfo}
               >
                 <Info size={14} />
                 Info
@@ -157,7 +151,7 @@ export default function TropicalForest({ donors = [], language = "vi" }: Tropica
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6 text-white hover:text-white hover:bg-green-700"
-                  onClick={() => setMinimizePanel(!minimizePanel)}
+                  onClick={toggleMinimizePanel}
                 >
                   {minimizePanel ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                 </Button>
@@ -165,7 +159,7 @@ export default function TropicalForest({ donors = [], language = "vi" }: Tropica
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6 text-white hover:text-white hover:bg-green-700"
-                  onClick={() => setShowUI(false)}
+                  onClick={toggleUI}
                 >
                   <Minimize size={14} />
                 </Button>
@@ -188,7 +182,7 @@ export default function TropicalForest({ donors = [], language = "vi" }: Tropica
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <label className="text-sm font-medium">Time of Day</label>
-                          <Switch checked={isNight} onCheckedChange={setIsNight} />
+                          <Switch checked={isNight} onCheckedChange={toggleNight} />
                         </div>
                         <p className="text-xs text-gray-500">Toggle between day and night</p>
                       </div>
@@ -196,14 +190,14 @@ export default function TropicalForest({ donors = [], language = "vi" }: Tropica
                       <div className="space-y-2">
                         <div className="flex justify-between items-center">
                           <label className="text-sm font-medium">Tree Count</label>
-                          <span className="text-xs bg-gray-100 px-2 py-1 rounded">{treeCount}</span>
+                          <span className="text-xs bg-gray-100 px-2 py-1 rounded">{performanceSettings.treeCount}</span>
                         </div>
                       </div>
 
                       <div className="space-y-2">
                         <div className="flex justify-between items-center">
                           <label className="text-sm font-medium">Flower Count</label>
-                          <span className="text-xs bg-gray-100 px-2 py-1 rounded">{flowerDensity}</span>
+                          <span className="text-xs bg-gray-100 px-2 py-1 rounded">{performanceSettings.flowerDensity}</span>
                         </div>
                       </div>
                     </div>
@@ -261,16 +255,16 @@ export default function TropicalForest({ donors = [], language = "vi" }: Tropica
         <div className="absolute top-16 left-4 w-80 bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-lg">
           <div className="flex justify-between items-center mb-2">
             <h3 className="font-bold text-lg">Tropical Forest</h3>
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setShowInfo(false)}>
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={toggleInfo}>
               <X size={14} />
             </Button>
           </div>
           <div className="space-y-2 text-sm">
             <p>This tropical forest features:</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li>{treeCount} trees with detailed root systems</li>
+              <li>{performanceSettings.treeCount} trees with detailed root systems</li>
               <li>Multiple tropical tree species (palm, banana, kapok, bamboo, and ficus)</li>
-              <li>{flowerDensity} beautiful tropical flowers</li>
+              <li>{performanceSettings.flowerDensity} beautiful tropical flowers</li>
               <li>A natural water feature</li>
               <li>Winding forest paths</li>
               <li>Day and night lighting modes</li>
@@ -282,7 +276,7 @@ export default function TropicalForest({ donors = [], language = "vi" }: Tropica
 
       {/* Show UI button (when UI is hidden) */}
       {!showUI && (
-        <Button className="absolute bottom-4 right-4" onClick={() => setShowUI(true)}>
+        <Button className="absolute bottom-4 right-4" onClick={toggleUI}>
           <Maximize size={16} className="mr-2" />
           Show Controls
         </Button>
@@ -296,12 +290,9 @@ export default function TropicalForest({ donors = [], language = "vi" }: Tropica
   )
 }
 
-// Optimize the CloudGroup component
 function CloudGroup({ isNight }) {
-  // Generate cloud positions
   const cloudPositions = useMemo(() => {
     const positions = []
-    // Keep the reduced cloud count (5)
     for (let i = 0; i < 5; i++) {
       const x = Math.random() * 200 - 100
       const y = 90 + Math.random() * 60
@@ -315,13 +306,13 @@ function CloudGroup({ isNight }) {
       })
     }
     return positions
-  }, [])
+  }, []) // Empty dependency array is fine here since we want static cloud positions
 
   return (
     <>
       {cloudPositions.map((cloud, index) => (
         <Cloud
-          key={index}
+          key={`cloud-${index}`}
           position={cloud.position}
           scale={cloud.scale}
           rotation={cloud.rotation}
@@ -329,22 +320,16 @@ function CloudGroup({ isNight }) {
           speed={0}
           opacity={1}
           color="white"
-          segments={8} // Reduce segments from 12 to 8
-          depthTest={true}
-          castShadow={false}
-          receiveShadow={false}
-          transparent={false}
-          fog={false}
+          segments={8}
         />
       ))}
     </>
   )
 }
 
-// Cải tiến CameraController với tốc độ nhanh hơn và di chuyển sang trái/phải trực tiếp
 function CameraController() {
   const { camera, gl } = useThree()
-  const orbitControlsRef = useRef()
+  const orbitControlsRef = useRef<any>(null)
   const minHeight = 1.0 // Minimum height above ground
 
   // Movement state with improved smoothing
@@ -404,7 +389,7 @@ function CameraController() {
       if (e.button === 2) {
         // Right mouse button
         isZooming.current = true
-        if (camera.fov !== zoomFOV.current) {
+        if ('fov' in camera && camera.fov !== zoomFOV.current) {
           defaultFOV.current = camera.fov // Store current FOV
         }
       }
@@ -465,10 +450,10 @@ function CameraController() {
   // Handle FOV changes for zoom effect
   useFrame((state, delta) => {
     // Apply zoom effect with smooth transition
-    if (isZooming.current) {
+    if (isZooming.current && 'fov' in camera) {
       camera.fov = MathUtils.lerp(camera.fov, zoomFOV.current, delta * 5)
       camera.updateProjectionMatrix()
-    } else if (camera.fov !== defaultFOV.current) {
+    } else if ('fov' in camera && camera.fov !== defaultFOV.current) {
       camera.fov = MathUtils.lerp(camera.fov, defaultFOV.current, delta * 5)
       camera.updateProjectionMatrix()
     }
@@ -617,7 +602,8 @@ function CameraController() {
   return (
     <OrbitControls
       ref={orbitControlsRef}
-      args={[camera, gl.domElement]}
+      camera={camera}
+      domElement={gl.domElement}
       enablePan={true}
       enableZoom={true}
       enableRotate={true}
@@ -693,9 +679,7 @@ function Ground() {
   )
 }
 
-// Optimize the GroundFlowers component to reduce the number of objects
 function GroundFlowers({ count = 50 }) {
-  // Reduce flower count from 100 to 50
   const flowerPatches = useMemo(() => {
     const patches = []
     const patchCount = count
@@ -704,10 +688,8 @@ function GroundFlowers({ count = 50 }) {
       const x = MathUtils.randFloatSpread(80)
       const z = MathUtils.randFloatSpread(80)
 
-      // Avoid placing flowers on the path
       const distanceFromCenter = Math.sqrt(x * x + z * z)
       if (distanceFromCenter > 5 || Math.random() > 0.7) {
-        // Random flower color
         const colorIndex = Math.floor(Math.random() * 8)
         const colors = [
           new Color("#FF1493"),
@@ -734,13 +716,12 @@ function GroundFlowers({ count = 50 }) {
   }, [count])
 
   // Reference for animation
-  const flowerGroupRef = useRef()
+  const flowerGroupRef = useRef<any>(null)
 
   // Optimize flower animation with throttling
   useFrame(({ clock }) => {
     if (flowerGroupRef.current) {
       const time = clock.getElapsedTime() * 0.5 // Slow down animation
-      // Only update every other flower to reduce calculations
       for (let i = 0; i < flowerGroupRef.current.children.length; i += 2) {
         const flower = flowerGroupRef.current.children[i]
         if (flower) {
@@ -1020,7 +1001,6 @@ function ForestElements({ treeCount = 15, onSelect, donors = [], language = "vi"
   const count = 6
   const factor = 0.7
 
-  // Reduce tree count from 20 to 15
   const treePositions = useMemo(() => {
     const positions = []
     for (let i = 0; i < treeCount; i++) {
@@ -1030,7 +1010,6 @@ function ForestElements({ treeCount = 15, onSelect, donors = [], language = "vi"
       const distanceFromCenter = Math.sqrt(x * x + z * z)
       const distanceFromLake = Math.sqrt(Math.pow(x - 10, 2) + Math.pow(z - 10, 2))
       if (distanceFromCenter > 5 && distanceFromLake > 8) {
-        // Assign a donor to this tree if available
         const donor = donors[i % donors.length] || null
 
         positions.push({
@@ -1042,9 +1021,8 @@ function ForestElements({ treeCount = 15, onSelect, donors = [], language = "vi"
       }
     }
     return positions
-  }, [treeCount, donors])
+  }, [treeCount, donors.length]) 
 
-  // Optimize path points
   const pathPoints = useMemo(() => {
     const points = []
     // Reduce path points from 20 to 10
@@ -1054,7 +1032,7 @@ function ForestElements({ treeCount = 15, onSelect, donors = [], language = "vi"
       points.push([Math.cos(angle) * radius, -0.4, Math.sin(angle) * radius])
     }
     return points
-  }, [])
+  }, []) // Empty dependency array is fine here since path points are static
 
   // Handle element selection
   const handleTreeClick = (position, treeType, donor) => {
@@ -1137,7 +1115,7 @@ function ForestElements({ treeCount = 15, onSelect, donors = [], language = "vi"
     }
 
     return elements
-  }, [])
+  }, []) // Empty dependency array is fine here since lake elements are static
 
   return (
     <>
@@ -1579,7 +1557,7 @@ function BambooCluster({ position, scale, onClick, onPointerOver, onPointerOut }
       })
     }
     return positions
-  }, [])
+  }, []) // Empty dependency array is fine here since we want static bamboo positions
 
   return (
     <group
@@ -1806,10 +1784,9 @@ function Stars({ radius = 100, depth = 50, count = 2500, factor = 4, saturation 
       const y = r * Math.sin(u)
       return [x, y, z]
     })
-  })
+  }) 
 
-  const shader = useRef()
-  // Throttle updates for better performance
+  const shader = useRef<any>(null)
   useFrame((state, delta) => {
     if (shader.current) {
       shader.current.uniforms.uTime.value += delta * speed * 0.5 // Slow down animation

@@ -3,7 +3,7 @@ import { serialize } from "cookie";
 
 const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET!;
-const backendApiUrl = process.env.NEXT_PUBLIC_API_URL!;
+const backendApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const params = new URLSearchParams(url.search);
@@ -23,7 +23,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(errorUrl);
   }
   try {
-    // 1. Đổi code sang access_token từ Google
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },

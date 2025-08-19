@@ -21,10 +21,14 @@ import { useToast } from "@/hooks/use-toast";
 import ParticlesBackground from "@/components/particles-background";
 import { Eye, EyeOff } from "lucide-react";
 import apiAuth from "../fetch/fetch.auth";
+import { registerLanguage } from "./language";
+
 export default function RegisterPage() {
   const router = useRouter();
   const { t, language } = useLanguage();
   const { toast } = useToast();
+  const lang = registerLanguage[language];
+  
   const [formState, setFormState] = useState({
     name: "",
     phone: "",
@@ -36,6 +40,7 @@ export default function RegisterPage() {
     showPassword: false,
     showConfirmPassword: false,
   });
+  
   const updateState = (key: string, value: any) => {
     setFormState((prev) => ({
       ...prev,
@@ -60,8 +65,8 @@ export default function RegisterPage() {
       const response = await apiAuth.register(userData);
       if (response?.success) {
         toast({
-          title: language === "vi" ? "Đăng ký thành công" : "Registration successful",
-          description: `${language === "vi" ? "Chào mừng" : "Welcome"} ${userData.name}!`,
+          title: lang.toast.success.title,
+          description: lang.toast.success.description(userData.name),
           variant: "success",
         });
         router.push("/dang-nhap");
@@ -70,11 +75,8 @@ export default function RegisterPage() {
       }
     } catch (error: any) {
       toast({
-        title: language === "vi" ? "Đăng ký thất bại" : "Registration failed",
-        description:
-          language === "vi"
-            ? error.message || "Có lỗi xảy ra, thử lại nhé!"
-            : error.message || "Something went wrong, try again!",
+        title: lang.toast.error.title,
+        description: error.message || lang.toast.error.description,
         variant: "destructive",
       });
     } finally {
@@ -122,7 +124,7 @@ export default function RegisterPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            {language === "vi" ? "Đăng ký tài khoản" : "Create your account"}
+            {lang.title}
           </motion.h2>
           <motion.p
             className="mt-2 text-center text-sm text-gray-300"
@@ -130,14 +132,12 @@ export default function RegisterPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            {language === "vi"
-              ? "Đã có tài khoản?"
-              : "Already have an account?"}{" "}
+            {lang.subtitle}{" "}
             <Link
               href="/dang-nhap"
               className="font-medium text-teal-400 hover:text-teal-300"
             >
-              {language === "vi" ? "Đăng nhập ngay" : "Log in now"}
+              {lang.loginLink}
             </Link>
           </motion.p>
         </div>
@@ -160,7 +160,7 @@ export default function RegisterPage() {
                     htmlFor="name"
                     className="block text-sm font-medium text-gray-200"
                   >
-                    {language === "vi" ? "Tên" : "Name"}
+                    {lang.form.name.label}
                   </Label>
                   <Input
                     id="name"
@@ -170,9 +170,7 @@ export default function RegisterPage() {
                     value={formState.name}
                     onChange={(e) => updateState("name", e.target.value)}
                     className="appearance-none block w-full px-3 py-2 border border-gray-700 bg-gray-900/60 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm text-white"
-                    placeholder={
-                      language === "vi" ? "Ví dụ: John Doe" : "E.g., John Doe"
-                    }
+                    placeholder={lang.form.name.placeholder}
                   />
                 </div>
 
@@ -182,7 +180,7 @@ export default function RegisterPage() {
                     htmlFor="phone"
                     className="block text-sm font-medium text-gray-200"
                   >
-                    {language === "vi" ? "Số điện thoại" : "Phone Number"}
+                    {lang.form.phone.label}
                   </Label>
                   <Input
                     id="phone"
@@ -192,7 +190,7 @@ export default function RegisterPage() {
                     value={formState.phone}
                     onChange={(e) => updateState("phone", e.target.value)}
                     className="appearance-none block w-full px-3 py-2 border border-gray-700 bg-gray-900/60 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm text-white"
-                    placeholder="0123456789"
+                    placeholder={lang.form.phone.placeholder}
                   />
                 </div>
 
@@ -202,7 +200,7 @@ export default function RegisterPage() {
                     htmlFor="email"
                     className="block text-sm font-medium text-gray-200"
                   >
-                    {language === "vi" ? "Email" : "Email Address"}
+                    {lang.form.email.label}
                   </Label>
                   <Input
                     id="email"
@@ -213,7 +211,7 @@ export default function RegisterPage() {
                     value={formState.email}
                     onChange={(e) => updateState("email", e.target.value)}
                     className="appearance-none block w-full px-3 py-2 border border-gray-700 bg-gray-900/60 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm text-white"
-                    placeholder="example@email.com"
+                    placeholder={lang.form.email.placeholder}
                   />
                 </div>
 
@@ -223,7 +221,7 @@ export default function RegisterPage() {
                     htmlFor="password"
                     className="block text-sm font-medium text-gray-200"
                   >
-                    {language === "vi" ? "Mật khẩu" : "Password"}
+                    {lang.form.password.label}
                   </Label>
                   <div className="mt-1 relative">
                     <Input
@@ -235,7 +233,7 @@ export default function RegisterPage() {
                       value={formState.password}
                       onChange={(e) => updateState("password", e.target.value)}
                       className="appearance-none block w-full px-3 py-2 border border-gray-700 bg-gray-900/60 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm text-white"
-                      placeholder="••••••••"
+                      placeholder={lang.form.password.placeholder}
                     />
                     <button
                       type="button"
@@ -252,15 +250,14 @@ export default function RegisterPage() {
                     </button>
                   </div>
                 </div>
+                
                 {/* Confirm Password */}
                 <div>
                   <Label
                     htmlFor="confirmPassword"
                     className="block text-sm font-medium text-gray-200"
                   >
-                    {language === "vi"
-                      ? "Xác nhận mật khẩu"
-                      : "Confirm Password"}
+                    {lang.form.confirmPassword.label}
                   </Label>
                   <div className="mt-1 relative">
                     <Input
@@ -274,7 +271,7 @@ export default function RegisterPage() {
                         updateState("confirmPassword", e.target.value)
                       }
                       className="appearance-none block w-full px-3 py-2 border border-gray-700 bg-gray-900/60 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm text-white"
-                      placeholder="••••••••"
+                      placeholder={lang.form.confirmPassword.placeholder}
                     />
                     <button
                       type="button"
@@ -308,9 +305,7 @@ export default function RegisterPage() {
                     htmlFor="agree-terms"
                     className="ml-2 block text-sm text-gray-200"
                   >
-                    {language === "vi"
-                      ? "Tôi đồng ý với các điều khoản và chính sách"
-                      : "I agree to the terms and policies"}
+                    {lang.form.agreeTerms}
                   </Label>
                 </div>
 
@@ -322,12 +317,8 @@ export default function RegisterPage() {
                     disabled={formState.isLoading}
                   >
                     {formState.isLoading
-                      ? language === "vi"
-                        ? "Đang đăng ký..."
-                        : "Registering..."
-                      : language === "vi"
-                        ? "Đăng ký"
-                        : "Register"}
+                      ? lang.buttons.registering
+                      : lang.buttons.register}
                   </Button>
                 </div>
               </form>

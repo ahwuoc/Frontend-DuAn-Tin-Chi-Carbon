@@ -11,8 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Trees, Users, Plus, Leaf } from "lucide-react"
 import { treeNames } from "@/lib/forest-data"
 import type { Contributor, TreeData } from "@/lib/types"
+import { adminLanguage } from "./language"
+import { useLanguage } from "@/context/language-context"
 
 export default function AdminPage() {
+  const { language } = useLanguage()
+  const lang = adminLanguage[language]
+  
   const [contributors, setContributors] = useState<Contributor[]>([])
   const [trees, setTrees] = useState<TreeData[]>([])
   const [loading, setLoading] = useState(true)
@@ -28,14 +33,14 @@ export default function AdminPage() {
         setContributors(contributorsData)
         setTrees(treesData)
       } catch (error) {
-        console.error("Failed to load data:", error)
+        console.error(lang.errors.loadData, error)
       } finally {
         setLoading(false)
       }
     }
 
     loadData()
-  }, [])
+  }, [lang.errors.loadData])
 
   const handleAddContributor = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -47,7 +52,7 @@ export default function AdminPage() {
       setContributors([...contributors, contributor])
       setNewContributor({ name: "", trees: 1 })
     } catch (error) {
-      console.error("Failed to add contributor:", error)
+      console.error(lang.errors.addContributor, error)
     } finally {
       setAddingContributor(false)
     }
@@ -70,7 +75,7 @@ export default function AdminPage() {
 
       setNewTree({ type: 0, contributorId: newTree.contributorId, x: 0, z: 0 })
     } catch (error) {
-      console.error("Failed to add tree:", error)
+      console.error(lang.errors.addTree, error)
     } finally {
       setAddingTree(false)
     }
@@ -82,7 +87,7 @@ export default function AdminPage() {
         <div className="animate-spin mr-2">
           <Trees size={24} className="text-emerald-600" />
         </div>
-        <p>Đang tải dữ liệu...</p>
+        <p>{lang.loading}</p>
       </div>
     )
   }
@@ -92,20 +97,20 @@ export default function AdminPage() {
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-emerald-800 flex items-center gap-2">
           <Trees className="text-emerald-600" />
-          Quản lý Khu Rừng Nhiệt Đới
+          {lang.title}
         </h1>
-        <p className="text-gray-600 mt-2">Quản lý người đóng góp và cây trong khu rừng</p>
+        <p className="text-gray-600 mt-2">{lang.subtitle}</p>
       </header>
 
       <Tabs defaultValue="contributors" className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="contributors" className="flex items-center gap-1">
             <Users size={16} />
-            Người đóng góp
+            {lang.contributors}
           </TabsTrigger>
           <TabsTrigger value="trees" className="flex items-center gap-1">
             <Trees size={16} />
-            Cây
+            {lang.trees}
           </TabsTrigger>
         </TabsList>
 
@@ -115,24 +120,24 @@ export default function AdminPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="text-emerald-600" size={20} />
-                  Thêm người đóng góp mới
+                  {lang.addContributor.title}
                 </CardTitle>
-                <CardDescription>Thêm người đóng góp mới vào khu rừng</CardDescription>
+                <CardDescription>{lang.addContributor.description}</CardDescription>
               </CardHeader>
               <form onSubmit={handleAddContributor}>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Tên người đóng góp</Label>
+                    <Label htmlFor="name">{lang.addContributor.nameLabel}</Label>
                     <Input
                       id="name"
-                      placeholder="Nhập tên người đóng góp"
+                      placeholder={lang.addContributor.namePlaceholder}
                       value={newContributor.name}
                       onChange={(e) => setNewContributor({ ...newContributor, name: e.target.value })}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="trees">Số cây đóng góp</Label>
+                    <Label htmlFor="trees">{lang.addContributor.treesLabel}</Label>
                     <Input
                       id="trees"
                       type="number"
@@ -156,12 +161,12 @@ export default function AdminPage() {
                         <div className="animate-spin mr-2">
                           <Users size={16} />
                         </div>
-                        Đang thêm...
+                        {lang.addContributor.addingButton}
                       </>
                     ) : (
                       <>
                         <Plus size={16} className="mr-2" />
-                        Thêm người đóng góp
+                        {lang.addContributor.submitButton}
                       </>
                     )}
                   </Button>
@@ -173,9 +178,9 @@ export default function AdminPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="text-emerald-600" size={20} />
-                  Danh sách người đóng góp
+                  {lang.contributorsList.title}
                 </CardTitle>
-                <CardDescription>{contributors.length} người đóng góp</CardDescription>
+                <CardDescription>{lang.contributorsList.count(contributors.length)}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
@@ -189,11 +194,11 @@ export default function AdminPage() {
                           <h3 className="font-medium text-emerald-800">{contributor.name}</h3>
                           <p className="text-sm text-emerald-600 flex items-center gap-1 mt-1">
                             <Trees size={14} />
-                            Đã trồng {contributor.trees} cây
+                            {lang.contributorsList.plantedTrees(contributor.trees)}
                           </p>
                         </div>
                         <div className="bg-emerald-100 px-2 py-1 rounded-full text-xs font-medium text-emerald-800">
-                          ID: {contributor.id || `contributor-${contributors.indexOf(contributor)}`}
+                          {lang.contributorsList.id}: {contributor.id || `contributor-${contributors.indexOf(contributor)}`}
                         </div>
                       </div>
                     </div>
@@ -210,20 +215,20 @@ export default function AdminPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Trees className="text-emerald-600" size={20} />
-                  Thêm cây mới
+                  {lang.addTree.title}
                 </CardTitle>
-                <CardDescription>Thêm cây mới vào khu rừng</CardDescription>
+                <CardDescription>{lang.addTree.description}</CardDescription>
               </CardHeader>
               <form onSubmit={handleAddTree}>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="tree-type">Loại cây</Label>
+                    <Label htmlFor="tree-type">{lang.addTree.typeLabel}</Label>
                     <Select
                       value={newTree.type.toString()}
                       onValueChange={(value) => setNewTree({ ...newTree, type: Number.parseInt(value) })}
                     >
                       <SelectTrigger id="tree-type">
-                        <SelectValue placeholder="Chọn loại cây" />
+                        <SelectValue placeholder={lang.addTree.typePlaceholder} />
                       </SelectTrigger>
                       <SelectContent>
                         {treeNames.map((name, index) => (
@@ -236,13 +241,13 @@ export default function AdminPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="contributor">Người đóng góp</Label>
+                    <Label htmlFor="contributor">{lang.addTree.contributorLabel}</Label>
                     <Select
                       value={newTree.contributorId}
                       onValueChange={(value) => setNewTree({ ...newTree, contributorId: value })}
                     >
                       <SelectTrigger id="contributor">
-                        <SelectValue placeholder="Chọn người đóng góp" />
+                        <SelectValue placeholder={lang.addTree.contributorPlaceholder} />
                       </SelectTrigger>
                       <SelectContent>
                         {contributors.map((contributor) => (
@@ -259,7 +264,7 @@ export default function AdminPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="x-position">Vị trí X</Label>
+                      <Label htmlFor="x-position">{lang.addTree.xPositionLabel}</Label>
                       <Input
                         id="x-position"
                         type="number"
@@ -269,7 +274,7 @@ export default function AdminPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="z-position">Vị trí Z</Label>
+                      <Label htmlFor="z-position">{lang.addTree.zPositionLabel}</Label>
                       <Input
                         id="z-position"
                         type="number"
@@ -291,12 +296,12 @@ export default function AdminPage() {
                         <div className="animate-spin mr-2">
                           <Leaf size={16} />
                         </div>
-                        Đang thêm...
+                        {lang.addTree.addingButton}
                       </>
                     ) : (
                       <>
                         <Plus size={16} className="mr-2" />
-                        Thêm cây
+                        {lang.addTree.submitButton}
                       </>
                     )}
                   </Button>
@@ -308,9 +313,9 @@ export default function AdminPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Trees className="text-emerald-600" size={20} />
-                  Danh sách cây
+                  {lang.treesList.title}
                 </CardTitle>
-                <CardDescription>{trees.length} cây trong khu rừng</CardDescription>
+                <CardDescription>{lang.treesList.count(trees.length)}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
@@ -322,7 +327,7 @@ export default function AdminPage() {
                           <div>
                             <h3 className="font-medium text-emerald-800">{treeNames[tree.type]}</h3>
                             <p className="text-sm text-emerald-600 mt-1">
-                              Vị trí: ({tree.position.x.toFixed(1)}, {tree.position.z.toFixed(1)})
+                              {lang.treesList.position(tree.position.x, tree.position.z)}
                             </p>
                             {contributor && (
                               <p className="text-xs text-gray-600 mt-1 flex items-center gap-1">
@@ -332,7 +337,7 @@ export default function AdminPage() {
                             )}
                           </div>
                           <div className="bg-emerald-100 px-2 py-1 rounded-full text-xs font-medium text-emerald-800">
-                            ID: {tree.id.substring(0, 8)}
+                            {lang.treesList.id}: {tree.id.substring(0, 8)}
                           </div>
                         </div>
                       </div>

@@ -12,7 +12,6 @@ import contactPageTranslations from "./language";
 export default function ContactPage() {
   const { language } = useLanguage();
 
-  // Helper function to get text based on current language
   const getText = (key: keyof typeof contactPageTranslations) => {
     const translation = contactPageTranslations[key];
     if (
@@ -23,7 +22,6 @@ export default function ContactPage() {
     ) {
       return (translation as { vi: string; en: string })[language];
     }
-    // Fallback for cases where the key might not be directly a simple string object
     console.warn(
       `Translation key "${key}" not found or not a simple {vi, en} object.`,
     );

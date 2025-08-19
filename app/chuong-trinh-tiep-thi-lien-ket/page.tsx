@@ -14,9 +14,12 @@ import {
   Shield,
 } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
-import translations from "../common/language";
+import { affiliateLanguage } from "./language";
+
 export default function AffiliateProgram() {
   const { language } = useLanguage();
+  const lang = affiliateLanguage[language];
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -33,13 +36,13 @@ export default function AffiliateProgram() {
         </div>
         <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-center items-start">
           <span className="inline-block py-1 px-3 bg-green-600 text-white text-sm font-medium rounded-full mb-4">
-            {translations.hero.badge[language]}
+            {lang.hero.badge}
           </span>
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-            {translations.hero.title[language]}
+            {lang.hero.title}
           </h1>
           <p className="text-white text-xl max-w-2xl mb-8">
-            {translations.hero.subtitle[language]}
+            {lang.hero.subtitle}
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/quan-ly/tiep-thi-lien-ket">
@@ -47,7 +50,7 @@ export default function AffiliateProgram() {
                 size="lg"
                 className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg"
               >
-                {translations.hero.registerNow[language]}
+                {lang.hero.registerNow}
               </Button>
             </Link>
             <Button
@@ -55,7 +58,7 @@ export default function AffiliateProgram() {
               size="lg"
               className="border-green-600 text-green-600 bg-white hover:bg-green-600 hover:text-white hover:border-green-600 px-8 py-6 text-lg transition-colors"
             >
-              {translations.hero.learnMore[language]}
+              {lang.hero.learnMore}
             </Button>
           </div>
         </div>
@@ -66,13 +69,13 @@ export default function AffiliateProgram() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
-              {translations.overview.badge[language]}
+              {lang.overview.badge}
             </span>
             <h2 className="text-4xl font-bold mb-4 text-gray-800">
-              {translations.overview.title[language]}
+              {lang.overview.title}
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              {translations.overview.description[language]}
+              {lang.overview.description}
             </p>
           </div>
 
@@ -80,21 +83,17 @@ export default function AffiliateProgram() {
             <div className="relative h-[500px] rounded-xl overflow-hidden shadow-2xl">
               <Image
                 src="/images/cloud-4136344_1920.jpg"
-                alt={
-                  language === "vi"
-                    ? "Chương trình tiếp thị liên kết"
-                    : "Affiliate Marketing Program"
-                }
+                alt={lang.overview.badge}
                 fill
                 className="object-cover"
               />
             </div>
             <div>
               <h3 className="text-3xl font-bold mb-6 text-gray-800">
-                {translations.overview.howItWorks[language]}
+                {lang.overview.howItWorks}
               </h3>
               <div className="space-y-6">
-                {translations.overview.steps.map((step, index) => (
+                {lang.overview.steps.map((step, index) => (
                   <div key={index} className="flex items-start">
                     <div className="bg-green-100 p-3 rounded-full mr-4 flex-shrink-0">
                       <span className="font-bold text-green-600">
@@ -103,10 +102,10 @@ export default function AffiliateProgram() {
                     </div>
                     <div>
                       <h4 className="text-xl font-semibold mb-2">
-                        {step.title[language]}
+                        {step.title}
                       </h4>
                       <p className="text-gray-600">
-                        {step.description[language]}
+                        {step.description}
                       </p>
                     </div>
                   </div>
@@ -122,18 +121,18 @@ export default function AffiliateProgram() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
-              {translations.benefits.badge[language]}
+              {lang.benefits.badge}
             </span>
             <h2 className="text-4xl font-bold mb-4 text-gray-800">
-              {translations.benefits.title[language]}
+              {lang.benefits.title}
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              {translations.benefits.description[language]}
+              {lang.benefits.description}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {translations.benefits.items.map((benefit, index) => (
+            {lang.benefits.items.map((benefit, index) => (
               <Card
                 key={index}
                 className="hover:shadow-xl transition-all duration-300 hover:bg-green-50"
@@ -160,10 +159,10 @@ export default function AffiliateProgram() {
                     )}
                   </div>
                   <h3 className="text-2xl font-bold mb-4 text-gray-800">
-                    {benefit.title[language]}
+                    {benefit.title}
                   </h3>
                   <p className="text-gray-600">
-                    {benefit.description[language]}
+                    {benefit.description}
                   </p>
                 </CardContent>
               </Card>
@@ -177,13 +176,13 @@ export default function AffiliateProgram() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
-              {translations.commission.badge[language]}
+              {lang.commission.badge}
             </span>
             <h2 className="text-4xl font-bold mb-4 text-gray-800">
-              {translations.commission.title[language]}
+              {lang.commission.title}
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              {translations.commission.description[language]}
+              {lang.commission.description}
             </p>
           </div>
 
@@ -193,29 +192,21 @@ export default function AffiliateProgram() {
                 <thead>
                   <tr className="bg-green-50">
                     <th className="py-4 px-6 text-left text-lg font-semibold text-gray-800 border-b">
-                      {translations.commission.table.headers.product[language]}
+                      {lang.commission.table.headers.product}
                     </th>
                     <th className="py-4 px-6 text-center text-lg font-semibold text-gray-800 border-b">
-                      {
-                        translations.commission.table.headers.basicCommission[
-                          language
-                        ]
-                      }
+                      {lang.commission.table.headers.basicCommission}
                     </th>
                     <th className="py-4 px-6 text-center text-lg font-semibold text-gray-800 border-b">
-                      {
-                        translations.commission.table.headers.vipCommission[
-                          language
-                        ]
-                      }
+                      {lang.commission.table.headers.vipCommission}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {translations.commission.table.rows.map((row, index) => (
+                  {lang.commission.table.rows.map((row, index) => (
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="py-4 px-6 border-b">
-                        {row.product[language]}
+                        {row.product}
                       </td>
                       <td className="py-4 px-6 text-center border-b">
                         {row.basic}
@@ -231,18 +222,18 @@ export default function AffiliateProgram() {
 
             <div className="mt-8 bg-green-50 p-6 rounded-lg">
               <h3 className="text-xl font-bold mb-4 text-gray-800">
-                {translations.commission.vipSection.title[language]}
+                {lang.commission.vipSection.title}
               </h3>
               <p className="text-gray-600 mb-4">
-                {translations.commission.vipSection.description[language]}
+                {lang.commission.vipSection.description}
               </p>
               <ul className="space-y-2">
-                {translations.commission.vipSection.conditions.map(
+                {lang.commission.vipSection.conditions.map(
                   (condition, index) => (
                     <li key={index} className="flex items-start">
                       <CheckCircle className="h-5 w-5 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-700">
-                        {condition[language]}
+                        {condition}
                       </span>
                     </li>
                   ),
@@ -258,17 +249,17 @@ export default function AffiliateProgram() {
         <div className="container mx-auto px-4">
           <div className="text-center">
             <h3 className="text-3xl font-bold mb-4 text-gray-800">
-              {translations.registration.title[language]}
+              {lang.registration.title}
             </h3>
             <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-              {translations.registration.description[language]}
+              {lang.registration.description}
             </p>
             <Link href="/dang-nhap">
               <Button
                 size="lg"
                 className="bg-green-600 hover:bg-green-700 text-white px-10 py-6 text-lg"
               >
-                {translations.registration.button[language]}
+                {lang.registration.button}
               </Button>
             </Link>
           </div>
@@ -280,24 +271,24 @@ export default function AffiliateProgram() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <span className="inline-block py-1 px-3 bg-green-100 text-green-800 text-sm font-medium rounded-full mb-4">
-              {translations.faq.badge[language]}
+              {lang.faq.badge}
             </span>
             <h2 className="text-4xl font-bold mb-4 text-gray-800">
-              {translations.faq.title[language]}
+              {lang.faq.title}
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              {translations.faq.description[language]}
+              {lang.faq.description}
             </p>
           </div>
 
           <div className="max-w-3xl mx-auto">
-            {translations.faq.questions.map((faq, index) => (
+            {lang.faq.questions.map((faq, index) => (
               <div key={index} className="mb-4">
                 <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300">
                   <details className="group">
                     <summary className="flex justify-between items-center p-6 cursor-pointer">
                       <h3 className="text-xl font-bold text-gray-800">
-                        {faq.question[language]}
+                        {faq.question}
                       </h3>
                       <div className="w-5 h-5 border-2 border-green-600 rounded-full flex items-center justify-center group-open:bg-green-600 transition-all duration-300">
                         <span className="transform group-open:rotate-180 transition-transform duration-300">
@@ -319,7 +310,7 @@ export default function AffiliateProgram() {
                       </div>
                     </summary>
                     <div className="px-6 pb-6 text-gray-600 animate-fadeIn">
-                      <p>{faq.answer[language]}</p>
+                      <p>{faq.answer}</p>
                     </div>
                   </details>
                 </div>
@@ -335,15 +326,15 @@ export default function AffiliateProgram() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="text-white">
               <h2 className="text-3xl font-bold mb-2">
-                {translations.cta.title[language]}
+                {lang.cta.title}
               </h2>
               <p className="text-white/80 text-lg">
-                {translations.cta.description[language]}
+                {lang.cta.description}
               </p>
             </div>
             <Link href="/dang-ky?affiliate=true">
               <Button className="bg-white text-green-600 hover:bg-green-50 px-8 py-3 text-lg font-medium">
-                {translations.cta.button[language]}
+                {lang.cta.button}
               </Button>
             </Link>
           </div>
